@@ -1,0 +1,143 @@
+.navbar {
+  background-color: transparent;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1300px;
+  height: 80px;
+  padding: 0 50px;
+}
+
+.navbar-logo { 
+  color: #fff;
+  justify-self: start;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  letter-spacing: 2px;
+}
+
+.logo-image {
+  height: 150px; /* logonun yüksekliği */
+  width: 150px; /* logonun genişliği */
+  margin-right: 10px; /* logonun metinle arasındaki boşluk */
+  border-radius: 65%; /* logonun yuvarlak görünmesi için */
+  transition: transform 0.3s ease; /* geçiş efekti için */  
+}
+
+
+.navbar-logo a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-menu { 
+  display: flex;
+  align-items: center;
+  list-style: none;
+  text-align: center;
+  margin-right: -22px;
+}
+
+.nav-item {
+  height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-links {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0 1rem;
+  height: 100%;
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-links:hover {
+  color: #d4af37;
+  border-bottom: 3px solid #d4af37;
+}
+
+.menu-icon {
+  display: none;
+}
+
+/* Responsive tasarım */
+@media screen and (max-width: 960px) {
+  .navbar-container {
+    padding: 0 30px;
+  }
+  
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 90vh;
+    position: absolute;
+    top: 80px;
+    left: -100%;
+    opacity: 1;
+    transition: all 0.5s ease;
+    background-color: #101522;
+  }
+
+  .nav-menu.active {
+    left: 0;
+    opacity: 1;
+    transition: all 0.5s ease;
+    z-index: 1;
+  }
+
+  .nav-item {
+    height: 60px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-links {
+    text-align: center;
+    padding: 2rem;
+    width: 100%;
+    display: table;
+  }
+
+  .menu-icon {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(-100%, 60%);
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #fff;
+  }
+}
+
+/* Scroll Effect */
+.navbar.scrolled {
+  background-color: #0c1e35;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}

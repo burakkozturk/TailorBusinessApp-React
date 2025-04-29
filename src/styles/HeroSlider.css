@@ -1,0 +1,15 @@
+.hero-slider {
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    color: #fff;
+    transition: background-image 1s ease-in-out;
+  }
+  
+  /* .hero-overlay, .hero-content, .hero-title vs. mevcut HeroSection'daki ile aynı kalsın */
+  
