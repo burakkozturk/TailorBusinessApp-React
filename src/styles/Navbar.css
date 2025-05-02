@@ -37,7 +37,6 @@
 .logo-image {
   height: 150px; /* logonun yüksekliği */
   width: 150px; /* logonun genişliği */
-  margin-right: 10px; /* logonun metinle arasındaki boşluk */
   border-radius: 65%; /* logonun yuvarlak görünmesi için */
   transition: transform 0.3s ease; /* geçiş efekti için */  
 }
