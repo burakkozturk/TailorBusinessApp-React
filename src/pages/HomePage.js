@@ -2,10 +2,11 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import HeroSlider from '../components/HeroSlider';
-import About from '../components/About';
 import '../styles/HomePage.css';
-import Expertise from '../components/Expertise';
-import Feature from '../components/Feature';
+import Services from '../components/Services';
+import About from '../components/About';
+import Testimonials from '../components/Testimonials';
+import Blog from '../components/Blog';
 
 function HomePage() {
   return (
@@ -13,8 +14,9 @@ function HomePage() {
       <Navbar />
       <HeroSlider />
       <About />
-      <Expertise />
-      <Feature />
+      <Services />
+      <Testimonials />
+      <Blog />
       <Footer />
     </div>
   );

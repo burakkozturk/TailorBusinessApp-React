@@ -1,4 +1,6 @@
+// src/components/Navbar.js
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Navbar.css';
 
 function Navbar() {
@@ -13,23 +15,17 @@ function Navbar() {
         navbar.classList.remove('scrolled');
       }
     };
-
     window.addEventListener('scroll', handleScroll);
-
-    // Bileşen unmount olduğunda event'ı kaldır
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-logo">
-          <a href="/">
+          <Link to="/">
             <img src="/img/logo.jpeg" alt="Logo" className="logo-image" />
-          </a>
+          </Link>
         </div>
 
         <div className="menu-icon" onClick={() => setIsOpen(!isOpen)}>
@@ -38,19 +34,19 @@ function Navbar() {
 
         <ul className={isOpen ? 'nav-menu active' : 'nav-menu'}>
           <li className="nav-item">
-            <a href="/" className="nav-links">Ana Sayfa</a>
+            <Link to="/" className="nav-links">Ana Sayfa</Link>
           </li>
           <li className="nav-item">
-            <a href="/hizmetler" className="nav-links">Hizmetler</a>
+            <Link to="/hizmetler" className="nav-links">Hizmetler</Link>
           </li>
           <li className="nav-item">
-            <a href="/koleksiyon" className="nav-links">Koleksiyon</a>
+            <Link to="/koleksiyon" className="nav-links">Koleksiyon</Link>
           </li>
           <li className="nav-item">
-            <a href="/blog" className="nav-links">Blog</a>
+            <Link to="/blog" className="nav-links">Blog</Link>
           </li>
           <li className="nav-item">
-            <a href="/iletisim" className="nav-links">İletişim</a>
+            <Link to="/iletisim" className="nav-links">İletişim</Link>
           </li>
         </ul>
       </div>
@@ -59,4 +55,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
