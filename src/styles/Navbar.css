@@ -21,11 +21,12 @@
   max-width: 1300px;
   height: 80px;
   padding: 0 50px;
+  position: relative;
 }
 
 .navbar-logo { 
   color: #fff;
-  justify-self: start;
+  justify-self: flex-start;
   cursor: pointer;
   text-decoration: none;
   font-size: 1.2rem;
@@ -48,12 +49,12 @@
   font-weight: 600;
 }
 
-.nav-menu { 
+.nav-menu {
   display: flex;
   align-items: center;
   list-style: none;
   text-align: center;
-  margin-right: -22px;
+  margin-left: auto; /* sola yasla */
 }
 
 .nav-item {
@@ -139,4 +140,16 @@
 .navbar.scrolled {
   background-color: #0c1e35;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-icon {
+  color: #fff;
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.login-icon:hover {
+  color: #d4af37;
 }

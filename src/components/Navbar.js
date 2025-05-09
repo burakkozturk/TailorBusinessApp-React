@@ -1,6 +1,7 @@
 // src/components/Navbar.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { FiLogIn } from 'react-icons/fi';
 import '../styles/Navbar.css';
 
 function Navbar() {
@@ -37,10 +38,7 @@ function Navbar() {
             <Link to="/" className="nav-links">Ana Sayfa</Link>
           </li>
           <li className="nav-item">
-            <Link to="/hizmetler" className="nav-links">Hizmetler</Link>
-          </li>
-          <li className="nav-item">
-            <Link to="/koleksiyon" className="nav-links">Koleksiyon</Link>
+            <Link to="/hakkimizda" className="nav-links">Hakkımızda</Link>
           </li>
           <li className="nav-item">
             <Link to="/blog" className="nav-links">Blog</Link>
@@ -49,7 +47,13 @@ function Navbar() {
             <Link to="/iletisim" className="nav-links">İletişim</Link>
           </li>
         </ul>
+
+        {/* Giriş ikonu - sağa sabit */}
+        <Link to="/giris" className="login-icon">
+          <FiLogIn size={24} />
+        </Link>
       </div>
+
     </nav>
   );
 }

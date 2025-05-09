@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import ContactPage from './pages/ContactPage';
 import Services from './components/Services';
 import Blog from './components/Blog';
+import AboutPage from './pages/AboutPage';
 // … diğer import’lar
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
         <Route path="/hizmetler" element={<Services />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/iletisim" element={<ContactPage />} />
+        <Route path="/hakkimizda" element={<AboutPage />} />
+        
       </Routes>
     </Router>
   );

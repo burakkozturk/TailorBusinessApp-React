@@ -1,95 +1,97 @@
 .about-section {
-    padding: 150px 20px;
-    background-color: #ffffff;
-  }
-  
+  padding: 150px 20px;
+  background-color: #ffffff;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 80px;
+  flex-wrap: wrap;
+}
+
+.about-images {
+  flex: 1 1 400px;
+  position: relative;
+  height: 500px;
+}
+
+.about-img {
+  width: 55%;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  position: absolute;
+}
+
+.img-1 {
+  top: 0;
+  left: -12%;
+}
+
+.img-2 {
+  bottom: 0;
+  right: -2%;
+}
+
+/* Yeni class adlarına uygun stiller */
+.about-section-text {
+  flex: 1 1 450px;
+}
+
+.about-section-subtitle {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888888;
+  margin-bottom: 8px;
+}
+
+.about-section-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-family: 'Playfair Display', serif;
+  color: #2c2a29;
+}
+
+.about-section-desc {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  color: #4a4846;
+}
+
+.about-button {
+  padding: 12px 30px;
+  font-size: 1rem;
+  border: 2px solid #2c2a29;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.about-button:hover {
+  background: #2c2a29;
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .about-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 80px;
-    flex-wrap: wrap;
+    flex-direction: column-reverse;
+    text-align: center;
   }
-  
+
   .about-images {
-    flex: 1 1 400px;
-    position: relative;
-    height: 500px;      /* 300'dan 400px'e yükselttik */
+    height: auto;
+    margin-bottom: 40px;
   }
-  
+
   .about-img {
-    width: 55%;         /* %55'ten %45'e düşürerek arada daha fazla boşluk yarattık */
-    border-radius: 8px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    position: absolute;
+    position: static;
+    width: 80%;
+    margin: 0 auto 20px;
+    transform: none !important;
   }
-  
-  .img-1 {
-    top: 0;
-    left: -12%;
-  }
-  
-  .img-2 {
-    bottom: 0;
-    right: -2%;
-  }
-  
-  .about-text {
-    flex: 1 1 450px;
-  }
-  
-  .about-subtitle {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #888888;
-    margin-bottom: 8px;
-  }
-  
-  .about-title {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    font-family: 'Playfair Display', serif;
-    color: #2c2a29;
-  }
-  
-  .about-desc {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 30px;
-    color: #4a4846;
-  }
-  
-  .about-button {
-    padding: 12px 30px;
-    font-size: 1rem;
-    border: 2px solid #2c2a29;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .about-button:hover {
-    background: #2c2a29;
-    color: #fff;
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .about-container {
-      flex-direction: column-reverse;
-      text-align: center;
-    }
-    .about-images {
-        height: auto;
-        margin-bottom: 40px;
-      }
-      .about-img {
-        position: static;
-        width: 80%;
-        margin: 0 auto 20px;
-        transform: none !important;
-      }
-  }
-  
+}
