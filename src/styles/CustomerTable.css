@@ -1,0 +1,35 @@
+.customer-table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.customer-table th, .customer-table td {
+  padding: 15px;
+  text-align: center;
+}
+
+.customer-table th {
+  background-color: #101522;
+  color: white;
+}
+
+.customer-table tr:nth-child(even) {
+  background-color: #f4f4f4;
+}
+
+.customer-table tr:hover {
+  background-color: #f1e7a9;
+}
+
+.customer-table td {
+  font-size: 14px;
+  color: #333;
+}
+
+.customer-table th, td {
+  border-bottom: 1px solid #ddd;
+}

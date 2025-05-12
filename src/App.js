@@ -8,7 +8,9 @@ import Blog from './components/Blog';
 import AboutPage from './pages/AboutPage';
 import Login from './components/Login';
 import AdminDashboard from './pages/AdminDashboard';
-// … diğer import’lar
+import AdminPage from './pages/AdminPage';
+import CustomersPage from './pages/CustomersPage';
+import OrdersPage from './pages/OrdersPage';
 
 function App() {
   return (
@@ -21,7 +23,9 @@ function App() {
         <Route path="/hakkimizda" element={<AboutPage />} />
         <Route path="/giris" element={<Login />} />
         <Route path="/admin" element={<AdminDashboard />} />
-
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/customers" element={<CustomersPage />} />
+        <Route path="/admin/orders" element={<OrdersPage />} />
       </Routes>
     </Router>
   );

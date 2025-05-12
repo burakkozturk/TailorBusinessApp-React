@@ -1,32 +1,32 @@
 import React from 'react';
-import { FaHome, FaUser, FaTshirt, FaCogs, FaSignOutAlt, FaLayerGroup, FaTools } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import '../styles/SideBar.css';
 
-const SideBar = ({ active }) => {
+const SideBar = () => {
   return (
     <div className="sidebar">
       <h2>Admin Paneli</h2>
       <ul>
-        <li className={active === 'dashboard' ? 'active' : ''}>
-          <FaHome /> Genel Bakış
-        </li>
-        <li className={active === 'customers' ? 'active' : ''}>
-          <FaUser /> Müşteriler
-        </li>
-        <li className={active === 'orders' ? 'active' : ''}>
-          <FaTshirt /> Siparişler
-        </li>
-        <li className={active === 'fabrics' ? 'active' : ''}>
-          <FaLayerGroup /> Kumaşlar
-        </li>
-        <li className={active === 'templates' ? 'active' : ''}>
-          <FaTools /> Şablonlar
-        </li>
-        <li className={active === 'settings' ? 'active' : ''}>
-          <FaCogs /> Ayarlar
+        <li>
+          <Link to="/admin/dashboard">Genel Bakış</Link>
         </li>
         <li>
-          <FaSignOutAlt /> Çıkış Yap
+          <Link to="/admin/customers">Müşteriler</Link>
+        </li>
+        <li>
+          <Link to="/admin/orders">Siparişler</Link>
+        </li>
+        <li>
+          <Link to="/admin/fabrics">Kumaşlar</Link>
+        </li>
+        <li>
+          <Link to="/admin/templates">Şablonlar</Link>
+        </li>
+        <li>
+          <Link to="/admin/settings">Ayarlar</Link>
+        </li>
+        <li>
+          <Link to="/admin/logout">Çıkış Yap</Link>
         </li>
       </ul>
     </div>
