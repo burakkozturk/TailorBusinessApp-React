@@ -1,32 +1,50 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaUser, FaTshirt, FaCogs, FaSignOutAlt, FaLayerGroup, FaTools } from 'react-icons/fa';
 import '../styles/SideBar.css';
 
-const SideBar = ({ active }) => {
+const SideBar = () => {
+  const location = useLocation();
+  const currentPath = location.pathname.split('/')[2] || '';
+
   return (
     <div className="sidebar">
       <h2>Admin Paneli</h2>
       <ul>
-        <li className={active === 'dashboard' ? 'active' : ''}>
-          <FaHome /> Genel Bakış
+        <li className={currentPath === '' ? 'active' : ''}>
+          <Link to="/admin">
+            <FaHome /> Genel Bakış
+          </Link>
         </li>
-        <li className={active === 'customers' ? 'active' : ''}>
-          <FaUser /> Müşteriler
+        <li className={currentPath === 'customers' ? 'active' : ''}>
+          <Link to="/admin/customers">
+            <FaUser /> Müşteriler
+          </Link>
         </li>
-        <li className={active === 'orders' ? 'active' : ''}>
-          <FaTshirt /> Siparişler
+        <li className={currentPath === 'orders' ? 'active' : ''}>
+          <Link to="/admin/orders">
+            <FaTshirt /> Siparişler
+          </Link>
         </li>
-        <li className={active === 'fabrics' ? 'active' : ''}>
-          <FaLayerGroup /> Kumaşlar
+        <li className={currentPath === 'fabrics' ? 'active' : ''}>
+          <Link to="/admin/fabrics">
+            <FaLayerGroup /> Kumaşlar
+          </Link>
         </li>
-        <li className={active === 'templates' ? 'active' : ''}>
-          <FaTools /> Şablonlar
+        <li className={currentPath === 'templates' ? 'active' : ''}>
+          <Link to="/admin/templates">
+            <FaTools /> Şablonlar
+          </Link>
         </li>
-        <li className={active === 'settings' ? 'active' : ''}>
-          <FaCogs /> Ayarlar
+        <li className={currentPath === 'settings' ? 'active' : ''}>
+          <Link to="/admin/settings">
+            <FaCogs /> Ayarlar
+          </Link>
         </li>
         <li>
-          <FaSignOutAlt /> Çıkış Yap
+          <Link to="/logout">
+            <FaSignOutAlt /> Çıkış Yap
+          </Link>
         </li>
       </ul>
     </div>
