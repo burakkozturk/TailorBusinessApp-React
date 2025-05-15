@@ -1,0 +1,14 @@
+.dashboard-container {
+  padding: 2rem;
+  width: 100%;
+}
+
+.welcome-section {
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+} 

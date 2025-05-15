@@ -33,9 +33,12 @@ import {
   AccessTime,
   Done,
   LocalShipping,
-  Cancel
+  Cancel,
+  Add
 } from '@mui/icons-material';
 import '../styles/Orders.css';
+import { Order } from '../constants/orderTypes';
+import { OrderDialog } from './Customers';
 
 const getStatusChip = (status) => {
   const statusConfig = {
@@ -60,12 +63,39 @@ const getStatusChip = (status) => {
 const Row = ({ order, onDelete }) => {
   const [open, setOpen] = useState(false);
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'PREPARING':
+        return '#FFA726';
+      case 'CUTTING':
+        return '#29B6F6';
+      case 'SEWING':
+        return '#66BB6A';
+      case 'FITTING':
+        return '#AB47BC';
+      case 'READY':
+        return '#26A69A';
+      case 'DELIVERED':
+        return '#2E7D32';
+      case 'CANCELLED':
+        return '#EF5350';
+      default:
+        return '#78909C';
+    }
+  };
+
   return (
     <>
       <TableRow 
         className="order-row"
         onClick={() => setOpen(!open)}
-        sx={{ '& > *': { borderBottom: 'unset' } }}
+        sx={{ 
+          '& > *': { borderBottom: 'unset' },
+          '&:hover': {
+            backgroundColor: '#f8fafc',
+            cursor: 'pointer'
+          }
+        }}
       >
         <TableCell>
           <IconButton
@@ -80,12 +110,27 @@ const Row = ({ order, onDelete }) => {
           </IconButton>
         </TableCell>
         <TableCell>{order.orderNumber}</TableCell>
-        <TableCell>{`${order.customer.firstName} ${order.customer.lastName}`}</TableCell>
+        <TableCell>
+          <Typography variant="subtitle2">
+            {order.customer.firstName} {order.customer.lastName}
+          </Typography>
+        </TableCell>
         <TableCell>{order.customer.phone}</TableCell>
         <TableCell>{new Date(order.orderDate).toLocaleDateString('tr-TR')}</TableCell>
-        <TableCell>{order.totalAmount} ₺</TableCell>
         <TableCell>
-          {getStatusChip(order.status)}
+          <Typography sx={{ color: 'success.main', fontWeight: 500 }}>
+            {order.totalAmount?.toLocaleString('tr-TR')} ₺
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Chip
+            label={Order.OrderStatus[order.status]?.displayName || order.status}
+            sx={{
+              bgcolor: `${getStatusColor(order.status)}20`,
+              color: getStatusColor(order.status),
+              fontWeight: 500
+            }}
+          />
         </TableCell>
         <TableCell>
           <IconButton 
@@ -127,27 +172,20 @@ const Row = ({ order, onDelete }) => {
                   <Typography>{order.notes || 'Not bulunmuyor'}</Typography>
                 </div>
                 <div className="detail-section">
-                  <Typography variant="subtitle2">Ürünler:</Typography>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Ürün</TableCell>
-                        <TableCell>Kumaş</TableCell>
-                        <TableCell align="right">Miktar</TableCell>
-                        <TableCell align="right">Fiyat</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {order.items?.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{item.productName}</TableCell>
-                          <TableCell>{item.fabricName}</TableCell>
-                          <TableCell align="right">{item.quantity}</TableCell>
-                          <TableCell align="right">{item.price} ₺</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <Typography variant="subtitle2">Ürün Bilgileri:</Typography>
+                  <Box sx={{ mt: 1 }}>
+                    <Typography>
+                      <strong>Ürün Tipi:</strong> {Order.ProductType[order.productType]?.displayName || order.productType}
+                    </Typography>
+                    <Typography>
+                      <strong>Kalıp:</strong> {Order.FitType[order.fitType]?.displayName || order.fitType}
+                    </Typography>
+                    {order.fabric && (
+                      <Typography>
+                        <strong>Kumaş:</strong> {order.fabric.name}
+                      </Typography>
+                    )}
+                  </Box>
                 </div>
               </Box>
             </Box>
@@ -168,6 +206,7 @@ const Orders = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const ordersPerPage = 8;
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
 
   const fetchOrders = async () => {
     try {
@@ -175,15 +214,15 @@ const Orders = () => {
       const response = await axios.get('http://localhost:6767/api/orders');
       setOrders(response.data);
       setTotalPages(Math.ceil(response.data.length / ordersPerPage));
-      setLoading(false);
     } catch (error) {
       console.error('Siparişler yüklenirken hata oluştu:', error);
-      setLoading(false);
       setSnackbar({
         open: true,
         message: 'Siparişler yüklenirken bir hata oluştu',
         severity: 'error'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -242,7 +281,8 @@ const Orders = () => {
     order.customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.customer.phone.includes(searchTerm) ||
-    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.productType.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const paginatedOrders = filteredOrders.slice(
@@ -263,24 +303,33 @@ const Orders = () => {
 
   return (
     <div className="orders-container">
-      <Box className="orders-header">
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1">
           Sipariş Listesi
         </Typography>
-        <TextField
-          className="search-field"
-          variant="outlined"
-          placeholder="Sipariş Ara..."
-          value={searchTerm}
-          onChange={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            variant="outlined"
+            placeholder="Sipariş Ara..."
+            value={searchTerm}
+            onChange={handleSearch}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<Add />}
+            onClick={() => setOrderDialogOpen(true)}
+          >
+            Yeni Sipariş
+          </Button>
+        </Box>
       </Box>
 
       <TableContainer component={Paper} className="table-container">
@@ -308,7 +357,11 @@ const Orders = () => {
               </TableRow>
             ) : (
               paginatedOrders.map((order) => (
-                <Row key={order.id} order={order} onDelete={handleDelete} />
+                <Row
+                  key={order.id}
+                  order={order}
+                  onDelete={handleDelete}
+                />
               ))
             )}
           </TableBody>
@@ -344,6 +397,20 @@ const Orders = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <OrderDialog
+        open={orderDialogOpen}
+        onClose={() => setOrderDialogOpen(false)}
+        onSave={(savedOrder) => {
+          setOrders(prev => [savedOrder, ...prev]);
+          setSnackbar({
+            open: true,
+            message: 'Sipariş başarıyla oluşturuldu',
+            severity: 'success'
+          });
+          setOrderDialogOpen(false);
+        }}
+      />
 
       <Snackbar
         open={snackbar.open}

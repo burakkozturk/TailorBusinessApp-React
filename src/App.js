@@ -8,6 +8,7 @@ import Blog from './components/Blog';
 import AboutPage from './pages/AboutPage';
 import Login from './components/Login';
 import DashboardLayout from './components/DashboardLayout';
+import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
 import Orders from './components/Orders';
 import './styles/App.css';
@@ -24,7 +25,7 @@ function App() {
         <Route path="/hakkimizda" element={<AboutPage />} />
         <Route path="/giris" element={<Login />} />
         <Route path="/admin" element={<DashboardLayout />}>
-          <Route index element={<div>Dashboard Ana Sayfa</div>} />
+          <Route index element={<Dashboard />} />
           <Route path="customers" element={<Customers />} />
           <Route path="orders" element={<Orders />} />
           <Route path="fabrics" element={<div>Kumaşlar</div>} />
