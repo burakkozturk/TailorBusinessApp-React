@@ -31,7 +31,10 @@ import {
   MenuItem,
   Container,
   Avatar,
-  Chip
+  Chip,
+  Autocomplete,
+  CircularProgress,
+  InputBase
 } from '@mui/material';
 import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -578,25 +581,63 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
     notes: order?.notes || '',
     totalPrice: order?.totalPrice || '',
     fabric: order?.fabric || null,
-    customer: customer || null
+    customer: customer || null,
+    deliveryDate: order?.deliveryDate || ''
   });
 
   const [customers, setCustomers] = useState([]);
   const [fabrics, setFabrics] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [customerInputValue, setCustomerInputValue] = useState('');
+  const [fabricInputValue, setFabricInputValue] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
     fetchFabrics();
   }, []);
 
+  useEffect(() => {
+    // Sipariş düzenleme durumunda form verilerini güncelle
+    if (order) {
+      setFormData({
+        productType: order.productType || 'CEKET',
+        fitType: order.fitType || 'REGULAR',
+        status: order.status || 'PREPARING',
+        estimatedDeliveryDate: order.estimatedDeliveryDate || '',
+        notes: order.notes || '',
+        totalPrice: order.totalPrice || '',
+        fabric: order.fabric || null,
+        customer: order.customer || null,
+        deliveryDate: order.deliveryDate || ''
+      });
+    } else {
+      // Yeni sipariş durumunda varsayılan değerler
+      setFormData({
+        productType: 'CEKET',
+        fitType: 'REGULAR',
+        status: 'PREPARING',
+        estimatedDeliveryDate: '',
+        notes: '',
+        totalPrice: '',
+        fabric: null,
+        customer: customer || null,
+        deliveryDate: ''
+      });
+    }
+  }, [order, customer]);
+
   const fetchCustomers = async () => {
     try {
+      setSearchLoading(true);
       const response = await axios.get('http://localhost:6767/api/customers');
       const data = Array.isArray(response.data) ? response.data : (Array.isArray(response.data.customers) ? response.data.customers : []);
       setCustomers(data);
     } catch (error) {
       console.error('Müşteriler yüklenirken hata oluştu:', error);
+    } finally {
+      setSearchLoading(false);
     }
   };
 
@@ -620,25 +661,95 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      const orderData = {
-        ...formData,
-        customer: { id: formData.customer }
-      };
+      
+      // Müşteri verisi düzeltme
+      let orderData = { ...formData };
+      
+      // Eğer formData.customer bir nesne değilse, sadece ID varsa doğru formatta gönderelim
+      if (formData.customer && typeof formData.customer !== 'object') {
+        const selectedCustomer = customers.find(c => c.id === formData.customer);
+        orderData.customer = { id: formData.customer };
+      } else if (formData.customer && typeof formData.customer === 'object') {
+        // Zaten nesne formatındaysa sadece ID'yi alalım
+        orderData.customer = { id: formData.customer.id };
+      }
 
-      const response = await axios[order ? 'put' : 'post'](
-        `http://localhost:6767/api/orders${order ? `/${order.id}` : ''}`,
-        orderData
-      );
-
-      onSave(response.data);
-      onClose();
+      let response;
+      
+      // DELIVERED durumunda doğrudan deliveryDate değerini ayarla
+      if (orderData.status === 'DELIVERED' && !orderData.deliveryDate) {
+        const today = new Date().toISOString().split('T')[0];
+        orderData.deliveryDate = today;
+      }
+      
+      if (order) {
+        // Güncelleme işlemi - Tüm sipariş verilerini tek seferde güncelle
+        try {
+          response = await axios.put(`http://localhost:6767/api/orders/${order.id}`, orderData);
+          console.log("Sipariş başarıyla güncellendi:", response.data);
+          
+          // Başarılı güncelleme durumunda state'i güncelle
+          onSave(response.data);
+          onClose();
+        } catch (updateError) {
+          console.error("Sipariş güncellenirken hata:", updateError);
+          
+          // Hata mesajını göster
+          let errorMessage = 'Sipariş güncellenirken bir hata oluştu';
+          if (updateError.response) {
+            if (updateError.response.data) {
+              errorMessage += ': ' + (typeof updateError.response.data === 'string' 
+                ? updateError.response.data 
+                : JSON.stringify(updateError.response.data));
+            }
+          }
+          throw new Error(errorMessage);
+        }
+      } else {
+        // Yeni oluşturma işlemi
+        try {
+          response = await axios.post('http://localhost:6767/api/orders', orderData);
+          console.log("Yeni sipariş başarıyla oluşturuldu:", response.data);
+          
+          // Başarılı oluşturma durumunda state'i güncelle
+          onSave(response.data);
+          onClose();
+        } catch (createError) {
+          console.error("Sipariş oluşturulurken hata:", createError);
+          
+          // Hata mesajını göster
+          let errorMessage = 'Sipariş oluşturulurken bir hata oluştu';
+          if (createError.response) {
+            if (createError.response.data) {
+              errorMessage += ': ' + (typeof createError.response.data === 'string' 
+                ? createError.response.data 
+                : JSON.stringify(createError.response.data));
+            }
+          }
+          throw new Error(errorMessage);
+        }
+      }
     } catch (error) {
-      console.error('Sipariş kaydedilirken hata oluştu:', error);
-      alert('Sipariş kaydedilirken bir hata oluştu');
+      console.error('İşlem sırasında hata:', error);
+      alert(error.message || 'Beklenmeyen bir hata oluştu');
     } finally {
       setLoading(false);
     }
   };
+
+  // Filtrelenmış müşteriler
+  const filteredCustomers = customers.filter(c => {
+    const fullName = `${c.firstName} ${c.lastName}`.toLowerCase();
+    return fullName.includes((customerInputValue || '').toLowerCase()) || 
+           (c.phone && c.phone.includes(customerInputValue));
+  });
+
+  // Filtrelenmiş kumaşlar
+  const filteredFabrics = fabrics.filter(f => {
+    const searchLower = (fabricInputValue || '').toLowerCase();
+    return f.name.toLowerCase().includes(searchLower) || 
+           (f.texture && f.texture.toLowerCase().includes(searchLower));
+  });
 
   return (
     <Dialog
@@ -666,31 +777,96 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
       </DialogTitle>
       <DialogContent sx={{ p: 4 }}>
         <Stack spacing={3} sx={{ mt: 2 }}>
-          {!customer && (
-            <FormControl fullWidth required>
-              <InputLabel>Müşteri</InputLabel>
-              <Select
-                name="customer"
-                value={formData.customer?.id || ''}
-                onChange={(e) => {
-                  const customerId = e.target.value;
+          {/* Müşteri alanı - sadece yeni sipariş için göster */}
+          {!customer && !order && (
+            <FormControl fullWidth required sx={{ mb: 2 }}>
+              <Autocomplete
+                id="customer-search"
+                options={filteredCustomers}
+                loading={searchLoading}
+                getOptionLabel={(option) => `${option.firstName} ${option.lastName}${option.phone ? ` (${option.phone})` : ''}`}
+                value={customers.find(c => c.id === formData.customer) || null}
+                onChange={(event, newValue) => {
                   setFormData(prev => ({
                     ...prev,
-                    customer: customerId
+                    customer: newValue?.id || null
                   }));
                 }}
-                label="Müşteri"
-              >
-                <MenuItem value="">
-                  <em>Seçiniz</em>
-                </MenuItem>
-                {customers.map((c) => (
-                  <MenuItem key={c.id} value={c.id}>
-                    {c.firstName} {c.lastName}
-                  </MenuItem>
-                ))}
-              </Select>
+                inputValue={customerInputValue}
+                onInputChange={(event, newInputValue) => {
+                  setCustomerInputValue(newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField 
+                    {...params} 
+                    label="Müşteri Ara" 
+                    variant="outlined"
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {searchLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <li {...props}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <Avatar 
+                        sx={{ 
+                          width: 32, 
+                          height: 32, 
+                          mr: 1.5, 
+                          bgcolor: 'primary.main',
+                          fontSize: '0.8rem'
+                        }}
+                      >
+                        {option.firstName?.charAt(0)}{option.lastName?.charAt(0)}
+                      </Avatar>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          {option.firstName} {option.lastName}
+                        </Typography>
+                        {option.phone && (
+                          <Typography variant="caption" color="text.secondary">
+                            {option.phone}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  </li>
+                )}
+                noOptionsText="Müşteri bulunamadı"
+                loadingText="Müşteriler yükleniyor..."
+                sx={{ width: '100%' }}
+              />
             </FormControl>
+          )}
+
+          {/* Müşteri bilgisi gösterimi - Düzenleme sırasında */}
+          {order && (
+            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Avatar 
+                sx={{ 
+                  bgcolor: 'primary.main',
+                  width: 40, 
+                  height: 40
+                }}
+              >
+                {order.customer?.firstName?.charAt(0)}{order.customer?.lastName?.charAt(0)}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  {order.customer?.firstName} {order.customer?.lastName}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {order.customer?.phone || 'Telefon bilgisi yok'}
+                </Typography>
+              </Box>
+            </Box>
           )}
 
           <Grid container spacing={2}>
@@ -702,6 +878,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                   value={formData.productType}
                   onChange={handleChange}
                   label="Ürün Tipi"
+                  disabled={order !== null} // Düzenleme modunda değiştirilemez
                 >
                   {Object.entries(Order.ProductType).map(([key, value]) => (
                     <MenuItem key={key} value={key}>
@@ -719,6 +896,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                   value={formData.fitType}
                   onChange={handleChange}
                   label="Kalıp Tipi"
+                  disabled={order !== null} // Düzenleme modunda değiştirilemez
                 >
                   {Object.entries(Order.FitType).map(([key, value]) => (
                     <MenuItem key={key} value={key}>
@@ -764,30 +942,80 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
             </Grid>
           </Grid>
 
+          {/* Teslim tarihi alanı - Düzenleme sırasında göster */}
+          {order && (
+            <TextField
+              name="deliveryDate"
+              label="Gerçek Teslim Tarihi"
+              type="date"
+              value={formData.deliveryDate || ''}
+              onChange={handleChange}
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
+              helperText="Teslim tarihini sadece ürün teslim edildiyse girin"
+            />
+          )}
+
           <FormControl fullWidth>
-            <InputLabel>Kumaş</InputLabel>
-            <Select
-              name="fabric"
-              value={formData.fabric?.id || ''}
-              onChange={(e) => {
-                const fabricId = e.target.value;
-                const selectedFabric = fabrics.find(f => f.id === fabricId);
+            <Autocomplete
+              id="fabric-search"
+              options={filteredFabrics}
+              getOptionLabel={(option) => `${option.name}${option.texture ? ` - ${option.texture}` : ''}`}
+              value={fabrics.find(f => f.id === formData.fabric?.id) || null}
+              onChange={(event, newValue) => {
                 setFormData(prev => ({
                   ...prev,
-                  fabric: selectedFabric
+                  fabric: newValue
                 }));
               }}
-              label="Kumaş"
-            >
-              <MenuItem value="">
-                <em>Seçiniz</em>
-              </MenuItem>
-              {fabrics.map((fabric) => (
-                <MenuItem key={fabric.id} value={fabric.id}>
-                  {fabric.name}
-                </MenuItem>
-              ))}
-            </Select>
+              inputValue={fabricInputValue}
+              onInputChange={(event, newInputValue) => {
+                setFabricInputValue(newInputValue);
+              }}
+              disabled={order !== null} // Düzenleme modunda değiştirilemez
+              renderInput={(params) => (
+                <TextField 
+                  {...params} 
+                  label="Kumaş Ara" 
+                  variant="outlined"
+                />
+              )}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    {option.imageUrl && (
+                      <Box 
+                        component="img" 
+                        src={option.imageUrl}
+                        alt={option.name}
+                        sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          borderRadius: 1, 
+                          mr: 2,
+                          objectFit: 'cover',
+                          border: '1px solid #eee'
+                        }}
+                      />
+                    )}
+                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {option.name}
+                      </Typography>
+                      {option.texture && (
+                        <Typography variant="caption" color="text.secondary">
+                          {option.texture}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </li>
+              )}
+              noOptionsText="Kumaş bulunamadı"
+              sx={{ width: '100%' }}
+            />
           </FormControl>
 
           <TextField
@@ -842,7 +1070,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={loading || !formData.customer || !formData.productType || !formData.fitType || !formData.status || !formData.estimatedDeliveryDate || !formData.totalPrice}
+          disabled={loading || (!order && !formData.customer) || !formData.productType || !formData.fitType || !formData.status || !formData.estimatedDeliveryDate || !formData.totalPrice}
           sx={{
             borderRadius: 2,
             px: 4,

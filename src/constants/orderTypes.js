@@ -20,5 +20,13 @@ export const Order = {
     READY: { displayName: 'Hazır', color: '#26A69A' },
     DELIVERED: { displayName: 'Teslim Edildi', color: '#2E7D32' },
     CANCELLED: { displayName: 'İptal Edildi', color: '#EF5350' }
+  },
+  // Backend için enum değerleri açıklaması
+  apiComments: {
+    // NOT: Backend tarafında OrderStatus enum değerleri şu şekildedir:
+    // public enum OrderStatus {
+    //   PREPARING, CUTTING, SEWING, FITTING, READY, DELIVERED, CANCELLED
+    // }
+    // Bu değerler tam olarak yukarıdaki OrderStatus nesnesinin anahtarlarıyla aynı olmalıdır.
   }
 }; 

@@ -40,7 +40,8 @@ import {
   Add,
   Event,
   LocalShipping,
-  FilterList
+  FilterList,
+  Update
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import '../styles/Orders.css';
@@ -118,7 +119,7 @@ const getStatusChip = (status) => {
   );
 };
 
-const Row = ({ order, onDelete }) => {
+const Row = ({ order, onDelete, onEdit }) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -186,20 +187,37 @@ const Row = ({ order, onDelete }) => {
           {getStatusChip(order.status)}
         </TableCell>
         <TableCell>
-          <IconButton 
-            color="error" 
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(order.id);
-            }}
-            sx={{ 
-              transition: 'transform 0.2s', 
-              '&:hover': { transform: 'scale(1.2)' } 
-            }}
-          >
-            <Delete />
-          </IconButton>
+          <Box sx={{ display: 'flex' }}>
+            <IconButton 
+              color="primary" 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(order);
+              }}
+              sx={{ 
+                transition: 'transform 0.2s', 
+                '&:hover': { transform: 'scale(1.2)' },
+                mr: 1
+              }}
+            >
+              <Edit />
+            </IconButton>
+            <IconButton 
+              color="error" 
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(order.id);
+              }}
+              sx={{ 
+                transition: 'transform 0.2s', 
+                '&:hover': { transform: 'scale(1.2)' } 
+              }}
+            >
+              <Delete />
+            </IconButton>
+          </Box>
         </TableCell>
       </AnimatedTableRow>
       <TableRow>
@@ -328,6 +346,7 @@ const Orders = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const ordersPerPage = 8;
 
   const fetchOrders = async () => {
@@ -411,6 +430,44 @@ const Orders = () => {
     return filteredOrders.slice(startIndex, startIndex + ordersPerPage);
   }, [filteredOrders, page]);
 
+  const handleEdit = (order) => {
+    setSelectedOrder(order);
+    setOrderDialogOpen(true);
+  };
+
+  const handleOrderSave = async (savedOrder) => {
+    try {
+      // Eğer mevcut siparişi güncellediyse, orders listesini güncelle
+      if (selectedOrder) {
+        setOrders(prevOrders => 
+          prevOrders.map(o => o.id === savedOrder.id ? savedOrder : o)
+        );
+        setSnackbar({
+          open: true,
+          message: 'Sipariş başarıyla güncellendi',
+          severity: 'success'
+        });
+      } else {
+        // Yeni sipariş oluşturulduysa, orders listesini güncelle
+        fetchOrders();
+        setSnackbar({
+          open: true,
+          message: 'Sipariş başarıyla oluşturuldu',
+          severity: 'success'
+        });
+      }
+      setOrderDialogOpen(false);
+      setSelectedOrder(null);
+    } catch (error) {
+      console.error('Sipariş işleminde hata oluştu:', error);
+      setSnackbar({
+        open: true,
+        message: 'Sipariş işleminde bir hata oluştu',
+        severity: 'error'
+      });
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -491,6 +548,7 @@ const Orders = () => {
                     key={order.id} 
                     order={order} 
                     onDelete={handleDelete}
+                    onEdit={handleEdit}
                   />
                 ))
               ) : (
@@ -555,19 +613,15 @@ const Orders = () => {
         </Alert>
       </Snackbar>
       
-      {/* Yeni Sipariş Dialog */}
+      {/* Sipariş Ekleme/Düzenleme Dialog */}
       <OrderDialog
         open={orderDialogOpen}
-        onClose={() => setOrderDialogOpen(false)}
-        onSave={(savedOrder) => {
-          fetchOrders();
+        onClose={() => {
           setOrderDialogOpen(false);
-          setSnackbar({
-            open: true,
-            message: 'Sipariş başarıyla oluşturuldu',
-            severity: 'success'
-          });
+          setSelectedOrder(null);
         }}
+        onSave={handleOrderSave}
+        order={selectedOrder}
       />
     </Container>
   );
