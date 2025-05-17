@@ -13,7 +13,8 @@ import {
   MenuItem,
   Grid,
   Stack,
-  InputAdornment
+  InputAdornment,
+  Alert
 } from '@mui/material';
 import { Order } from '../constants/orderTypes';
 
@@ -26,35 +27,49 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
     notes: order?.notes || '',
     totalPrice: order?.totalPrice || '',
     fabric: order?.fabric || null,
-    customer: customer || null
+    customer: customer?.id || order?.customer?.id || null
   });
 
   const [customers, setCustomers] = useState([]);
   const [fabrics, setFabrics] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetchCustomers();
-    fetchFabrics();
-  }, []);
+  const [error, setError] = useState('');
 
   const fetchCustomers = async () => {
     try {
       const response = await axios.get('http://localhost:6767/api/customers');
-      setCustomers(response.data);
+      const data = Array.isArray(response.data) 
+        ? response.data 
+        : (Array.isArray(response.data.customers) ? response.data.customers : []);
+      setCustomers(data);
+      setError('');
     } catch (error) {
       console.error('Müşteriler yüklenirken hata oluştu:', error);
+      setCustomers([]);
+      setError('Müşteriler yüklenirken bir hata oluştu');
     }
   };
+  
 
   const fetchFabrics = async () => {
     try {
       const response = await axios.get('http://localhost:6767/api/fabrics');
-      setFabrics(response.data);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setFabrics(data);
+      setError('');
     } catch (error) {
       console.error('Kumaşlar yüklenirken hata oluştu:', error);
+      setFabrics([]);
+      setError('Kumaşlar yüklenirken bir hata oluştu');
     }
   };
+
+  useEffect(() => {
+    if (open) {
+      fetchCustomers();
+      fetchFabrics();
+    }
+  }, [open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,6 +82,8 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
   const handleSubmit = async () => {
     try {
       setLoading(true);
+      setError('');
+      
       const orderData = {
         ...formData,
         customer: { id: formData.customer }
@@ -81,11 +98,21 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
       onClose();
     } catch (error) {
       console.error('Sipariş kaydedilirken hata oluştu:', error);
-      alert('Sipariş kaydedilirken bir hata oluştu');
+      setError('Sipariş kaydedilirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
   };
+
+  const customerList = React.useMemo(() => {
+    if (!Array.isArray(customers)) return [];
+    return customers;
+  }, [customers]);
+
+  const fabricList = React.useMemo(() => {
+    if (!Array.isArray(fabrics)) return [];
+    return fabrics;
+  }, [fabrics]);
 
   return (
     <Dialog
@@ -111,29 +138,26 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
       >
         {order ? 'Siparişi Düzenle' : 'Yeni Sipariş'}
       </DialogTitle>
-      <DialogContent sx={{ p: 4 }}>
-        <Stack spacing={3} sx={{ mt: 2 }}>
+      <DialogContent sx={{ p: 3 }}>
+        <Stack spacing={3}>
+          {error && (
+            <Alert severity="error" onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+
           {!customer && (
             <FormControl fullWidth required>
               <InputLabel>Müşteri</InputLabel>
               <Select
                 name="customer"
-                value={formData.customer?.id || ''}
-                onChange={(e) => {
-                  const customerId = e.target.value;
-                  setFormData(prev => ({
-                    ...prev,
-                    customer: customerId
-                  }));
-                }}
+                value={formData.customer || ''}
+                onChange={handleChange}
                 label="Müşteri"
               >
-                <MenuItem value="">
-                  <em>Seçiniz</em>
-                </MenuItem>
-                {customers.map((c) => (
+                {customerList.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
-                    {c.firstName} {c.lastName}
+                    {`${c.firstName} ${c.lastName}`}
                   </MenuItem>
                 ))}
               </Select>
@@ -218,7 +242,7 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
               value={formData.fabric?.id || ''}
               onChange={(e) => {
                 const fabricId = e.target.value;
-                const selectedFabric = fabrics.find(f => f.id === fabricId);
+                const selectedFabric = fabricList.find(f => f.id === fabricId);
                 setFormData(prev => ({
                   ...prev,
                   fabric: selectedFabric
@@ -229,7 +253,7 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
               <MenuItem value="">
                 <em>Seçiniz</em>
               </MenuItem>
-              {fabrics.map((fabric) => (
+              {fabricList.map((fabric) => (
                 <MenuItem key={fabric.id} value={fabric.id}>
                   {fabric.name}
                 </MenuItem>

@@ -13,12 +13,12 @@ export const Order = {
     CUSTOM: { displayName: 'Özel Kesim' }
   },
   OrderStatus: {
-    PREPARING: { displayName: 'Hazırlanıyor' },
-    CUTTING: { displayName: 'Kesim Aşamasında' },
-    SEWING: { displayName: 'Dikim Aşamasında' },
-    FITTING: { displayName: 'Prova Aşamasında' },
-    READY: { displayName: 'Hazır' },
-    DELIVERED: { displayName: 'Teslim Edildi' },
-    CANCELLED: { displayName: 'İptal Edildi' }
+    PREPARING: { displayName: 'Hazırlanıyor', color: '#FFA726' },
+    CUTTING: { displayName: 'Kesim Aşamasında', color: '#29B6F6' },
+    SEWING: { displayName: 'Dikim Aşamasında', color: '#66BB6A' },
+    FITTING: { displayName: 'Prova Aşamasında', color: '#AB47BC' },
+    READY: { displayName: 'Hazır', color: '#26A69A' },
+    DELIVERED: { displayName: 'Teslim Edildi', color: '#2E7D32' },
+    CANCELLED: { displayName: 'İptal Edildi', color: '#EF5350' }
   }
 }; 

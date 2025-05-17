@@ -11,7 +11,9 @@ function ContactPage() {
 
       {/* Sub-Banner */}
       <div className="contact-banner">
-        <h1>İletişim</h1>
+        <div className="banner-heading">
+          <p className="banner-subtitle">BİZE ULAŞIN</p>
+        </div>
       </div>
 
       {/* Harita */}

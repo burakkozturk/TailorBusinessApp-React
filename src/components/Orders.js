@@ -22,7 +22,8 @@ import {
   Collapse,
   Alert,
   Snackbar,
-  Chip
+  Chip,
+  Stack
 } from '@mui/material';
 import {
   Edit,
@@ -30,31 +31,28 @@ import {
   Search,
   KeyboardArrowDown,
   KeyboardArrowUp,
-  AccessTime,
-  Done,
-  LocalShipping,
-  Cancel,
-  Add
+  Add,
+  Event,
+  LocalShipping
 } from '@mui/icons-material';
 import '../styles/Orders.css';
 import { Order } from '../constants/orderTypes';
 import { OrderDialog } from './Customers';
 
 const getStatusChip = (status) => {
-  const statusConfig = {
-    PENDING: { color: 'warning', icon: <AccessTime />, label: 'Beklemede' },
-    IN_PROGRESS: { color: 'info', icon: <LocalShipping />, label: 'Hazırlanıyor' },
-    COMPLETED: { color: 'success', icon: <Done />, label: 'Tamamlandı' },
-    CANCELLED: { color: 'error', icon: <Cancel />, label: 'İptal Edildi' }
+  const statusConfig = Order.OrderStatus[status] || {
+    displayName: status,
+    color: '#78909C'
   };
-
-  const config = statusConfig[status] || statusConfig.PENDING;
 
   return (
     <Chip
-      icon={config.icon}
-      label={config.label}
-      color={config.color}
+      label={statusConfig.displayName}
+      sx={{
+        bgcolor: `${statusConfig.color}20`,
+        color: statusConfig.color,
+        fontWeight: 500
+      }}
       size="small"
     />
   );
@@ -62,27 +60,6 @@ const getStatusChip = (status) => {
 
 const Row = ({ order, onDelete }) => {
   const [open, setOpen] = useState(false);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PREPARING':
-        return '#FFA726';
-      case 'CUTTING':
-        return '#29B6F6';
-      case 'SEWING':
-        return '#66BB6A';
-      case 'FITTING':
-        return '#AB47BC';
-      case 'READY':
-        return '#26A69A';
-      case 'DELIVERED':
-        return '#2E7D32';
-      case 'CANCELLED':
-        return '#EF5350';
-      default:
-        return '#78909C';
-    }
-  };
 
   return (
     <>
@@ -109,40 +86,36 @@ const Row = ({ order, onDelete }) => {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{order.orderNumber}</TableCell>
         <TableCell>
           <Typography variant="subtitle2">
             {order.customer.firstName} {order.customer.lastName}
           </Typography>
         </TableCell>
         <TableCell>{order.customer.phone}</TableCell>
-        <TableCell>{new Date(order.orderDate).toLocaleDateString('tr-TR')}</TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Event fontSize="small" color="action" />
+            {new Date(order.orderDate).toLocaleDateString('tr-TR')}
+          </Box>
+        </TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocalShipping fontSize="small" color="action" />
+            {order.estimatedDeliveryDate ? 
+              new Date(order.estimatedDeliveryDate).toLocaleDateString('tr-TR') : 
+              'Belirlenmedi'
+            }
+          </Box>
+        </TableCell>
         <TableCell>
           <Typography sx={{ color: 'success.main', fontWeight: 500 }}>
-            {order.totalAmount?.toLocaleString('tr-TR')} ₺
+            {order.totalPrice?.toLocaleString('tr-TR')} ₺
           </Typography>
         </TableCell>
         <TableCell>
-          <Chip
-            label={Order.OrderStatus[order.status]?.displayName || order.status}
-            sx={{
-              bgcolor: `${getStatusColor(order.status)}20`,
-              color: getStatusColor(order.status),
-              fontWeight: 500
-            }}
-          />
+          {getStatusChip(order.status)}
         </TableCell>
         <TableCell>
-          <IconButton 
-            color="primary" 
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Edit işlemi buraya gelecek
-            }}
-          >
-            <Edit />
-          </IconButton>
           <IconButton 
             color="error" 
             size="small"
@@ -205,15 +178,18 @@ const Orders = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const ordersPerPage = 8;
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const ordersPerPage = 8;
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:6767/api/orders');
-      setOrders(response.data);
-      setTotalPages(Math.ceil(response.data.length / ordersPerPage));
+      
+      // API'den gelen veriyi kontrol et ve diziye dönüştür
+      const data = Array.isArray(response.data) ? response.data : [];
+      setOrders(data);
+      setTotalPages(Math.ceil(data.length / ordersPerPage));
     } catch (error) {
       console.error('Siparişler yüklenirken hata oluştu:', error);
       setSnackbar({
@@ -221,6 +197,7 @@ const Orders = () => {
         message: 'Siparişler yüklenirken bir hata oluştu',
         severity: 'error'
       });
+      setOrders([]); // Hata durumunda boş dizi set et
     } finally {
       setLoading(false);
     }
@@ -236,7 +213,7 @@ const Orders = () => {
       const response = await axios.delete(`http://localhost:6767/api/orders/${selectedOrderId}`);
       
       if (response.status === 204) {
-        setOrders(orders.filter(o => o.id !== selectedOrderId));
+        setOrders(prevOrders => prevOrders.filter(o => o.id !== selectedOrderId));
         setSnackbar({
           open: true,
           message: 'Sipariş başarıyla silindi',
@@ -247,19 +224,9 @@ const Orders = () => {
       }
     } catch (error) {
       console.error('Sipariş silinirken hata oluştu:', error);
-      let errorMessage = 'Sipariş silinirken bir hata oluştu';
-      
-      if (error.response) {
-        if (error.response.status === 404) {
-          errorMessage = 'Sipariş bulunamadı';
-        } else if (error.response.data && typeof error.response.data === 'string') {
-          errorMessage = error.response.data;
-        }
-      }
-      
       setSnackbar({
         open: true,
-        message: errorMessage,
+        message: 'Sipariş silinirken bir hata oluştu',
         severity: 'error'
       });
     } finally {
@@ -277,29 +244,43 @@ const Orders = () => {
     setPage(value);
   };
 
-  const filteredOrders = orders.filter(order =>
-    order.customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customer.phone.includes(searchTerm) ||
-    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.productType.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const paginatedOrders = filteredOrders.slice(
-    (page - 1) * ordersPerPage,
-    page * ordersPerPage
-  );
+  const filteredOrders = React.useMemo(() => {
+    if (!Array.isArray(orders)) return [];
+    
+    return orders.filter(order => {
+      if (!order || !order.customer) return false;
+      
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        order.customer.firstName.toLowerCase().includes(searchLower) ||
+        order.customer.lastName.toLowerCase().includes(searchLower) ||
+        order.customer.phone.includes(searchTerm) ||
+        (order.productType && Order.ProductType[order.productType]?.displayName.toLowerCase().includes(searchLower))
+      );
+    });
+  }, [orders, searchTerm]);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
   useEffect(() => {
-    setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
-    if (page > Math.ceil(filteredOrders.length / ordersPerPage)) {
-      setPage(1);
+    if (Array.isArray(filteredOrders)) {
+      setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
+      if (page > Math.ceil(filteredOrders.length / ordersPerPage)) {
+        setPage(1);
+      }
     }
-  }, [filteredOrders]);
+  }, [filteredOrders, page, ordersPerPage]);
+
+  const paginatedOrders = React.useMemo(() => {
+    if (!Array.isArray(filteredOrders)) return [];
+    
+    return filteredOrders.slice(
+      (page - 1) * ordersPerPage,
+      page * ordersPerPage
+    );
+  }, [filteredOrders, page, ordersPerPage]);
 
   return (
     <div className="orders-container">
@@ -337,13 +318,13 @@ const Orders = () => {
           <TableHead>
             <TableRow>
               <TableCell style={{ width: '50px' }} />
-              <TableCell>Sipariş No</TableCell>
-              <TableCell>Müşteri</TableCell>
-              <TableCell>Telefon</TableCell>
-              <TableCell>Tarih</TableCell>
-              <TableCell>Tutar</TableCell>
-              <TableCell>Durum</TableCell>
-              <TableCell>İşlemler</TableCell>
+              <TableCell>MÜŞTERİ</TableCell>
+              <TableCell>TELEFON</TableCell>
+              <TableCell>SİPARİŞ TARİHİ</TableCell>
+              <TableCell>TESLİM TARİHİ</TableCell>
+              <TableCell>TUTAR</TableCell>
+              <TableCell>DURUM</TableCell>
+              <TableCell>İŞLEMLER</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -369,7 +350,7 @@ const Orders = () => {
       </TableContainer>
 
       {!loading && filteredOrders.length > 0 && (
-        <Box className="pagination-container">
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
           <Pagination
             count={totalPages}
             page={page}

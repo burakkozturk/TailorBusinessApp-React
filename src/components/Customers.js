@@ -548,7 +548,8 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const fetchCustomers = async () => {
     try {
       const response = await axios.get('http://localhost:6767/api/customers');
-      setCustomers(response.data);
+      const data = Array.isArray(response.data) ? response.data : (Array.isArray(response.data.customers) ? response.data.customers : []);
+      setCustomers(data);
     } catch (error) {
       console.error('Müşteriler yüklenirken hata oluştu:', error);
     }
@@ -1552,8 +1553,9 @@ const Customers = () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:6767/api/customers');
-      setCustomers(response.data);
-      setTotalPages(Math.ceil(response.data.length / customersPerPage));
+      const data = Array.isArray(response.data) ? response.data : (Array.isArray(response.data.customers) ? response.data.customers : []);
+      setCustomers(data);
+      setTotalPages(Math.ceil(data.length / customersPerPage));
       setLoading(false);
     } catch (error) {
       console.error('Müşteriler yüklenirken hata oluştu:', error);

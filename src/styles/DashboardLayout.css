@@ -1,10 +1,10 @@
 .dashboard-layout {
-  display: flex;
+    display: flex;
   min-height: 100vh;
   width: 100%;
-}
-
-.main-content {
+  }
+  
+  .main-content {
   flex: 1;
   padding: 2rem;
   background-color: #f8f9fa;
@@ -78,11 +78,11 @@
     position: relative;
     padding: 1rem 0;
   }
-
+  
   .main-content {
     margin-left: 0;
     width: 100%;
     padding: 1rem;
   }
-}
+  }
   
