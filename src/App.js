@@ -12,8 +12,9 @@ import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
 import Orders from './components/Orders';
 import AdminBlog from './pages/AdminBlog';
+import AdminFabrics from './pages/AdminFabrics';
 import './styles/App.css';
-// … diğer import'lar
+
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="customers" element={<Customers />} />
           <Route path="orders" element={<Orders />} />
-          <Route path="fabrics" element={<div>Kumaşlar</div>} />
+          <Route path="fabrics" element={<AdminFabrics />} />
           <Route path="templates" element={<div>Şablonlar</div>} />
           <Route path="settings" element={<div>Ayarlar</div>} />
           <Route path="blog" element={<AdminBlog />} />

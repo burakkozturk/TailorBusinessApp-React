@@ -28,11 +28,56 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Container,
+  Avatar,
+  Chip
 } from '@mui/material';
-import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping } from '@mui/icons-material';
+import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import '../styles/Customers.css';
 import { Order } from '../constants/orderTypes';
+
+// Stillendirilmiş bileşenler
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+}));
+
+const StyledButton = styled(Button)(({ theme, color = 'primary' }) => ({
+  borderRadius: '10px',
+  padding: '8px 16px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)',
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '10px',
+    backgroundColor: '#f8fafc',
+    '&:hover': {
+      backgroundColor: '#f1f5f9',
+    },
+    '&.Mui-focused': {
+      backgroundColor: '#fff',
+      boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)',
+    }
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#e2e8f0',
+  }
+}));
+
+const CustomerAvatar = styled(Avatar)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  width: 40,
+  height: 40
+}));
 
 const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
   const [formData, setFormData] = useState({
@@ -817,11 +862,10 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
 
 const Row = ({ customer, onDelete, onEdit }) => {
   const [open, setOpen] = useState(false);
-  const [measurements, setMeasurements] = useState(null);
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [ordersLoading, setOrdersLoading] = useState(false);
-  const [measurementForm, setMeasurementForm] = useState({
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [measurementOpen, setMeasurementOpen] = useState(false);
+  const [measurementValues, setMeasurementValues] = useState({
     chest: '',
     waist: '',
     hip: '',
@@ -835,46 +879,33 @@ const Row = ({ customer, onDelete, onEdit }) => {
     rightCalf: '',
     elbowLength: ''
   });
-  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const inputStyle = {
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '8px',
-      backgroundColor: '#f8fafc',
-      '&:hover': {
-        backgroundColor: '#f1f5f9',
-      },
-      '&.Mui-focused': {
-        backgroundColor: '#fff',
-      }
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e2e8f0',
+  useEffect(() => {
+    if (open) {
+      fetchOrders();
+      fetchMeasurements();
     }
-  };
+  }, [open, customer.id]);
 
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = async () => {
     try {
-      setOrdersLoading(true);
-      const response = await axios.get(`http://localhost:6767/api/orders/by-customer/${customer.id}`);
+      setLoading(true);
+      const response = await axios.get(`http://localhost:6767/api/orders/customer/${customer.id}`);
       setOrders(response.data);
     } catch (error) {
       console.error('Siparişler yüklenirken hata oluştu:', error);
     } finally {
-      setOrdersLoading(false);
+      setLoading(false);
     }
-  }, [customer.id]);
+  };
 
-  const fetchMeasurements = useCallback(async () => {
-    if (!customer) return;
-
+  const fetchMeasurements = async () => {
     try {
-      setLoading(true);
       const response = await axios.get(`http://localhost:6767/api/measurements/${customer.id}`);
-      setMeasurements(response.data);
       if (response.data) {
-        setMeasurementForm({
+        setMeasurementValues({
           chest: response.data.chest || '',
           waist: response.data.waist || '',
           hip: response.data.hip || '',
@@ -891,21 +922,12 @@ const Row = ({ customer, onDelete, onEdit }) => {
       }
     } catch (error) {
       console.error('Ölçüler yüklenirken hata oluştu:', error);
-    } finally {
-      setLoading(false);
     }
-  }, [customer]);
-
-  useEffect(() => {
-    if (open) {
-      fetchMeasurements();
-      fetchOrders();
-    }
-  }, [open, fetchMeasurements, fetchOrders]);
+  };
 
   const handleMeasurementChange = (e) => {
     const { name, value } = e.target;
-    setMeasurementForm(prev => ({
+    setMeasurementValues(prev => ({
       ...prev,
       [name]: value
     }));
@@ -913,12 +935,19 @@ const Row = ({ customer, onDelete, onEdit }) => {
 
   const handleMeasurementSubmit = async () => {
     try {
-      const method = measurements ? 'put' : 'post';
+      const method = orders.length > 0 ? 'put' : 'post';
       const response = await axios[method](
         `http://localhost:6767/api/measurements/${customer.id}`,
-        measurementForm
+        measurementValues
       );
-      setMeasurements(response.data);
+      if (method === 'put') {
+        setOrders(prevOrders =>
+          prevOrders.map(o => o.id === response.data.id ? response.data : o)
+        );
+      } else {
+        setOrders(prevOrders => [response.data, ...prevOrders]);
+      }
+      setMeasurementOpen(false);
       alert('Ölçüler başarıyla kaydedildi');
     } catch (error) {
       console.error('Ölçüler kaydedilirken hata oluştu:', error);
@@ -932,392 +961,441 @@ const Row = ({ customer, onDelete, onEdit }) => {
   };
 
   const handleOrderSave = (savedOrder) => {
-    if (selectedOrder) {
-      // Güncelleme
-      setOrders(prevOrders =>
-        prevOrders.map(o => o.id === savedOrder.id ? savedOrder : o)
-      );
-    } else {
-      // Yeni ekleme
-      setOrders(prevOrders => [savedOrder, ...prevOrders]);
-    }
+    fetchOrders();
+    setOrderDialogOpen(false);
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'PREPARING':
-        return '#FFA726';
-      case 'CUTTING':
-        return '#29B6F6';
-      case 'SEWING':
-        return '#66BB6A';
-      case 'FITTING':
-        return '#AB47BC';
-      case 'READY':
-        return '#26A69A';
-      case 'DELIVERED':
-        return '#2E7D32';
-      case 'CANCELLED':
-        return '#EF5350';
-      default:
-        return '#78909C';
+    switch(status) {
+      case 'PREPARING': return '#FFC107';
+      case 'CUTTING': return '#2196F3';
+      case 'SEWING': return '#9C27B0';
+      case 'FITTING': return '#3F51B5';
+      case 'READY': return '#4CAF50';
+      case 'DELIVERED': return '#8BC34A';
+      case 'CANCELLED': return '#F44336';
+      default: return '#757575';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'PREPARING': return 'Hazırlanıyor';
+      case 'CUTTING': return 'Kesim';
+      case 'SEWING': return 'Dikim';
+      case 'FITTING': return 'Prova';
+      case 'READY': return 'Hazır';
+      case 'DELIVERED': return 'Teslim Edildi';
+      case 'CANCELLED': return 'İptal';
+      default: return status;
     }
   };
 
   return (
     <>
-      <TableRow 
-        className="customer-row"
-        onClick={() => setOpen(!open)}
-        sx={{ 
-          '& > *': { borderBottom: 'unset' },
-          '&:hover': {
-            backgroundColor: '#f8fafc',
-            cursor: 'pointer'
-          }
-        }}
-      >
+      <TableRow sx={{ 
+        '& > *': { borderBottom: 'unset' }, 
+        transition: 'background-color 0.2s',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+        }
+      }}>
         <TableCell>
           <IconButton
-            aria-label="expand row"
             size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(!open);
+            onClick={() => setOpen(!open)}
+            sx={{ 
+              transition: 'transform 0.2s',
+              transform: open ? 'rotate(180deg)' : 'rotate(0deg)'
             }}
           >
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+            <KeyboardArrowDown />
           </IconButton>
         </TableCell>
-        <TableCell sx={{ fontWeight: 500 }}>{customer.firstName}</TableCell>
-        <TableCell sx={{ fontWeight: 500 }}>{customer.lastName}</TableCell>
+        <TableCell>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <CustomerAvatar alt={customer.firstName}>
+              {customer.firstName.charAt(0)}{customer.lastName.charAt(0)}
+            </CustomerAvatar>
+            <Box sx={{ ml: 2 }}>
+              <Typography sx={{ fontWeight: 'bold' }}>
+                {customer.firstName} {customer.lastName}
+              </Typography>
+            </Box>
+          </Box>
+        </TableCell>
         <TableCell>{customer.phone}</TableCell>
         <TableCell>{customer.address}</TableCell>
-        <TableCell align="right">{customer.height} cm</TableCell>
-        <TableCell align="right">{customer.weight} kg</TableCell>
         <TableCell>
+          {customer.height ? customer.height + ' cm' : '-'} / {customer.weight ? customer.weight + ' kg' : '-'}
+        </TableCell>
+        <TableCell align="center">
           <IconButton 
-            color="primary" 
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(customer);
+            size="small" 
+            color="primary"
+            onClick={() => onEdit(customer)}
+            sx={{ 
+              bgcolor: 'rgba(25, 118, 210, 0.1)', 
+              mr: 1,
+              transition: 'transform 0.2s',
+              '&:hover': {
+                bgcolor: 'rgba(25, 118, 210, 0.2)',
+                transform: 'scale(1.1)'
+              }
             }}
-            sx={{ mr: 1 }}
           >
-            <Edit />
+            <Edit fontSize="small" />
           </IconButton>
           <IconButton 
-            color="error" 
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(customer.id);
+            size="small" 
+            color="error"
+            onClick={() => onDelete(customer.id)}
+            sx={{ 
+              bgcolor: 'rgba(211, 47, 47, 0.1)', 
+              transition: 'transform 0.2s',
+              '&:hover': {
+                bgcolor: 'rgba(211, 47, 47, 0.2)',
+                transform: 'scale(1.1)'
+              }
             }}
           >
-            <Delete />
+            <Delete fontSize="small" />
           </IconButton>
         </TableCell>
       </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2 }}>
-              <Grid container spacing={3}>
-                {/* Ölçüler Bölümü */}
-                <Grid item xs={12} lg={6}>
-                  <Typography variant="h6" gutterBottom>
-                    Ölçüler
-                  </Typography>
-                  {loading ? (
-                    <Box sx={{ textAlign: 'center', py: 2 }}>
-                      <Typography>Yükleniyor...</Typography>
-                    </Box>
-                  ) : (
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="chest"
-                          label="Göğüs"
-                          type="number"
-                          value={measurementForm.chest}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="waist"
-                          label="Bel"
-                          type="number"
-                          value={measurementForm.waist}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="hip"
-                          label="Kalça"
-                          type="number"
-                          value={measurementForm.hip}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="shoulder"
-                          label="Omuz"
-                          type="number"
-                          value={measurementForm.shoulder}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="neck"
-                          label="Boyun"
-                          type="number"
-                          value={measurementForm.neck}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="leftArm"
-                          label="Sol Kol"
-                          type="number"
-                          value={measurementForm.leftArm}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="rightArm"
-                          label="Sağ Kol"
-                          type="number"
-                          value={measurementForm.rightArm}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="leftThigh"
-                          label="Sol Uyluk"
-                          type="number"
-                          value={measurementForm.leftThigh}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="rightThigh"
-                          label="Sağ Uyluk"
-                          type="number"
-                          value={measurementForm.rightThigh}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="leftCalf"
-                          label="Sol Baldır"
-                          type="number"
-                          value={measurementForm.leftCalf}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="rightCalf"
-                          label="Sağ Baldır"
-                          type="number"
-                          value={measurementForm.rightCalf}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          name="elbowLength"
-                          label="Dirsek Uzunluğu"
-                          type="number"
-                          value={measurementForm.elbowLength}
-                          onChange={handleMeasurementChange}
-                          fullWidth
-                          size="small"
-                          sx={inputStyle}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={handleMeasurementSubmit}
-                          sx={{ mt: 2 }}
-                        >
-                          Ölçüleri Kaydet
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  )}
-                </Grid>
 
-                {/* Siparişler Bölümü */}
-                <Grid item xs={12} lg={6}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6">
-                      Siparişler
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      startIcon={<Add />}
-                      onClick={() => {
-                        setSelectedOrder(null);
-                        setOrderDialogOpen(true);
-                      }}
-                    >
-                      Yeni Sipariş
-                    </Button>
-                  </Box>
-                  
-                  {ordersLoading ? (
-                    <Box sx={{ textAlign: 'center', py: 2 }}>
-                      <Typography>Siparişler Yükleniyor...</Typography>
-                    </Box>
-                  ) : orders.length === 0 ? (
-                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'grey.50' }}>
-                      <Typography color="textSecondary">
-                        Henüz sipariş bulunmuyor
-                      </Typography>
-                    </Paper>
-                  ) : (
-                    <Stack spacing={2}>
-                      {orders.map((order) => (
+      {/* Detay kısmı */}
+      <TableRow>
+        <TableCell style={{ padding: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ p: 3, bgcolor: '#f8fafc', borderRadius: '0 0 16px 16px' }}>
+              
+              {/* Ölçüler ve Sipariş butonları */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                  Müşteri Detayı
+                </Typography>
+                <Box>
+                  <StyledButton
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => setMeasurementOpen(true)}
+                    sx={{ mr: 1 }}
+                  >
+                    Ölçüler
+                  </StyledButton>
+                  <StyledButton
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    startIcon={<Event />}
+                    onClick={() => {
+                      setSelectedOrder(null);
+                      setOrderDialogOpen(true);
+                    }}
+                  >
+                    Yeni Sipariş
+                  </StyledButton>
+                </Box>
+              </Box>
+              
+              <Divider sx={{ mb: 2 }} />
+              
+              {/* Siparişler Listesi */}
+              <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', mt: 3 }}>
+                Siparişler
+              </Typography>
+              
+              {orders.length > 0 ? (
+                <Box sx={{ mt: 2 }}>
+                  <Grid container spacing={2}>
+                    {orders.map((order) => (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={order.id}>
                         <Paper
-                          key={order.id}
+                          elevation={2}
                           sx={{
                             p: 2,
+                            borderRadius: 2,
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s, box-shadow 0.2s',
                             '&:hover': {
-                              bgcolor: 'grey.50',
-                              cursor: 'pointer'
-                            }
+                              transform: 'translateY(-5px)',
+                              boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+                            },
+                            borderLeft: `5px solid ${getStatusColor(order.status)}`,
                           }}
                           onClick={() => handleOrderClick(order)}
                         >
-                          <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                                  {Order.ProductType[order.productType]?.displayName || order.productType}
-                                </Typography>
-                                <Box
-                                  sx={{
-                                    px: 1.5,
-                                    py: 0.5,
-                                    borderRadius: 1,
-                                    bgcolor: getStatusColor(order.status) + '20',
-                                    color: getStatusColor(order.status)
-                                  }}
-                                >
-                                  {Order.OrderStatus[order.status]?.displayName || order.status}
-                                </Box>
-                              </Box>
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <Typography variant="body2" color="textSecondary">
-                                Kalıp: {Order.FitType[order.fitType]?.displayName || order.fitType}
-                              </Typography>
-                              {order.fabric && (
-                                <Typography variant="body2" color="textSecondary">
-                                  Kumaş: {order.fabric.name}
-                                </Typography>
-                              )}
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Event fontSize="small" color="action" />
-                                <Typography variant="body2" color="textSecondary">
-                                  Sipariş: {new Date(order.orderDate).toLocaleDateString('tr-TR')}
-                                </Typography>
-                              </Box>
-                              {order.estimatedDeliveryDate && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <LocalShipping fontSize="small" color="action" />
-                                  <Typography variant="body2" color="textSecondary">
-                                    Teslim: {new Date(order.estimatedDeliveryDate).toLocaleDateString('tr-TR')}
-                                  </Typography>
-                                </Box>
-                              )}
-                            </Grid>
-                            {order.notes && (
-                              <Grid item xs={12}>
-                                <Typography variant="body2" color="textSecondary">
-                                  Notlar: {order.notes}
-                                </Typography>
-                              </Grid>
-                            )}
-                            {order.totalPrice && (
-                              <Grid item xs={12}>
-                                <Typography variant="subtitle2" sx={{ color: 'success.main', fontWeight: 'bold' }}>
-                                  Toplam: {order.totalPrice.toLocaleString('tr-TR')} ₺
-                                </Typography>
-                              </Grid>
-                            )}
-                          </Grid>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                            {order.productType}
+                          </Typography>
+                          <Divider sx={{ my: 1 }} />
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Durum:
+                            </Typography>
+                            <Chip
+                              label={getStatusText(order.status)}
+                              size="small"
+                              sx={{
+                                bgcolor: getStatusColor(order.status),
+                                color: 'white',
+                                fontWeight: 'bold',
+                                fontSize: '0.7rem',
+                              }}
+                            />
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Teslim:
+                            </Typography>
+                            <Typography variant="body2">
+                              {order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleDateString('tr-TR') : 'Belirtilmedi'}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">
+                              Tutar:
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                              {order.totalPrice ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(order.totalPrice) : '-'}
+                            </Typography>
+                          </Box>
                         </Paper>
-                      ))}
-                    </Stack>
-                  )}
-                </Grid>
-              </Grid>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
+                  {loading ? 'Siparişler yükleniyor...' : 'Bu müşteriye ait sipariş bulunamadı.'}
+                </Typography>
+              )}
+              
+              {/* Ölçü Modalı */}
+              <Dialog 
+                open={measurementOpen} 
+                onClose={() => setMeasurementOpen(false)}
+                PaperProps={{
+                  sx: { borderRadius: 3 }
+                }}
+                maxWidth="md"
+                fullWidth
+              >
+                <DialogTitle sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
+                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+                    Ölçüler: {customer.firstName} {customer.lastName}
+                  </Typography>
+                </DialogTitle>
+                <DialogContent sx={{ pt: 3 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="chest"
+                        label="Göğüs"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.chest}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="waist"
+                        label="Bel"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.waist}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="hip"
+                        label="Kalça"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.hip}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="shoulder"
+                        label="Omuz"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.shoulder}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="neck"
+                        label="Boyun"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.neck}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="leftArm"
+                        label="Sol Kol"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.leftArm}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="rightArm"
+                        label="Sağ Kol"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.rightArm}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="leftThigh"
+                        label="Sol Uyluk"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.leftThigh}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="rightThigh"
+                        label="Sağ Uyluk"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.rightThigh}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="leftCalf"
+                        label="Sol Baldır"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.leftCalf}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="rightCalf"
+                        label="Sağ Baldır"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.rightCalf}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        name="elbowLength"
+                        label="Dirsek Uzunluğu"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={measurementValues.elbowLength}
+                        onChange={handleMeasurementChange}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                        }}
+                        sx={{ mb: 2 }}
+                      />
+                    </Grid>
+                  </Grid>
+                </DialogContent>
+                <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
+                  <Button onClick={() => setMeasurementOpen(false)}>İptal</Button>
+                  <StyledButton
+                    onClick={handleMeasurementSubmit}
+                    color="primary"
+                    variant="contained"
+                  >
+                    Kaydet
+                  </StyledButton>
+                </DialogActions>
+              </Dialog>
+              
+              {/* Sipariş Modal */}
+              <OrderDialog
+                open={orderDialogOpen}
+                onClose={() => setOrderDialogOpen(false)}
+                customer={customer}
+                order={selectedOrder}
+                onSave={handleOrderSave}
+              />
             </Box>
           </Collapse>
         </TableCell>
       </TableRow>
-
-      <OrderDialog
-        open={orderDialogOpen}
-        onClose={() => {
-          setOrderDialogOpen(false);
-          setSelectedOrder(null);
-        }}
-        customer={customer}
-        order={selectedOrder}
-        onSave={handleOrderSave}
-      />
     </>
   );
 };
@@ -1669,171 +1747,151 @@ const Customers = () => {
   }, [filteredCustomers, customersPerPage, page]);
 
   return (
-    <div className="customers-container">
-      <Box className="customers-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
+    <Container maxWidth="xl" sx={{ py: 3 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" sx={{ 
+          fontWeight: 'bold',
+          position: 'relative',
+          display: 'inline-block',
+          mb: 4,
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            width: '60px',
+            height: '4px',
+            bottom: '-10px',
+            left: '0',
+            backgroundColor: '#1976d2',
+            borderRadius: '10px'
+          }
+        }}>
           Müşteri Listesi
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            className="search-field"
-            variant="outlined"
-            placeholder="Müşteri Ara..."
-            value={searchTerm}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<LocalShipping />}
-            onClick={() => setOrderDialogOpen(true)}
-            sx={{
-              bgcolor: 'secondary.main',
-              '&:hover': {
-                bgcolor: 'secondary.dark',
-              }
-            }}
-          >
-            Yeni Sipariş
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={() => setAddDialogOpen(true)}
-          >
-            Yeni Müşteri
-          </Button>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip 
+              icon={<Person />} 
+              label={`Toplam: ${customers.length} Müşteri`} 
+              color="primary" 
+              variant="outlined" 
+              sx={{ mr: 2, fontWeight: 'bold' }} 
+            />
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <StyledTextField
+              variant="outlined"
+              placeholder="Müşteri Ara..."
+              value={searchTerm}
+              onChange={handleSearch}
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ minWidth: '250px' }}
+            />
+            
+            <StyledButton
+              variant="contained"
+              color="secondary"
+              startIcon={<LocalShipping />}
+              onClick={() => setOrderDialogOpen(true)}
+            >
+              Yeni Sipariş
+            </StyledButton>
+            
+            <StyledButton
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => setAddDialogOpen(true)}
+            >
+              Yeni Müşteri
+            </StyledButton>
+          </Box>
         </Box>
       </Box>
 
-      <TableContainer component={Paper} className="table-container">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell style={{ width: '50px' }} />
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  width: '150px'
-                }}
-              >
-                AD
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  width: '150px'
-                }}
-              >
-                SOYAD
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  width: '150px'
-                }}
-              >
-                TELEFON
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  flex: 1
-                }}
-              >
-                ADRES
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  width: '100px'
-                }}
-              >
-                BOY
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  width: '100px'
-                }}
-              >
-                KİLO
-              </TableCell>
-              <TableCell 
-                sx={{ 
-                  fontWeight: 600, 
-                  color: '#fff',
-                  backgroundColor: '#2c3e50',
-                  width: '120px'
-                }}
-              >
-                İŞLEMLER
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
+      <Paper sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.08)', mb: 4 }}>
+        <TableContainer>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={8} align="center">Yükleniyor...</TableCell>
+                <StyledTableCell style={{ width: '50px' }} />
+                <StyledTableCell>Müşteri</StyledTableCell>
+                <StyledTableCell>Telefon</StyledTableCell>
+                <StyledTableCell>Adres</StyledTableCell>
+                <StyledTableCell>Boy / Kilo</StyledTableCell>
+                <StyledTableCell align="center">İşlemler</StyledTableCell>
               </TableRow>
-            ) : paginatedCustomers.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">Müşteri bulunamadı</TableCell>
-              </TableRow>
-            ) : (
-              paginatedCustomers.map((customer) => (
-                <Row key={customer.id} customer={customer} onDelete={handleDelete} onEdit={handleEdit} />
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {paginatedCustomers.length > 0 ? (
+                paginatedCustomers.map((customer) => (
+                  <Row
+                    key={customer.id}
+                    customer={customer}
+                    onDelete={handleDelete}
+                    onEdit={handleEdit}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      {loading ? 'Müşteriler yükleniyor...' : 'Müşteri bulunamadı'}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-      {!loading && filteredCustomers.length > 0 && (
-        <Box className="pagination-container">
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            size="large"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
-      )}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+          size="large"
+          showFirstButton
+          showLastButton
+          sx={{
+            '& .MuiPaginationItem-root': {
+              borderRadius: '8px',
+            }
+          }}
+        />
+      </Box>
 
+      {/* Dialog bileşenleri */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="xs"
+        PaperProps={{
+          sx: { borderRadius: 3 }
+        }}
       >
         <DialogTitle>Müşteriyi Sil</DialogTitle>
         <DialogContent>
-          Bu müşteriyi silmek istediğinizden emin misiniz?
+          <Typography>Bu müşteriyi silmek istediğinize emin misiniz?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>İptal</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
+          <Button 
+            onClick={confirmDelete} 
+            color="error" 
+            variant="contained"
+            sx={{ borderRadius: '8px' }}
+          >
             Sil
           </Button>
         </DialogActions>
@@ -1841,10 +1899,7 @@ const Customers = () => {
 
       <EditCustomerDialog
         open={editDialogOpen}
-        onClose={() => {
-          setEditDialogOpen(false);
-          setSelectedCustomer(null);
-        }}
+        onClose={() => setEditDialogOpen(false)}
         customer={selectedCustomer}
         onUpdate={handleUpdate}
       />
@@ -1858,7 +1913,8 @@ const Customers = () => {
       <OrderDialog
         open={orderDialogOpen}
         onClose={() => setOrderDialogOpen(false)}
-        onSave={(savedOrder) => {
+        customer={null}
+        onSave={() => {
           setSnackbar({
             open: true,
             message: 'Sipariş başarıyla oluşturuldu',
@@ -1868,20 +1924,23 @@ const Customers = () => {
         }}
       />
 
+      {/* Bildirim */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
           severity={snackbar.severity}
-          sx={{ width: '100%' }}
+          variant="filled"
+          sx={{ width: '100%', borderRadius: '10px' }}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+    </Container>
   );
 };
 

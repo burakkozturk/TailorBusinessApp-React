@@ -23,7 +23,13 @@ import {
   Alert,
   Snackbar,
   Chip,
-  Stack
+  Stack,
+  Container,
+  Card,
+  CardContent,
+  Avatar,
+  CircularProgress,
+  Grid
 } from '@mui/material';
 import {
   Edit,
@@ -33,11 +39,62 @@ import {
   KeyboardArrowUp,
   Add,
   Event,
-  LocalShipping
+  LocalShipping,
+  FilterList
 } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import '../styles/Orders.css';
 import { Order } from '../constants/orderTypes';
 import { OrderDialog } from './Customers';
+
+// Stillendirilmiş bileşenler
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: 'bold',
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+}));
+
+const StyledButton = styled(Button)(({ theme, color = 'primary' }) => ({
+  borderRadius: '10px',
+  padding: '8px 16px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)',
+  },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '10px',
+    backgroundColor: '#f8fafc',
+    '&:hover': {
+      backgroundColor: '#f1f5f9',
+    },
+    '&.Mui-focused': {
+      backgroundColor: '#fff',
+      boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.2)',
+    }
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#e2e8f0',
+  }
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  borderRadius: 16,
+  boxShadow: '0 6px 20px rgba(0, 0, 0, 0.08)',
+  overflow: 'hidden'
+}));
+
+const AnimatedTableRow = styled(TableRow)(({ theme }) => ({
+  transition: 'transform 0.2s, background-color 0.2s',
+  '&:hover': {
+    backgroundColor: '#f8fafc !important',
+    transform: 'translateX(5px)',
+  }
+}));
 
 const getStatusChip = (status) => {
   const statusConfig = Order.OrderStatus[status] || {
@@ -51,7 +108,10 @@ const getStatusChip = (status) => {
       sx={{
         bgcolor: `${statusConfig.color}20`,
         color: statusConfig.color,
-        fontWeight: 500
+        fontWeight: 500,
+        borderRadius: '10px',
+        padding: '2px 4px',
+        border: `1px solid ${statusConfig.color}40`
       }}
       size="small"
     />
@@ -63,15 +123,12 @@ const Row = ({ order, onDelete }) => {
 
   return (
     <>
-      <TableRow 
+      <AnimatedTableRow 
         className="order-row"
         onClick={() => setOpen(!open)}
         sx={{ 
           '& > *': { borderBottom: 'unset' },
-          '&:hover': {
-            backgroundColor: '#f8fafc',
-            cursor: 'pointer'
-          }
+          backgroundColor: open ? '#f8fafc' : 'transparent',
         }}
       >
         <TableCell>
@@ -82,14 +139,27 @@ const Row = ({ order, onDelete }) => {
               e.stopPropagation();
               setOpen(!open);
             }}
+            sx={{ transition: 'transform 0.3s', transform: open ? 'rotate(180deg)' : 'rotate(0)' }}
           >
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+            <KeyboardArrowDown />
           </IconButton>
         </TableCell>
         <TableCell>
-          <Typography variant="subtitle2">
-            {order.customer.firstName} {order.customer.lastName}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Avatar 
+              sx={{ 
+                bgcolor: 'primary.main',
+                width: 36, 
+                height: 36,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+            >
+              {order.customer.firstName?.charAt(0)}{order.customer.lastName?.charAt(0)}
+            </Avatar>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+              {order.customer.firstName} {order.customer.lastName}
+            </Typography>
+          </Box>
         </TableCell>
         <TableCell>{order.customer.phone}</TableCell>
         <TableCell>
@@ -108,7 +178,7 @@ const Row = ({ order, onDelete }) => {
           </Box>
         </TableCell>
         <TableCell>
-          <Typography sx={{ color: 'success.main', fontWeight: 500 }}>
+          <Typography sx={{ color: 'success.main', fontWeight: 600 }}>
             {order.totalPrice?.toLocaleString('tr-TR')} ₺
           </Typography>
         </TableCell>
@@ -123,43 +193,122 @@ const Row = ({ order, onDelete }) => {
               e.stopPropagation();
               onDelete(order.id);
             }}
+            sx={{ 
+              transition: 'transform 0.2s', 
+              '&:hover': { transform: 'scale(1.2)' } 
+            }}
           >
             <Delete />
           </IconButton>
         </TableCell>
-      </TableRow>
+      </AnimatedTableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2 }}>
-              <Typography variant="h6" gutterBottom component="div">
+            <Box sx={{ margin: 2, mt: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom component="div" sx={{ 
+                fontWeight: 'bold', 
+                position: 'relative',
+                display: 'inline-block',
+                mb: 3,
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  width: '40px',
+                  height: '3px',
+                  bottom: '-8px',
+                  left: '0',
+                  backgroundColor: '#1976d2',
+                  borderRadius: '8px'
+                }
+              }}>
                 Sipariş Detayları
               </Typography>
               <Box className="order-details">
-                <div className="detail-section">
-                  <Typography variant="subtitle2">Teslimat Adresi:</Typography>
-                  <Typography>{order.deliveryAddress || order.customer.address}</Typography>
-                </div>
-                <div className="detail-section">
-                  <Typography variant="subtitle2">Sipariş Notu:</Typography>
-                  <Typography>{order.notes || 'Not bulunmuyor'}</Typography>
-                </div>
-                <div className="detail-section">
-                  <Typography variant="subtitle2">Ürün Bilgileri:</Typography>
-                  <Box sx={{ mt: 1 }}>
-                    <Typography>
-                      <strong>Ürün Tipi:</strong> {Order.ProductType[order.productType]?.displayName || order.productType}
-                    </Typography>
-                    <Typography>
-                      <strong>Kalıp:</strong> {Order.FitType[order.fitType]?.displayName || order.fitType}
-                    </Typography>
-                    {order.fabric && (
-                      <Typography>
-                        <strong>Kumaş:</strong> {order.fabric.name}
-                      </Typography>
-                    )}
-                  </Box>
-                </div>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={4}>
+                    <Card 
+                      variant="outlined" 
+                      sx={{ 
+                        borderRadius: 2, 
+                        height: '100%',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                        transition: 'transform 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
+                        }
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                          Teslimat Adresi:
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.95rem' }}>
+                          {order.deliveryAddress || order.customer.address || 'Adres belirtilmemiş'}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Card 
+                      variant="outlined" 
+                      sx={{ 
+                        borderRadius: 2, 
+                        height: '100%',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                        transition: 'transform 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
+                        }
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                          Sipariş Notu:
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.95rem' }}>
+                          {order.notes || 'Not bulunmuyor'}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Card 
+                      variant="outlined" 
+                      sx={{ 
+                        borderRadius: 2, 
+                        height: '100%',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                        transition: 'transform 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
+                        }
+                      }}
+                    >
+                      <CardContent>
+                        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600, color: 'primary.main' }}>
+                          Ürün Bilgileri:
+                        </Typography>
+                        <Stack spacing={1} sx={{ mt: 1 }}>
+                          <Typography sx={{ fontSize: '0.95rem' }}>
+                            <strong>Ürün Tipi:</strong> {Order.ProductType[order.productType]?.displayName || order.productType}
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.95rem' }}>
+                            <strong>Kalıp:</strong> {Order.FitType[order.fitType]?.displayName || order.fitType}
+                          </Typography>
+                          {order.fabric && (
+                            <Typography sx={{ fontSize: '0.95rem' }}>
+                              <strong>Kumaş:</strong> {order.fabric.name}
+                            </Typography>
+                          )}
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
               </Box>
             </Box>
           </Collapse>
@@ -248,128 +397,140 @@ const Orders = () => {
     if (!Array.isArray(orders)) return [];
     
     return orders.filter(order => {
-      if (!order || !order.customer) return false;
+      const customerName = `${order.customer.firstName} ${order.customer.lastName}`.toLowerCase();
+      const searchValue = searchTerm.toLowerCase();
       
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        order.customer.firstName.toLowerCase().includes(searchLower) ||
-        order.customer.lastName.toLowerCase().includes(searchLower) ||
-        order.customer.phone.includes(searchTerm) ||
-        (order.productType && Order.ProductType[order.productType]?.displayName.toLowerCase().includes(searchLower))
-      );
+      return customerName.includes(searchValue) || 
+        (order.customer.phone && order.customer.phone.includes(searchValue)) ||
+        (Order.ProductType[order.productType]?.displayName.toLowerCase().includes(searchValue));
     });
   }, [orders, searchTerm]);
+
+  const paginatedOrders = React.useMemo(() => {
+    const startIndex = (page - 1) * ordersPerPage;
+    return filteredOrders.slice(startIndex, startIndex + ordersPerPage);
+  }, [filteredOrders, page]);
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  useEffect(() => {
-    if (Array.isArray(filteredOrders)) {
-      setTotalPages(Math.ceil(filteredOrders.length / ordersPerPage));
-      if (page > Math.ceil(filteredOrders.length / ordersPerPage)) {
-        setPage(1);
-      }
-    }
-  }, [filteredOrders, page, ordersPerPage]);
-
-  const paginatedOrders = React.useMemo(() => {
-    if (!Array.isArray(filteredOrders)) return [];
-    
-    return filteredOrders.slice(
-      (page - 1) * ordersPerPage,
-      page * ordersPerPage
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="80vh">
+        <CircularProgress />
+      </Box>
     );
-  }, [filteredOrders, page, ordersPerPage]);
+  }
 
   return (
-    <div className="orders-container">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          Sipariş Listesi
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" component="h1" sx={{ 
+          fontWeight: 'bold',
+          position: 'relative',
+          display: 'inline-block',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            width: '60px',
+            height: '4px',
+            bottom: '-10px',
+            left: '0',
+            backgroundColor: '#1976d2',
+            borderRadius: '10px'
+          }
+        }}>
+          Siparişler
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            variant="outlined"
-            placeholder="Sipariş Ara..."
+          <StyledTextField
+            placeholder="Müşteri adı veya telefon ara..."
+            size="small"
             value={searchTerm}
             onChange={handleSearch}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search />
+                  <Search color="action" />
                 </InputAdornment>
               ),
             }}
+            sx={{ minWidth: 300 }}
           />
-          <Button
+          <StyledButton
             variant="contained"
             color="primary"
             startIcon={<Add />}
             onClick={() => setOrderDialogOpen(true)}
           >
             Yeni Sipariş
-          </Button>
+          </StyledButton>
         </Box>
       </Box>
 
-      <TableContainer component={Paper} className="table-container">
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell style={{ width: '50px' }} />
-              <TableCell>MÜŞTERİ</TableCell>
-              <TableCell>TELEFON</TableCell>
-              <TableCell>SİPARİŞ TARİHİ</TableCell>
-              <TableCell>TESLİM TARİHİ</TableCell>
-              <TableCell>TUTAR</TableCell>
-              <TableCell>DURUM</TableCell>
-              <TableCell>İŞLEMLER</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
+      <StyledCard elevation={3}>
+        <TableContainer>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={8} align="center">Yükleniyor...</TableCell>
+                <StyledTableCell width="60px"></StyledTableCell>
+                <StyledTableCell>Müşteri</StyledTableCell>
+                <StyledTableCell>Telefon</StyledTableCell>
+                <StyledTableCell>Sipariş Tarihi</StyledTableCell>
+                <StyledTableCell>Teslim Tarihi</StyledTableCell>
+                <StyledTableCell>Toplam</StyledTableCell>
+                <StyledTableCell>Durum</StyledTableCell>
+                <StyledTableCell width="60px">İşlem</StyledTableCell>
               </TableRow>
-            ) : paginatedOrders.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">Sipariş bulunamadı</TableCell>
-              </TableRow>
-            ) : (
-              paginatedOrders.map((order) => (
-                <Row
-                  key={order.id}
-                  order={order}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {paginatedOrders.length > 0 ? (
+                paginatedOrders.map((order) => (
+                  <Row 
+                    key={order.id} 
+                    order={order} 
+                    onDelete={handleDelete}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                    <Typography variant="body1" color="textSecondary">
+                      {searchTerm ? 'Arama sonucunda sipariş bulunamadı.' : 'Henüz kayıtlı sipariş bulunmuyor.'}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </StyledCard>
 
-      {!loading && filteredOrders.length > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+      {filteredOrders.length > 0 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination
             count={totalPages}
             page={page}
             onChange={handlePageChange}
             color="primary"
-            size="large"
-            showFirstButton
-            showLastButton
+            shape="rounded"
+            siblingCount={1}
+            boundaryCount={1}
+            sx={{
+              '& .MuiPaginationItem-root': {
+                borderRadius: '10px',
+              }
+            }}
           />
         </Box>
       )}
 
-      <Dialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-      >
+      {/* Silme Onay Dialogu */}
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Siparişi Sil</DialogTitle>
         <DialogContent>
-          Bu siparişi silmek istediğinizden emin misiniz?
+          Bu siparişi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>İptal</Button>
@@ -379,20 +540,7 @@ const Orders = () => {
         </DialogActions>
       </Dialog>
 
-      <OrderDialog
-        open={orderDialogOpen}
-        onClose={() => setOrderDialogOpen(false)}
-        onSave={(savedOrder) => {
-          setOrders(prev => [savedOrder, ...prev]);
-          setSnackbar({
-            open: true,
-            message: 'Sipariş başarıyla oluşturuldu',
-            severity: 'success'
-          });
-          setOrderDialogOpen(false);
-        }}
-      />
-
+      {/* Bildirim */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -406,7 +554,22 @@ const Orders = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </div>
+      
+      {/* Yeni Sipariş Dialog */}
+      <OrderDialog
+        open={orderDialogOpen}
+        onClose={() => setOrderDialogOpen(false)}
+        onSave={(savedOrder) => {
+          fetchOrders();
+          setOrderDialogOpen(false);
+          setSnackbar({
+            open: true,
+            message: 'Sipariş başarıyla oluşturuldu',
+            severity: 'success'
+          });
+        }}
+      />
+    </Container>
   );
 };
 

@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import '../styles/Customers.css';
 
-export default function AdminBlog() {
+function AdminBlog() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export default function AdminBlog() {
   const fetchPosts = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:8080/api/posts');
+      const res = await axios.get('http://localhost:6767/api/posts');
       setPosts(res.data);
       setError('');
     } catch (err) {
@@ -42,7 +42,7 @@ export default function AdminBlog() {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8080/api/posts', newPost);
+      await axios.post('http://localhost:6767/api/posts', newPost);
       setNewPost({ title: '', content: '', featuredImage: '', published: false });
       setSuccess('Blog başarıyla eklendi');
       fetchPosts();
@@ -54,7 +54,7 @@ export default function AdminBlog() {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu blog yazısını silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`http://localhost:8080/api/posts/${id}`);
+      await axios.delete(`http://localhost:6767/api/posts/${id}`);
       setSuccess('Blog silindi');
       fetchPosts();
     } catch (err) {
@@ -70,7 +70,7 @@ export default function AdminBlog() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:8080/api/posts/${editingPost.id}`, editingPost);
+      await axios.put(`http://localhost:6767/api/posts/${editingPost.id}`, editingPost);
       setEditingPost(null);
       setDialogOpen(false);
       setSuccess('Blog güncellendi');
@@ -154,4 +154,6 @@ export default function AdminBlog() {
       </Snackbar>
     </Box>
   );
-} 
+}
+
+export default AdminBlog; 
