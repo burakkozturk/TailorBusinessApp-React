@@ -8,6 +8,7 @@ import BlogPage from './pages/BlogPage';
 import BlogPostPage from './pages/BlogPostPage';
 import CategoryPage from './pages/CategoryPage';
 import AboutPage from './pages/AboutPage';
+import CebinizdekiTerziniz from './pages/CebinizdekiTerziniz';
 import Login from './components/Login';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './components/Dashboard';
@@ -31,6 +32,7 @@ function App() {
         <Route path="/blog/kategori/:categorySlug" element={<CategoryPage />} />
         <Route path="/iletisim" element={<ContactPage />} />
         <Route path="/hakkimizda" element={<AboutPage />} />
+        <Route path="/cebinizdeki-terziniz" element={<CebinizdekiTerziniz />} />
         <Route path="/giris" element={<Login />} />
         <Route path="/admin" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />

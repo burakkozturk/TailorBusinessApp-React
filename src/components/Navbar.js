@@ -44,6 +44,9 @@ function Navbar() {
             <Link to="/blog" className="nav-links">Blog</Link>
           </li>
           <li className="nav-item">
+            <Link to="/cebinizdeki-terziniz" className="nav-links"><i>Cebinizdeki Terziniz</i></Link>
+          </li>
+          <li className="nav-item">
             <Link to="/iletisim" className="nav-links">İletişim</Link>
           </li>
         </ul>

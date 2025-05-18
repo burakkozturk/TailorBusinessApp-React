@@ -1,0 +1,241 @@
+/* CebinizdekiTerziniz.css */
+
+body {
+  background-color: #fff;
+  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Navbar alt boşluğu */
+nav {
+  margin-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+.hero-section {
+  background: linear-gradient(to bottom, #0a192f 0%, #0a192f 40%, #f5e6b0 70%, #fff 100%);
+  position: relative;
+  overflow: hidden;
+  padding-top: 80px;
+  margin-top: 0;
+  border-top: 1px solid rgba(245, 230, 176, 0.5);
+  border-bottom: 1px solid rgba(245, 230, 176, 0.5);
+  color: #fff;
+}
+
+.product-banner {
+  position: relative;
+  background: linear-gradient(to bottom, #0a192f 0%, #0a192f 40%, #f5e6b0 70%, #fff 100%);
+  overflow: hidden;
+  padding: 120px 0;
+  border-top: 1px solid rgba(245, 230, 176, 0.5);
+  border-bottom: 1px solid rgba(245, 230, 176, 0.5);
+  color: #fff;
+}
+
+.product-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../../public/img/product.png') repeat;
+  opacity: 0.05;
+  z-index: 1;
+}
+
+.feature-box {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.feature-box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.feature-icon svg {
+  font-size: 28px;
+  color: #f5e6b0;
+}
+
+/* Fitdays Özellik Kutuları */
+.feature-card {
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+.feature-card-icon {
+  width: 110px;
+  height: 110px;
+  background-color: #f9f9f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.feature-card-icon svg {
+  font-size: 50px;
+  color: #f5e6b0;
+}
+
+/* Float animasyonu */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Yanıp sönen satın al butonu */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 230, 176, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(245, 230, 176, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 230, 176, 0);
+  }
+}
+
+.pulse-button {
+  animation: pulse 2s infinite;
+}
+
+/* Adım kutularının yanyana görünümü için stiller */
+.step-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.step-item {
+  flex: 0 0 auto;
+  min-width: 180px;
+  max-width: 200px;
+}
+
+/* Teknik Özellikler Bölümü */
+.specs-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.spec-box {
+  width: 100%;
+  max-width: 500px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+}
+
+.spec-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  align-items: center;
+}
+
+.spec-item:last-child {
+  border-bottom: none;
+}
+
+.spec-label {
+  font-weight: 600;
+  color: #444;
+  font-size: 16px;
+  flex: 0 0 40%;
+}
+
+.spec-value {
+  color: #333;
+  font-size: 16px;
+  flex: 0 0 58%;
+  text-align: right;
+}
+
+/* Mobil uyumluluk için */
+@media (max-width: 768px) {
+  .feature-box, .step-box {
+    margin-top: 20px;
+  }
+  
+  .product-banner {
+    padding: 60px 0;
+  }
+  
+  .step-item {
+    min-width: 150px;
+    max-width: 180px;
+  }
+  
+  .feature-card {
+    margin-bottom: 1.5rem;
+  }
+  
+  .spec-box {
+    height: auto;
+    margin-bottom: 20px;
+    padding: 20px;
+  }
+  
+  .spec-item {
+    padding: 12px 0;
+  }
+  
+  .spec-label, .spec-value {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .step-item {
+    min-width: 130px;
+    max-width: 160px;
+  }
+} 
