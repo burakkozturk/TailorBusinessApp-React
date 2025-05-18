@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import '../styles/Login.css';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axiosConfig';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:6767/auth/login', {
+      const res = await api.post('/auth/login', {
         username,
         password,
       });
-      localStorage.setItem('token', res.data.token);
+      
+      // AuthContext üzerinden giriş yapma
+      login({
+        token: res.data.token,
+        role: res.data.role,
+        username: res.data.username
+      });
+      
       navigate('/admin');
     } catch (err) {
       setError('Giriş bilgileri hatalı!');

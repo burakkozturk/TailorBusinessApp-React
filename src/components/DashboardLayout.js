@@ -3,9 +3,9 @@ import { Outlet } from 'react-router-dom';
 import SideBar from './SideBar';
 import { Box, styled } from '@mui/material';
 
-const MainContent = styled(Box)(({ theme, sidebarWidth }) => ({
-  marginLeft: sidebarWidth,
-  width: `calc(100% - ${sidebarWidth})`,
+const MainContent = styled(Box)(({ theme, sidebarwidth }) => ({
+  marginLeft: sidebarwidth,
+  width: `calc(100% - ${sidebarwidth})`,
   minHeight: '100vh',
   backgroundColor: '#f8f9fa',
   padding: '1.5rem 2rem',
@@ -22,7 +22,7 @@ const DashboardLayout = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <SideBar onToggle={handleSidebarToggle} />
-      <MainContent sidebarWidth={sidebarWidth}>
+      <MainContent sidebarwidth={sidebarWidth}>
         <Outlet />
       </MainContent>
     </Box>

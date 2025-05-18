@@ -12,15 +12,17 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaEnvelope,
-  FaTags
+  FaTags,
+  FaUsersCog
 } from 'react-icons/fa';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Tooltip, Avatar, IconButton, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axiosConfig';
 
 // Stillendirilmiş bileşenler
-const SidebarContainer = styled(Box)(({ theme, isCollapsed }) => ({
-  width: isCollapsed ? '80px' : '280px',
+const SidebarContainer = styled(Box)(({ theme, iscollapsed }) => ({
+  width: iscollapsed === 'true' ? '80px' : '280px',
   height: '100vh',
   background: 'linear-gradient(180deg, #1A2C42 0%, #0B1625 100%)',
   color: '#fff',
@@ -35,11 +37,11 @@ const SidebarContainer = styled(Box)(({ theme, isCollapsed }) => ({
   overflow: 'hidden'
 }));
 
-const Logo = styled(Box)(({ theme, isCollapsed }) => ({
+const Logo = styled(Box)(({ theme, iscollapsed }) => ({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: isCollapsed ? 'center' : 'flex-start',
-  padding: isCollapsed ? '20px 0' : '24px 20px',
+  justifyContent: iscollapsed === 'true' ? 'center' : 'flex-start',
+  padding: iscollapsed === 'true' ? '20px 0' : '24px 20px',
   borderBottom: '1px solid rgba(255,255,255,0.1)',
   background: 'linear-gradient(90deg, rgba(40, 60, 80, 0.6) 0%, rgba(20, 30, 50, 0.3) 100%)',
   boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
@@ -62,17 +64,17 @@ const NavList = styled(List)({
   flexGrow: 1
 });
 
-const NavItem = styled(ListItem)(({ theme, isActive }) => ({
+const NavItem = styled(ListItem)(({ theme, isactive }) => ({
   padding: '12px 20px',
   margin: '4px 10px',
   borderRadius: '10px',
   transition: 'all 0.2s ease',
-  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+  backgroundColor: isactive === 'true' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
   position: 'relative',
   '&:hover': {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
-  ...(isActive && {
+  ...(isactive === 'true' && {
     '&::before': {
       content: '""',
       position: 'absolute',
@@ -115,12 +117,12 @@ const ToggleButton = styled(IconButton)({
   }
 });
 
-const ProfileSection = styled(Box)(({ theme, isCollapsed }) => ({
-  padding: isCollapsed ? '10px 0' : '15px 20px',
+const ProfileSection = styled(Box)(({ theme, iscollapsed }) => ({
+  padding: iscollapsed === 'true' ? '10px 0' : '15px 20px',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: isCollapsed ? 'center' : 'flex-start',
+  justifyContent: iscollapsed === 'true' ? 'center' : 'flex-start',
 }));
 
 const ProfileAvatar = styled(Avatar)(({ theme }) => ({
@@ -146,7 +148,7 @@ const ScrollBox = styled(Box)(({ theme }) => ({
   // Firefox için
   scrollbarWidth: 'none',
   // IE ve Edge için
-  '-ms-overflow-style': 'none',
+  msOverflowStyle: 'none',
 }));
 
 const SideBar = ({ onToggle }) => {
@@ -155,10 +157,11 @@ const SideBar = ({ onToggle }) => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { user, logout, isAdmin } = useAuth();
 
   const handleLogout = (e) => {
     e.preventDefault();
-    localStorage.removeItem('token');
+    logout();
     navigate('/');
   };
 
@@ -166,7 +169,7 @@ const SideBar = ({ onToggle }) => {
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
-        const response = await axios.get('http://localhost:6767/api/messages/count');
+        const response = await api.get('/api/messages/count');
         setUnreadCount(response.data.unreadCount);
       } catch (error) {
         console.error('Okunmamış mesaj sayısı alınamadı:', error);
@@ -179,24 +182,31 @@ const SideBar = ({ onToggle }) => {
     return () => clearInterval(interval);
   }, []);
 
-  const menuItems = [
-    { path: '', label: 'Genel Bakış', icon: <FaHome size={18} /> },
-    { path: 'customers', label: 'Müşteriler', icon: <FaUser size={18} /> },
-    { path: 'orders', label: 'Siparişler', icon: <FaTshirt size={18} /> },
-    { path: 'fabrics', label: 'Kumaşlar', icon: <FaLayerGroup size={18} /> },
-    { path: 'templates', label: 'Şablonlar', icon: <FaTools size={18} /> },
+  // Rol bazlı menü öğeleri
+  const allMenuItems = [
+    { path: '', label: 'Genel Bakış', icon: <FaHome size={18} />, roles: ['ADMIN', 'MANAGER'] },
+    { path: 'customers', label: 'Müşteriler', icon: <FaUser size={18} />, roles: ['ADMIN', 'MANAGER'] },
+    { path: 'orders', label: 'Siparişler', icon: <FaTshirt size={18} />, roles: ['ADMIN', 'MANAGER'] },
+    { path: 'fabrics', label: 'Kumaşlar', icon: <FaLayerGroup size={18} />, roles: ['ADMIN'] },
+    { path: 'templates', label: 'Şablonlar', icon: <FaTools size={18} />, roles: ['ADMIN'] },
     { 
       path: 'messages', 
       label: 'Mesajlar', 
       icon: 
         <Badge badgeContent={unreadCount} color="error" max={99} sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }}>
           <FaEnvelope size={18} />
-        </Badge> 
+        </Badge>,
+      roles: ['ADMIN']
     },
-    { path: 'blog', label: 'Blog', icon: <FaBlog size={18} /> },
-    { path: 'categories', label: 'Kategoriler', icon: <FaTags size={18} /> },
-    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} /> },
+    { path: 'blog', label: 'Blog', icon: <FaBlog size={18} />, roles: ['ADMIN'] },
+    { path: 'categories', label: 'Kategoriler', icon: <FaTags size={18} />, roles: ['ADMIN'] },
+    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN'] },
   ];
+
+  // Kullanıcının rolüne göre menü öğelerini filtrele
+  const menuItems = allMenuItems.filter((item) => 
+    item.roles.includes(user?.role)
+  );
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
@@ -207,8 +217,8 @@ const SideBar = ({ onToggle }) => {
   };
 
   return (
-    <SidebarContainer isCollapsed={isCollapsed}>
-      <Logo isCollapsed={isCollapsed}>
+    <SidebarContainer iscollapsed={isCollapsed ? 'true' : 'false'}>
+      <Logo iscollapsed={isCollapsed ? 'true' : 'false'}>
         {isCollapsed ? (
           <ProfileAvatar sx={{ width: 40, height: 40, fontSize: '1rem' }}>EG</ProfileAvatar>
         ) : (
@@ -234,10 +244,10 @@ const SideBar = ({ onToggle }) => {
               disableHoverListener={!isCollapsed}
             >
               <NavItem 
-                isActive={currentPath === item.path}
+                isactive={currentPath === item.path ? 'true' : 'false'}
                 component={Link} 
                 to={`/admin/${item.path}`}
-                button
+                button="true"
               >
                 <NavIcon>{item.icon}</NavIcon>
                 {!isCollapsed && <NavText primary={item.label} />}
@@ -249,22 +259,35 @@ const SideBar = ({ onToggle }) => {
 
       <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
       
-      <ProfileSection isCollapsed={isCollapsed}>
-        <Tooltip 
-          title={isCollapsed ? "Çıkış Yap" : ""}
-          placement="right"
-          arrow
-          disableHoverListener={!isCollapsed}
+      <ProfileSection iscollapsed={isCollapsed ? 'true' : 'false'}>
+        {!isCollapsed && (
+          <Box sx={{ ml: 1.5, mr: 2 }}>
+            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: '500' }}>
+              {user?.username || ''}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+              {user?.role === 'ADMIN' ? 'Admin' : 'Yönetici'}
+            </Typography>
+          </Box>
+        )}
+        
+        <IconButton 
+          sx={{ 
+            color: '#f44336', 
+            backgroundColor: 'rgba(244, 67, 54, 0.1)', 
+            borderRadius: '8px',
+            padding: '8px',
+            '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.15)' } 
+          }}
+          onClick={handleLogout}
         >
-          <NavItem 
-            button
-            onClick={handleLogout}
-            isActive={false}
-          >
-            <NavIcon><FaSignOutAlt size={18} /></NavIcon>
-            {!isCollapsed && <NavText primary="Çıkış Yap" />}
-          </NavItem>
-        </Tooltip>
+          <FaSignOutAlt size={isCollapsed ? 18 : 16} />
+          {!isCollapsed && (
+            <Typography sx={{ ml: 1, fontSize: '0.8rem', fontWeight: '500', color: '#f44336' }}>
+              Çıkış
+            </Typography>
+          )}
+        </IconButton>
       </ProfileSection>
     </SidebarContainer>
   );

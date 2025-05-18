@@ -18,35 +18,47 @@ import AdminBlog from './pages/AdminBlog';
 import AdminCategories from './pages/AdminCategories';
 import AdminFabrics from './pages/AdminFabrics';
 import AdminMessages from './pages/AdminMessages';
+import AdminSettings from './pages/AdminSettings';
+import TestPage from './components/TestPage';
 import './styles/App.css';
-
+import { AuthProvider, RequireAuth, RequireAdmin } from './context/AuthContext';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/hizmetler" element={<Services />} />
-        <Route path="/blog" element={<BlogPage />} />
-        <Route path="/blog/:slug" element={<BlogPostPage />} />
-        <Route path="/blog/kategori/:categorySlug" element={<CategoryPage />} />
-        <Route path="/iletisim" element={<ContactPage />} />
-        <Route path="/hakkimizda" element={<AboutPage />} />
-        <Route path="/cebinizdeki-terziniz" element={<CebinizdekiTerziniz />} />
-        <Route path="/giris" element={<Login />} />
-        <Route path="/admin" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="customers" element={<Customers />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="fabrics" element={<AdminFabrics />} />
-          <Route path="templates" element={<div>Şablonlar</div>} />
-          <Route path="settings" element={<div>Ayarlar</div>} />
-          <Route path="blog" element={<AdminBlog />} />
-          <Route path="categories" element={<AdminCategories />} />
-          <Route path="messages" element={<AdminMessages />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Genel Sayfalar */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/hizmetler" element={<Services />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/blog/kategori/:categorySlug" element={<CategoryPage />} />
+          <Route path="/iletisim" element={<ContactPage />} />
+          <Route path="/hakkimizda" element={<AboutPage />} />
+          <Route path="/cebinizdeki-terziniz" element={<CebinizdekiTerziniz />} />
+          <Route path="/giris" element={<Login />} />
+          <Route path="/test" element={<TestPage />} />
+          
+          {/* Admin Dashboard - Kimlik Doğrulama Gerektirir */}
+          <Route path="/admin" element={<RequireAuth><DashboardLayout /></RequireAuth>}>
+            <Route index element={<Dashboard />} />
+            
+            {/* Manager ve Admin erişimli sayfalar */}
+            <Route path="customers" element={<Customers />} />
+            <Route path="orders" element={<Orders />} />
+            
+            {/* Sadece Admin Erişimi Olan Sayfalar */}
+            <Route path="fabrics" element={<RequireAdmin><AdminFabrics /></RequireAdmin>} />
+            <Route path="templates" element={<RequireAdmin><div>Şablonlar</div></RequireAdmin>} />
+            <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
+            <Route path="settings" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
+            <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
+            <Route path="categories" element={<RequireAdmin><AdminCategories /></RequireAdmin>} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
