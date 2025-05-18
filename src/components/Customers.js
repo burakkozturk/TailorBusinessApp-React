@@ -1120,10 +1120,14 @@ const Row = ({ customer, onDelete, onEdit }) => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:6767/api/orders/customer/${customer.id}`);
-      setOrders(response.data);
+      const response = await axios.get(`http://localhost:6767/api/orders/by-customer/${customer.id}`);
+      
+      const data = Array.isArray(response.data) ? response.data : [];
+      setOrders(data);
+      console.log("Müşteri siparişleri:", data);
     } catch (error) {
       console.error('Siparişler yüklenirken hata oluştu:', error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
