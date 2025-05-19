@@ -16,7 +16,7 @@ function HomePage() {
       <About />
       <Services />
       <Testimonials />
-      <Blog />
+      <Blog homePage={true} />
       <Footer />
     </div>
   );

@@ -1,0 +1,147 @@
+.blog-post-banner {
+  background-color: #111;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../../public/img/sub-banner.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 100px 0;
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.banner-title {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.related-post-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.related-post-link:hover {
+  transform: translateY(-2px);
+  background-color: rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Blog içeriği için stil */
+p {
+  margin-bottom: 1.8rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* Makale başlığı */
+h1.blog-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+  color: #333;
+}
+
+/* Blog içindeki görseller için özel stil */
+.blog-image-container {
+  margin: 2rem 0;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.blog-content {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Kategori çipleri */
+.category-chip {
+  margin-right: 8px !important;
+  margin-bottom: 8px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  background-color: #f0f5ff !important;
+  color: #1976d2 !important;
+  transition: all 0.2s ease !important;
+}
+
+.category-chip:hover {
+  background-color: #1976d2 !important;
+  color: white !important;
+}
+
+/* İlgili yazılar bölümü */
+.related-posts-title {
+  font-size: 1.4rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.related-posts-title:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #1976d2;
+}
+
+.related-post-image {
+  border-radius: 8px;
+  object-fit: cover;
+  transition: all 0.3s ease;
+}
+
+.related-post-link:hover .related-post-image {
+  transform: scale(1.05);
+}
+
+.related-post-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+  transition: color 0.2s ease;
+  color: #333;
+}
+
+.related-post-link:hover .related-post-title {
+  color: #1976d2;
+}
+
+.related-post-date {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+/* Responsive ayarlamalar */
+@media (max-width: 960px) {
+  .blog-post-banner {
+    padding: 80px 0;
+  }
+  
+  h1.blog-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .blog-post-banner {
+    padding: 60px 0;
+  }
+  
+  h1.blog-title {
+    font-size: 1.8rem;
+  }
+  
+  p {
+    font-size: 1rem;
+  }
+} 

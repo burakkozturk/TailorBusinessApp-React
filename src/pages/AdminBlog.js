@@ -1,38 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Switch, FormControlLabel, Typography, Box, Stack, Chip, Select, MenuItem, InputLabel, FormControl, OutlinedInput, Autocomplete
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Switch, FormControlLabel, Typography, Box, Stack, Chip, Select, MenuItem, InputLabel, FormControl, OutlinedInput, Autocomplete, IconButton
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
+import { PhotoCamera } from '@mui/icons-material';
 import '../styles/Customers.css';
 
 function AdminBlog() {
-  const [posts, setPosts] = useState([]);
+  const [blogs, setBlogs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [newPost, setNewPost] = useState({ 
+  const [newBlog, setNewBlog] = useState({ 
     title: '', 
     content: '', 
-    featuredImage: '', 
+    imageUrl: '', 
     published: false,
-    categories: [],
-    urlSlug: ''
+    categoryIds: [],
+    slug: ''
   });
-  const [editingPost, setEditingPost] = useState(null);
+  const [editingBlog, setEditingBlog] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
-  const fetchPosts = async () => {
+  const fetchBlogs = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:6767/api/posts');
-      setPosts(res.data);
+      const res = await axios.get('http://localhost:6767/api/blogs');
+      setBlogs(res.data);
       setError('');
     } catch (err) {
       setError('Bloglar yüklenemedi');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -48,19 +53,19 @@ function AdminBlog() {
   };
 
   useEffect(() => {
-    fetchPosts();
+    fetchBlogs();
     fetchCategories();
   }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNewPost(prev => ({
+    setNewBlog(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
     
     // URL slug'ını otomatik oluşturalım
-    if (name === 'title' && !editingPost) {
+    if (name === 'title' && !editingBlog) {
       const slug = value.toLowerCase()
         .replace(/ı/g, 'i')
         .replace(/ğ/g, 'g')
@@ -72,63 +77,109 @@ function AdminBlog() {
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
       
-      setNewPost(prev => ({ ...prev, urlSlug: slug }));
+      setNewBlog(prev => ({ ...prev, slug: slug }));
     }
   };
 
-  const handleCategoryChange = (event, newValues) => {
-    if (editingPost) {
-      setEditingPost({...editingPost, categories: newValues});
+  const handleCategoryChange = (event, value) => {
+    setSelectedCategories(value);
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const openDialog = (blog = null) => {
+    if (blog) {
+      setEditingBlog(blog);
+      setNewBlog(blog);
+      setSelectedCategories(blog.categories || []);
+      setImagePreview(blog.imageUrl);
     } else {
-      setNewPost({...newPost, categories: newValues});
-    }
-  };
-
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('http://localhost:6767/api/posts', newPost);
-      setNewPost({ 
+      setEditingBlog(null);
+      setNewBlog({ 
         title: '', 
         content: '', 
-        featuredImage: '', 
+        imageUrl: '', 
         published: false,
-        categories: [],
-        urlSlug: ''
+        categoryIds: [],
+        slug: ''
       });
-      setSuccess('Blog başarıyla eklendi');
-      fetchPosts();
-    } catch (err) {
-      setError('Blog eklenemedi');
+      setSelectedCategories([]);
+      setImagePreview(null);
+    }
+    setDialogOpen(true);
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditingBlog(null);
+    setImage(null);
+    setImagePreview(null);
+  };
+
+  const handleCreateOrUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      let imageUrl = newBlog.imageUrl;
+      if (image) {
+        // Görseli S3'e yüklemek için formData oluşturulması
+        const formData = new FormData();
+        formData.append('file', image);
+        
+        const uploadRes = await axios.post('http://localhost:6767/api/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        
+        imageUrl = uploadRes.data.url;
+      }
+
+      const payload = {
+        title: newBlog.title,
+        content: newBlog.content,
+        imageUrl: imageUrl,
+        published: newBlog.published,
+        slug: newBlog.slug,
+        categoryIds: selectedCategories.map(cat => cat.id)
+      };
+
+      if (editingBlog) {
+        await axios.put(`http://localhost:6767/api/blogs/${editingBlog.id}`, payload);
+        setSuccess('Blog başarıyla güncellendi');
+      } else {
+        await axios.post('http://localhost:6767/api/blogs', payload);
+        setSuccess('Blog başarıyla oluşturuldu');
+      }
+
+      closeDialog();
+      fetchBlogs();
+    } catch (error) {
+      console.error('Blog işlemi hatası:', error);
+      setError(`Blog ${editingBlog ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Bu blog yazısını silmek istediğinize emin misiniz?')) return;
     try {
-      await axios.delete(`http://localhost:6767/api/posts/${id}`);
+      await axios.delete(`http://localhost:6767/api/blogs/${id}`);
       setSuccess('Blog silindi');
-      fetchPosts();
+      fetchBlogs();
     } catch (err) {
       setError('Blog silinemedi');
-    }
-  };
-
-  const handleEdit = (post) => {
-    setEditingPost(post);
-    setDialogOpen(true);
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.put(`http://localhost:6767/api/posts/${editingPost.id}`, editingPost);
-      setEditingPost(null);
-      setDialogOpen(false);
-      setSuccess('Blog güncellendi');
-      fetchPosts();
-    } catch (err) {
-      setError('Blog güncellenemedi');
+      console.error(err);
     }
   };
 
@@ -142,165 +193,80 @@ function AdminBlog() {
 
   return (
     <Box className="admin-blog-container" sx={{ p: 4, width: '100%' }}>
-      <Typography variant="h4" fontWeight={600} mb={3} color="#2c3e50">Blog Yönetimi</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
+        <Typography variant="h4" fontWeight={600} color="#2c3e50">Blog Yönetimi</Typography>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          startIcon={<AddIcon />}
+          onClick={() => openDialog()}
+        >
+          Yeni Blog Ekle
+        </Button>
+      </Box>
       
-      <Paper sx={{ p: 3, mb: 4 }} elevation={3}>
-        <Typography variant="h6" mb={2}>Yeni Blog Ekle</Typography>
-        <Stack spacing={2}>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <TextField 
-              label="Başlık" 
-              name="title" 
-              value={newPost.title} 
-              onChange={handleInputChange} 
-              required 
-              sx={{ flexGrow: 1, minWidth: '250px' }} 
-            />
-            
-            <TextField 
-              label="URL Slug" 
-              name="urlSlug" 
-              value={newPost.urlSlug} 
-              onChange={handleInputChange} 
-              required 
-              sx={{ flexGrow: 1, minWidth: '250px' }} 
-              helperText="Özel karakterler içermeyen URL-dostu metin"
-            />
-          </Box>
-          
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <TextField 
-              label="Görsel URL" 
-              name="featuredImage" 
-              value={newPost.featuredImage} 
-              onChange={handleInputChange} 
-              sx={{ flexGrow: 1 }} 
-            />
-            
-            <FormControlLabel 
-              control={
-                <Switch 
-                  checked={newPost.published} 
-                  onChange={e => setNewPost(prev => ({ ...prev, published: e.target.checked }))} 
-                  name="published" 
-                />
-              } 
-              label="Yayında mı?" 
-            />
-          </Box>
-          
-          <Autocomplete
-            multiple
-            options={categories}
-            getOptionLabel={(option) => option.name}
-            value={newPost.categories}
-            onChange={handleCategoryChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="outlined"
-                label="Kategoriler"
-                placeholder="Kategori seçiniz"
-              />
-            )}
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip label={option.name} {...getTagProps({ index })} />
-              ))
-            }
-          />
-          
-          <TextField 
-            label="İçerik" 
-            name="content" 
-            value={newPost.content} 
-            onChange={handleInputChange} 
-            required 
-            multiline 
-            rows={5} 
-            fullWidth 
-          />
-          
-          <Box>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={handleCreate}
-              startIcon={<AddIcon />}
-            >
-              Blog Ekle
-            </Button>
-          </Box>
-        </Stack>
-      </Paper>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>
+      )}
       
-      <TableContainer component={Paper} className="table-container" elevation={3}>
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>
+      )}
+
+      <TableContainer component={Paper} sx={{ mb: 4 }}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>ID</TableCell>
               <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>Başlık</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>URL</TableCell>
               <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>Kategoriler</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>Yayın</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>Oluşturulma</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>Durum</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>Oluşturulma Tarihi</TableCell>
               <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#1976d2', color: 'white' }}>İşlemler</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">Yükleniyor...</TableCell>
+                <TableCell colSpan={6} align="center">Yükleniyor...</TableCell>
               </TableRow>
-            ) : posts.length === 0 ? (
+            ) : blogs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">Blog bulunamadı</TableCell>
+                <TableCell colSpan={6} align="center">Henüz blog yazısı bulunmuyor</TableCell>
               </TableRow>
             ) : (
-              posts.map(post => (
-                <TableRow key={post.id}>
-                  <TableCell>{post.id}</TableCell>
-                  <TableCell>{post.title}</TableCell>
-                  <TableCell>{post.urlSlug}</TableCell>
+              blogs.map((blog) => (
+                <TableRow key={blog.id}>
+                  <TableCell>{blog.id}</TableCell>
+                  <TableCell>{blog.title}</TableCell>
                   <TableCell>
-                    {post.categories && post.categories.map(category => (
-                      <Chip 
-                        key={category.id} 
-                        label={category.name} 
-                        size="small" 
-                        sx={{ m: 0.3 }} 
-                      />
+                    {blog.categories && blog.categories.map(cat => (
+                      <Chip key={cat.id} label={cat.name} size="small" sx={{ m: 0.2 }} />
                     ))}
                   </TableCell>
                   <TableCell>
                     <Chip 
-                      label={post.published ? "Yayında" : "Taslak"} 
-                      color={post.published ? "success" : "default"} 
-                      size="small" 
-                      variant={post.published ? "filled" : "outlined"} 
+                      label={blog.published ? "Yayında" : "Taslak"} 
+                      color={blog.published ? "success" : "default"}
+                      size="small"
                     />
                   </TableCell>
-                  <TableCell>{formatDate(post.createdAt)}</TableCell>
+                  <TableCell>{formatDate(blog.createdAt)}</TableCell>
                   <TableCell>
-                    <Button 
-                      variant="outlined" 
-                      color="primary" 
-                      size="small" 
-                      onClick={() => handleEdit(post)} 
-                      sx={{ mr: 1 }}
-                      startIcon={<EditIcon />}
+                    <IconButton
+                      color="primary"
+                      size="small"
+                      onClick={() => openDialog(blog)}
                     >
-                      Düzenle
-                    </Button>
-                    <Button 
-                      variant="outlined" 
-                      color="error" 
-                      size="small" 
-                      onClick={() => handleDelete(post.id)}
-                      startIcon={<DeleteIcon />}
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      size="small"
+                      onClick={() => handleDelete(blog.id)}
                     >
-                      Sil
-                    </Button>
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))
@@ -308,100 +274,120 @@ function AdminBlog() {
           </TableBody>
         </Table>
       </TableContainer>
-      
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Blog Düzenle</DialogTitle>
+
+      {/* Blog Ekleme/Düzenleme Dialog */}
+      <Dialog open={dialogOpen} onClose={closeDialog} maxWidth="md" fullWidth>
+        <DialogTitle>{editingBlog ? 'Blog Düzenle' : 'Yeni Blog Ekle'}</DialogTitle>
         <DialogContent>
-          {editingPost && (
-            <Stack spacing={2} mt={1}>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <TextField 
-                  label="Başlık" 
-                  name="title" 
-                  value={editingPost.title} 
-                  onChange={e => setEditingPost({ ...editingPost, title: e.target.value })} 
-                  required 
-                  fullWidth 
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <TextField 
+              label="Başlık" 
+              name="title" 
+              value={newBlog.title} 
+              onChange={handleInputChange} 
+              fullWidth 
+              required 
+            />
+            
+            <TextField 
+              label="URL Slug" 
+              name="slug" 
+              value={newBlog.slug} 
+              onChange={handleInputChange} 
+              fullWidth 
+              required 
+              helperText="Otomatik oluşturulur, gerekirse düzenleyebilirsiniz"
+            />
+            
+            <Autocomplete
+              multiple
+              id="category-select"
+              options={categories}
+              value={selectedCategories}
+              onChange={handleCategoryChange}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Kategoriler"
+                  placeholder="Kategoriler"
                 />
-                
-                <TextField 
-                  label="URL Slug" 
-                  name="urlSlug" 
-                  value={editingPost.urlSlug} 
-                  onChange={e => setEditingPost({ ...editingPost, urlSlug: e.target.value })} 
-                  required 
-                  fullWidth 
-                  helperText="URL-dostu metin"
-                />
-              </Box>
+              )}
+            />
+            
+            <TextField 
+              label="İçerik" 
+              name="content" 
+              value={newBlog.content} 
+              onChange={handleInputChange} 
+              fullWidth 
+              required 
+              multiline 
+              rows={8} 
+            />
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>Görsel</Typography>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="raised-button-file"
+                type="file"
+                onChange={handleImageChange}
+              />
+              <label htmlFor="raised-button-file">
+                <Button variant="contained" component="span" startIcon={<PhotoCamera />}>
+                  Görsel Yükle
+                </Button>
+              </label>
               
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <TextField 
-                  label="Görsel URL" 
-                  name="featuredImage" 
-                  value={editingPost.featuredImage || ''} 
-                  onChange={e => setEditingPost({ ...editingPost, featuredImage: e.target.value })} 
-                  fullWidth 
-                />
-                
-                <FormControlLabel 
-                  control={
-                    <Switch 
-                      checked={editingPost.published} 
-                      onChange={e => setEditingPost({ ...editingPost, published: e.target.checked })} 
-                      name="published" 
-                    />
-                  } 
-                  label="Yayında mı?" 
-                />
-              </Box>
-              
-              <Autocomplete
-                multiple
-                options={categories}
-                getOptionLabel={(option) => option.name}
-                value={editingPost.categories || []}
-                onChange={handleCategoryChange}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    label="Kategoriler"
-                    placeholder="Kategori seçiniz"
+              {imagePreview && (
+                <Box sx={{ mt: 2, position: 'relative' }}>
+                  <img 
+                    src={imagePreview}
+                    alt="Önizleme" 
+                    style={{ maxHeight: '200px', maxWidth: '100%', objectFit: 'contain' }}
                   />
-                )}
-                renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip label={option.name} {...getTagProps({ index })} />
-                  ))
-                }
-              />
-              
-              <TextField 
-                label="İçerik" 
-                name="content" 
-                value={editingPost.content} 
-                onChange={e => setEditingPost({ ...editingPost, content: e.target.value })} 
-                required 
-                multiline 
-                rows={5} 
-                fullWidth 
-              />
-            </Stack>
-          )}
+                  <IconButton 
+                    size="small" 
+                    sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'background.paper' }}
+                    onClick={() => {
+                      setImage(null);
+                      setImagePreview(null);
+                      setNewBlog(prev => ({ ...prev, imageUrl: '' }));
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              )}
+            </Box>
+            
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={newBlog.published}
+                  onChange={handleInputChange}
+                  name="published"
+                  color="primary"
+                />
+              }
+              label="Yayınla"
+            />
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Vazgeç</Button>
-          <Button onClick={handleUpdate} variant="contained">Kaydet</Button>
+          <Button onClick={closeDialog}>İptal</Button>
+          <Button 
+            onClick={handleCreateOrUpdate} 
+            variant="contained" 
+            color="primary"
+            disabled={!newBlog.title || !newBlog.content || !newBlog.slug}
+          >
+            {editingBlog ? 'Güncelle' : 'Ekle'}
+          </Button>
         </DialogActions>
       </Dialog>
-      
-      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError('')} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert severity="error" onClose={() => setError('')}>{error}</Alert>
-      </Snackbar>
-      <Snackbar open={!!success} autoHideDuration={3000} onClose={() => setSuccess('')} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert severity="success" onClose={() => setSuccess('')}>{success}</Alert>
-      </Snackbar>
     </Box>
   );
 }

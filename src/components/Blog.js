@@ -1,34 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress, TextField, InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress } from '@mui/material';
 import '../styles/Blog.css';
 
-export default function Blog() {
+export default function Blog({ homePage = false }) {
   const [posts, setPosts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Blog yazılarını getir
-        const postsResponse = await axios.get('http://localhost:6767/api/posts');
-        // Sadece ilk 3 blog yazısını göster
-        const publishedPosts = postsResponse.data
-          .filter(post => post.published)
-          .slice(0, 3); // Ana sayfada sadece 3 blog göster
-        setPosts(publishedPosts);
+        let endpoint = '/api/blogs/published';
         
-        // Kategorileri getir
-        const categoriesResponse = await axios.get('http://localhost:6767/api/categories');
-        setCategories(categoriesResponse.data);
+        if (homePage) {
+          endpoint = '/api/blogs/top/2'; // Ana sayfada sadece 2 blog göster
+        }
         
+        const response = await axios.get(`http://localhost:6767${endpoint}`);
+        setPosts(response.data);
         setError(null);
       } catch (err) {
         console.error('Veri çekilirken hata oluştu:', err);
@@ -39,47 +31,7 @@ export default function Blog() {
     };
 
     fetchData();
-  }, []);
-
-  const fetchPostsByCategory = async (categoryId) => {
-    if (!categoryId) {
-      // Kategori seçimi kaldırılırsa tüm yayınlanan gönderileri göster
-      const postsResponse = await axios.get('http://localhost:6767/api/posts');
-      const publishedPosts = postsResponse.data.filter(post => post.published);
-      setPosts(publishedPosts);
-      setSelectedCategory(null);
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const response = await axios.get(`http://localhost:6767/api/posts/category/${categoryId}`);
-      const publishedPosts = response.data.filter(post => post.published);
-      setPosts(publishedPosts);
-      setSelectedCategory(categoryId);
-    } catch (error) {
-      console.error('Kategori gönderileri yüklenirken hata oluştu:', error);
-      setError('Kategori gönderileri yüklenirken bir hata oluştu.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-    
-    setLoading(true);
-    try {
-      const response = await axios.get(`http://localhost:6767/api/posts/search?keyword=${searchTerm}`);
-      const publishedPosts = response.data.filter(post => post.published);
-      setPosts(publishedPosts);
-    } catch (error) {
-      console.error('Arama yapılırken hata oluştu:', error);
-      setError('Arama yapılırken bir hata oluştu.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [homePage]);
 
   const truncateText = (text, maxLength) => {
     if (!text) return '';
@@ -130,11 +82,11 @@ export default function Blog() {
               <article key={post.id} className="blog-post">
                 <div className="blog-image-container">
                   <img
-                    src={post.featuredImage || '/img/default-blog.jpg'}
+                    src={post.imageUrl || '/img/default-blog.jpg'}
                     alt={post.title}
                     className="blog-image"
                   />
-                  {post.categories && post.categories[0] && (
+                  {post.categories && post.categories.length > 0 && (
                     <span className="blog-category">{post.categories[0].name}</span>
                   )}
                 </div>
@@ -142,7 +94,7 @@ export default function Blog() {
                   <h3 className="blog-post-title">{post.title}</h3>
                   <p className="blog-excerpt">{truncateText(post.content, 100)}</p>
                   <div className="blog-footer">
-                    <Link to={`/blog/${post.urlSlug}`} className="blog-read-more">
+                    <Link to={`/blog/${post.slug}`} className="blog-read-more">
                       DEVAMINI OKU
                     </Link>
                     <span className="blog-date">{formatDate(post.createdAt)}</span>
@@ -153,12 +105,14 @@ export default function Blog() {
           </div>
         )}
         
-        {/* Tüm Blog Yazıları butonu */}
-        <div className="blog-view-all">
-          <Link to="/blog" className="blog-view-all-button">
-            TÜM BLOG YAZILARI
-          </Link>
-        </div>
+        {/* Ana sayfada olup olmadığına göre tüm blog yazıları butonunu göster/gizle */}
+        {homePage && (
+          <div className="blog-view-all">
+            <Link to="/blog" className="blog-view-all-button">
+              TÜM BLOG YAZILARI
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

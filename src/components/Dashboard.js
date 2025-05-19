@@ -69,20 +69,29 @@ const GradientBackground = styled(Box)(({ startColor, endColor }) => ({
   width: '100%',
   height: '100%',
   background: `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`,
-  opacity: 0.9,
-  borderRadius: 16,
+  opacity: 0.92,
+  borderRadius: 20,
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'radial-gradient(circle at 10% 10%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)',
+  }
 }));
 
 const StatCard = styled(Card)(({ theme }) => ({
   height: '100%',
-  borderRadius: 16,
+  borderRadius: 20,
   position: 'relative',
   overflow: 'hidden',
-  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)',
   transition: 'transform 0.3s, box-shadow 0.3s',
   '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 12px 30px rgba(0, 0, 0, 0.15)',
+    transform: 'translateY(-8px)',
+    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)',
   },
 }));
 
@@ -317,13 +326,21 @@ const Dashboard = () => {
   // Büyüme göstergesini renk ve icon olarak döndürür
   const renderGrowth = (value) => {
     const isPositive = value >= 0;
-    const color = isPositive ? '#4CAF50' : '#F44336';
-    const Icon = isPositive ? FaArrowUp : FaArrowDown;
+    const color = isPositive ? '#FFFFFF' : '#FFCDD2';
+    const ArrowIcon = isPositive ? FaArrowUp : FaArrowDown;
     
     return (
-      <Box display="flex" alignItems="center" sx={{ color }}>
-        <Icon size={12} style={{ marginRight: 4 }} />
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <ArrowIcon size={12} color={color} style={{ marginRight: '2px' }} />
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: color, 
+            fontWeight: 600,
+            fontSize: '0.75rem',
+            letterSpacing: '0.3px'
+          }}
+        >
           {Math.abs(value).toFixed(1)}%
         </Typography>
       </Box>
@@ -334,29 +351,40 @@ const Dashboard = () => {
   const StatCardItem = ({ title, value, icon, startColor, endColor, subtitle, growth }) => (
     <StatCard>
       <GradientBackground startColor={startColor} endColor={endColor} />
-      <CardContent sx={{ position: 'relative', zIndex: 10, p: 3 }}>
+      <CardContent sx={{ position: 'relative', zIndex: 10, p: 3.5 }}>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start">
           <Box>
-            <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 500, mb: 0.5, opacity: 0.9 }}>
+            <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 500, mb: 1, opacity: 0.9, fontSize: '1rem' }}>
               {title}
             </Typography>
-            <Typography variant="h4" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
+            <Typography variant="h3" sx={{ color: 'white', fontWeight: 700, mb: 2, letterSpacing: '-0.5px' }}>
               {value}
             </Typography>
             {subtitle && (
               <Box display="flex" alignItems="center" spacing={1}>
-                <Typography variant="caption" sx={{ color: 'white', opacity: 0.9 }}>
+                <Typography variant="body2" sx={{ color: 'white', opacity: 0.9, fontWeight: 500 }}>
                   {subtitle}
                 </Typography>
                 {growth !== undefined && (
-                  <Box sx={{ ml: 1, bgcolor: alpha('#fff', 0.2), borderRadius: 4, px: 1, py: 0.2 }}>
+                  <Box 
+                    sx={{ 
+                      ml: 1, 
+                      bgcolor: alpha('#fff', 0.2), 
+                      borderRadius: 10, 
+                      px: 1.5, 
+                      py: 0.5, 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                    }}
+                  >
                     {renderGrowth(growth)}
                   </Box>
                 )}
               </Box>
             )}
           </Box>
-          <IconAvatar bgcolor={alpha('#fff', 0.2)}>
+          <IconAvatar bgcolor={alpha('#fff', 0.2)} sx={{ boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }}>
             {icon}
           </IconAvatar>
         </Box>
@@ -442,8 +470,8 @@ const Dashboard = () => {
       </Box>
       
       {/* İstatistik Kartları */}
-      <Grid container spacing={4} sx={{ mb: 5 }}>
-        <Grid item xs={12} sm={6} lg={3}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCardItem 
             title="Toplam Müşteri" 
             value={stats.totalCustomers.toLocaleString('tr-TR')}
@@ -455,7 +483,7 @@ const Dashboard = () => {
           />
         </Grid>
         
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCardItem 
             title="Toplam Sipariş" 
             value={stats.totalOrders.toLocaleString('tr-TR')}
@@ -467,7 +495,7 @@ const Dashboard = () => {
           />
         </Grid>
         
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCardItem 
             title="Toplam Ciro" 
             value={new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(stats.totalRevenue)}
@@ -479,7 +507,7 @@ const Dashboard = () => {
           />
         </Grid>
         
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <StatCardItem 
             title="Tamamlanan Siparişler" 
             value={stats.completedOrders.toLocaleString('tr-TR')}
@@ -490,12 +518,36 @@ const Dashboard = () => {
             growth={stats.growth.completedOrders}
           />
         </Grid>
+        
+        <Grid item xs={12} sm={6} md={4}>
+          <StatCardItem 
+            title="Bekleyen Siparişler" 
+            value={94}
+            icon={<FaClipboardCheck size={30} color="white" />}
+            startColor="#00BCD4"
+            endColor="#006064"
+            subtitle="Toplam siparişlerin %18'i"
+            growth={7.2}
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={4}>
+          <StatCardItem 
+            title="Ortalama Sipariş" 
+            value={new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(3450)}
+            icon={<FaCut size={30} color="white" />}
+            startColor="#3F51B5"
+            endColor="#1A237E"
+            subtitle="Son 30 günde"
+            growth={5.8}
+          />
+        </Grid>
       </Grid>
       
       {/* Ana İçerik */}
-      <Grid container spacing={4}>
-        <Grid item xs={12} lg={8}>
-          <StyledPaper>
+      <Grid container spacing={3}>
+                  <Grid item xs={12} lg={8}>
+            <StyledPaper sx={{ height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
@@ -574,7 +626,7 @@ const Dashboard = () => {
 
         {/* Sipariş Durumu Pasta Grafiği */}
         <Grid item xs={12} lg={4}>
-          <StyledPaper>
+          <StyledPaper sx={{ height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
@@ -653,8 +705,8 @@ const Dashboard = () => {
         </Grid>
 
         {/* Ürün Dağılımı */}
-        <Grid item xs={12} sm={6} lg={4}>
-          <StyledPaper>
+        <Grid item xs={12} md={4}>
+          <StyledPaper sx={{ height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 
@@ -704,8 +756,8 @@ const Dashboard = () => {
         </Grid>
 
         {/* En Son Siparişler */}
-        <Grid item xs={12} sm={6} lg={8}>
-          <StyledPaper>
+        <Grid item xs={12} md={8}>
+          <StyledPaper sx={{ height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 600, 

@@ -1,0 +1,71 @@
+.category-banner {
+  background-color: #111;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../../public/img/sub-banner.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 80px 0;
+  color: white;
+  text-align: center;
+}
+
+.banner-title {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.breadcrumb-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.read-more-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  position: relative;
+}
+
+.read-more-link:hover {
+  color: #1565c0;
+}
+
+.read-more-link:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: #1565c0;
+  transform-origin: bottom right;
+  transition: transform 0.3s ease-out;
+}
+
+.read-more-link:hover:after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.back-to-blog-link {
+  color: #1976d2;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+.back-to-blog-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive ayarlamalar */
+@media (max-width: 600px) {
+  .category-banner {
+    padding: 60px 0;
+  }
+} 

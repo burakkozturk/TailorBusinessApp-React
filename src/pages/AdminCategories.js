@@ -28,7 +28,7 @@ const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: '', description: '', urlSlug: '' });
+  const [newCategory, setNewCategory] = useState({ name: '', description: '', slug: '' });
   const [editMode, setEditMode] = useState(false);
   const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' });
 
@@ -70,13 +70,13 @@ const AdminCategories = () => {
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
       
-      setNewCategory(prev => ({ ...prev, urlSlug: slug }));
+      setNewCategory(prev => ({ ...prev, slug: slug }));
     }
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setNewCategory({ name: '', description: '', urlSlug: '' });
+    setNewCategory({ name: '', description: '', slug: '' });
     setEditMode(false);
   };
 
@@ -85,7 +85,7 @@ const AdminCategories = () => {
       setNewCategory(category);
       setEditMode(true);
     } else {
-      setNewCategory({ name: '', description: '', urlSlug: '' });
+      setNewCategory({ name: '', description: '', slug: '' });
       setEditMode(false);
     }
     setOpenDialog(true);
@@ -186,7 +186,7 @@ const AdminCategories = () => {
                 <TableRow key={category.id}>
                   <TableCell>{category.id}</TableCell>
                   <TableCell>{category.name}</TableCell>
-                  <TableCell>{category.urlSlug}</TableCell>
+                  <TableCell>{category.slug}</TableCell>
                   <TableCell>{category.description}</TableCell>
                   <TableCell align="center">
                     <IconButton
@@ -213,40 +213,35 @@ const AdminCategories = () => {
       </TableContainer>
 
       {/* Kategori Ekleme/Düzenleme Dialog */}
-      <Dialog 
-        open={openDialog} 
-        onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
           {editMode ? 'Kategori Düzenle' : 'Yeni Kategori Ekle'}
         </DialogTitle>
         <DialogContent>
-          <Stack spacing={2} sx={{ mt: 2 }}>
+          <Stack spacing={3} sx={{ mt: 2 }}>
             <TextField
               label="Kategori Adı"
               name="name"
-              fullWidth
               value={newCategory.name}
               onChange={handleInputChange}
+              fullWidth
               required
             />
             <TextField
-              label="URL"
-              name="urlSlug"
-              fullWidth
-              value={newCategory.urlSlug}
+              label="URL Slug"
+              name="slug"
+              value={newCategory.slug}
               onChange={handleInputChange}
+              fullWidth
               required
-              helperText="URL'de kullanılacak özel karakter içermeyen kısa ad"
+              helperText="Otomatik oluşturulur, gerekirse düzenleyebilirsiniz"
             />
             <TextField
               label="Açıklama"
               name="description"
-              fullWidth
-              value={newCategory.description || ''}
+              value={newCategory.description}
               onChange={handleInputChange}
+              fullWidth
               multiline
               rows={3}
             />
@@ -258,6 +253,7 @@ const AdminCategories = () => {
             onClick={handleSaveCategory} 
             variant="contained" 
             color="primary"
+            disabled={!newCategory.name || !newCategory.slug}
           >
             {editMode ? 'Güncelle' : 'Ekle'}
           </Button>
@@ -265,7 +261,12 @@ const AdminCategories = () => {
       </Dialog>
 
       {/* Bildirim */}
-      <Snackbar open={alert.open} autoHideDuration={5000} onClose={handleCloseAlert}>
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
         <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
           {alert.message}
         </Alert>

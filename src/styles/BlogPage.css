@@ -1,0 +1,221 @@
+.blog-banner {
+  background-color: #f5f5f5;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../public/img/sub-banner.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 120px 0;
+  color: white;
+  text-align: center;
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.blog-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: linear-gradient(to top, rgba(249, 249, 249, 0.5), transparent);
+}
+
+.banner-heading {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.banner-subtitle {
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 15px;
+  color: #f0f0f0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: inline-block;
+  padding-bottom: 8px;
+  position: relative;
+}
+
+.banner-subtitle::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 2px;
+  background-color: #fff;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.banner-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 0;
+  line-height: 1.2;
+  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+.category-container {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  margin-top: -30px;
+  position: relative;
+  z-index: 10;
+}
+
+.category-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+  position: relative;
+  padding-left: 15px;
+}
+
+.category-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 25px;
+  background-color: #1976d2;
+  border-radius: 3px;
+}
+
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-chip {
+  border-radius: 50px !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  border: none !important;
+}
+
+.category-chip.active {
+  background-color: #1976d2 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3) !important;
+}
+
+.category-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.blog-search {
+  margin: 20px 0;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+}
+
+.blog-search input {
+  width: 100%;
+  padding: 15px 20px;
+  border-radius: 50px;
+  border: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.blog-search input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.blog-search button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.blog-search button:hover {
+  background-color: #1565c0;
+}
+
+.no-results {
+  text-align: center;
+  padding: 40px 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-top: 30px;
+}
+
+.no-results h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.no-results p {
+  color: #666;
+  font-size: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+@media (max-width: 960px) {
+  .banner-title {
+    font-size: 2.8rem;
+  }
+  
+  .category-container {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 600px) {
+  .blog-banner {
+    padding: 80px 0;
+  }
+  
+  .banner-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .banner-title {
+    font-size: 2.2rem;
+  }
+  
+  .category-container {
+    padding: 20px;
+    margin-top: -20px;
+  }
+  
+  .category-title {
+    font-size: 1.2rem;
+  }
+  
+  .category-chip {
+    padding: 8px 15px !important;
+    font-size: 0.85rem !important;
+  }
+} 
