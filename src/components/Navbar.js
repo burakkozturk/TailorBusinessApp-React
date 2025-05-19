@@ -1,7 +1,7 @@
 // src/components/Navbar.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiLogIn } from 'react-icons/fi';
+import { FiLogIn, FiMenu, FiX } from 'react-icons/fi';
 import '../styles/Navbar.css';
 
 function Navbar() {
@@ -29,34 +29,35 @@ function Navbar() {
           </Link>
         </div>
 
-        <div className="menu-icon" onClick={() => setIsOpen(!isOpen)}>
-          <i className={isOpen ? 'fas fa-times' : 'fas fa-bars'} />
-        </div>
-
         <ul className={isOpen ? 'nav-menu active' : 'nav-menu'}>
           <li className="nav-item">
-            <Link to="/" className="nav-links">Ana Sayfa</Link>
+            <Link to="/" className="nav-links" onClick={() => setIsOpen(false)}>Ana Sayfa</Link>
           </li>
           <li className="nav-item">
-            <Link to="/hakkimizda" className="nav-links">Hakkımızda</Link>
+            <Link to="/hakkimizda" className="nav-links" onClick={() => setIsOpen(false)}>Hakkımızda</Link>
           </li>
           <li className="nav-item">
-            <Link to="/blog" className="nav-links">Blog</Link>
+            <Link to="/blog" className="nav-links" onClick={() => setIsOpen(false)}>Blog</Link>
           </li>
           <li className="nav-item">
-            <Link to="/cebinizdeki-terziniz" className="nav-links"><i>Cebinizdeki Terziniz</i></Link>
+            <Link to="/cebinizdeki-terziniz" className="nav-links" onClick={() => setIsOpen(false)}><i>Cebinizdeki Terziniz</i></Link>
           </li>
           <li className="nav-item">
-            <Link to="/iletisim" className="nav-links">İletişim</Link>
+            <Link to="/iletisim" className="nav-links" onClick={() => setIsOpen(false)}>İletişim</Link>
           </li>
         </ul>
 
-        {/* Giriş ikonu - sağa sabit */}
-        <Link to="/giris" className="login-icon">
-          <FiLogIn size={24} />
-        </Link>
+        {/* Menü ve Giriş ikonları - sağ tarafta */}
+        <div className="navbar-right">
+          <div className="menu-icon" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <FiX size={28} color="#f5e6b0" /> : <FiMenu size={28} color="#f5e6b0" />}
+          </div>
+          
+          <Link to="/giris" className="login-icon">
+            <FiLogIn size={24} color="#f5e6b0" />
+          </Link>
+        </div>
       </div>
-
     </nav>
   );
 }

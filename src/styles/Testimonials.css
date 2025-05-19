@@ -163,3 +163,89 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Responsive iyileştirmeler */
+@media (max-width: 992px) {
+  .testimonials-container {
+    padding: 30px 20px;
+  }
+  
+  .testimonials-title {
+    font-size: 28px;
+  }
+  
+  .testimonial-quote {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 768px) {
+  .testimonials-container {
+    padding: 20px 20px 40px;
+  }
+  
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .testimonials-content {
+    order: 2;
+    text-align: center;
+  }
+  
+  .testimonial-image-wrapper {
+    order: 1;
+  }
+  
+  .testimonials-header, .testimonial-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .testimonial-box {
+    min-height: 150px;
+  }
+  
+  .testimonial-quote {
+    height: auto;
+    min-height: 80px;
+  }
+  
+  .testimonial-quote::before {
+    left: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .testimonials-container {
+    padding: 20px 15px 30px;
+  }
+  
+  .testimonials-title {
+    font-size: 24px;
+  }
+  
+  .testimonials-subtitle {
+    font-size: 14px;
+  }
+  
+  .testimonial-quote {
+    font-size: 16px;
+    padding: 10px 5px;
+  }
+  
+  .testimonial-author {
+    font-size: 16px;
+  }
+  
+  .testimonial-image-container {
+    padding-bottom: 70%; /* Daha az yüksek görsel */
+  }
+  
+  .testimonial-quote::before, 
+  .testimonial-quote::after {
+    font-size: 36px;
+  }
+}

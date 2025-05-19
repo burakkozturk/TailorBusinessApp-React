@@ -47,12 +47,12 @@ function App() {
             {/* Manager ve Admin erişimli sayfalar */}
             <Route path="customers" element={<Customers />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="settings" element={<AdminSettings />} />
             
             {/* Sadece Admin Erişimi Olan Sayfalar */}
             <Route path="fabrics" element={<RequireAdmin><AdminFabrics /></RequireAdmin>} />
             <Route path="templates" element={<RequireAdmin><div>Şablonlar</div></RequireAdmin>} />
             <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
-            <Route path="settings" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
             <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
             <Route path="categories" element={<RequireAdmin><AdminCategories /></RequireAdmin>} />
           </Route>

@@ -1,5 +1,6 @@
 .home-page {
   font-family: 'Arial', sans-serif;
+  overflow-x: hidden;
 }
 
 /* Genel stil düzenlemeleri */
@@ -13,9 +14,35 @@ body {
   font-family: 'Arial', sans-serif;
   line-height: 1.6;
   color: #333;
+  overflow-x: hidden;
 }
 
 button {
   cursor: pointer;
   outline: none;
+}
+
+/* Responsive genel ayarlar */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.section-spacing {
+  padding: 60px 0;
+}
+
+/* Mobil dostu genel stillendirmeler */
+@media (max-width: 768px) {
+  .section-spacing {
+    padding: 40px 0;
+  }
+  
+  h1, h2 {
+    font-size: 1.8rem !important;
+  }
+  
+  p {
+    font-size: 0.95rem !important;
+  }
 }

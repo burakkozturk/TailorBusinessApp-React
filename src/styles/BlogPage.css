@@ -1,102 +1,69 @@
 .blog-banner {
-  background-color: #f5f5f5;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../public/img/sub-banner.jpg');
+  background-image: url('../../public/img/sub-banner.jpg');
   background-size: cover;
   background-position: center;
-  padding: 120px 0;
-  color: white;
-  text-align: center;
+  height: 40vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 60px 30px 0;
   position: relative;
-  margin-bottom: 30px;
-}
-
-.blog-banner::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50px;
-  background: linear-gradient(to top, rgba(249, 249, 249, 0.5), transparent);
+  color: #fff;
+  text-align: right;
 }
 
 .banner-heading {
-  max-width: 900px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 2;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 15px 25px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
 .banner-subtitle {
-  font-size: 1.3rem;
-  font-weight: 500;
-  margin-bottom: 15px;
-  color: #f0f0f0;
-  letter-spacing: 2px;
+  font-size: 22px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  display: inline-block;
-  padding-bottom: 8px;
-  position: relative;
-}
-
-.banner-subtitle::after {
-  content: '';
-  position: absolute;
-  width: 40px;
-  height: 2px;
-  background-color: #fff;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  color: #ccc;
+  margin: 0;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
 }
 
 .banner-title {
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin-bottom: 0;
-  line-height: 1.2;
-  text-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  font-size: 36px;
+  margin: 5px 0 0;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
 }
 
 .category-container {
   background-color: #fff;
   border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
-  margin-top: -30px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  max-width: 1200px;
+  margin: 40px auto;
   position: relative;
   z-index: 10;
 }
 
 .category-title {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #333;
-  position: relative;
+  margin-bottom: 25px;
+  color: #2c2a29;
+  border-left: 4px solid #1976d2;
   padding-left: 15px;
-}
-
-.category-title::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 5px;
-  height: 25px;
-  background-color: #1976d2;
-  border-radius: 3px;
 }
 
 .category-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .category-chip {
-  border-radius: 50px !important;
+  border-radius: 30px !important;
   padding: 10px 20px !important;
   font-weight: 500 !important;
   transition: all 0.3s ease !important;
@@ -182,40 +149,95 @@
   margin: 0 auto;
 }
 
+/* Tablet için responsive düzenlemeler */
 @media (max-width: 960px) {
+  .blog-banner {
+    height: 35vh;
+    padding: 0 40px 25px 0;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .banner-heading {
+    text-align: center;
+  }
+  
   .banner-title {
-    font-size: 2.8rem;
+    font-size: 32px;
   }
   
   .category-container {
-    padding: 25px;
+    padding: 30px;
+    margin: 30px 20px;
   }
 }
 
+/* Mobil için responsive düzenlemeler */
 @media (max-width: 600px) {
   .blog-banner {
-    padding: 80px 0;
+    height: 30vh;
+    padding: 0 20px 20px 20px;
+    justify-content: center;
+  }
+  
+  .banner-heading {
+    padding: 10px 15px;
+    width: 90%;
+    text-align: center;
   }
   
   .banner-subtitle {
-    font-size: 1.1rem;
+    font-size: 18px;
+    letter-spacing: 2px;
   }
   
   .banner-title {
-    font-size: 2.2rem;
+    font-size: 26px;
   }
   
   .category-container {
     padding: 20px;
-    margin-top: -20px;
+    margin: 20px 15px;
+    border-radius: 8px;
   }
   
   .category-title {
     font-size: 1.2rem;
+    margin-bottom: 20px;
   }
   
   .category-chip {
     padding: 8px 15px !important;
     font-size: 0.85rem !important;
+  }
+}
+
+/* Küçük mobil cihazlar için */
+@media (max-width: 375px) {
+  .blog-banner {
+    height: 25vh;
+  }
+  
+  .banner-subtitle {
+    font-size: 16px;
+  }
+  
+  .banner-title {
+    font-size: 22px;
+    margin-top: 3px;
+  }
+  
+  .category-container {
+    padding: 15px;
+    margin: 15px 10px;
+  }
+  
+  .category-chips {
+    gap: 8px;
+  }
+  
+  .category-chip {
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
   }
 } 

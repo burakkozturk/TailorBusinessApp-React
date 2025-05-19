@@ -4,10 +4,11 @@ import axios from 'axios';
 import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress } from '@mui/material';
 import '../styles/Blog.css';
 
-export default function Blog({ homePage = false }) {
+export default function Blog({ homePage = false, selectedCategory = null }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,6 +34,21 @@ export default function Blog({ homePage = false }) {
     fetchData();
   }, [homePage]);
 
+  // Kategori değişikliğinde veya posts değiştiğinde filtreleme yapma
+  useEffect(() => {
+    if (selectedCategory === null) {
+      // Kategori seçilmemişse tüm postları göster
+      setFilteredPosts(posts);
+    } else {
+      // Seçilen kategoriye göre postları filtrele
+      const filtered = posts.filter(post => 
+        post.categories && 
+        post.categories.some(category => category.id === selectedCategory)
+      );
+      setFilteredPosts(filtered);
+    }
+  }, [selectedCategory, posts]);
+
   const truncateText = (text, maxLength) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
@@ -52,17 +68,22 @@ export default function Blog({ homePage = false }) {
     }
   };
 
+  // Gösterilecek post listesini belirle
+  const postsToDisplay = selectedCategory !== null ? filteredPosts : posts;
+
   return (
     <section className="blog-section">
       <div className="blog-container">
         {/* Başlık Kısmı - Diğer bileşenlerle uyumlu */}
-        <div className="blog-header">
-          <p className="blog-subtitle">Blogumuz</p>
-          <h2 className="blog-title">Son Yazılarımız</h2>
-          <p className="blog-description">
-            Moda ve tekstil dünyasından son gelişmeleri, tasarımları ve ipuçlarını sizlerle paylaşıyoruz.
-          </p>
-        </div>
+        {homePage && (
+          <div className="blog-header">
+            <p className="blog-subtitle">Blogumuz</p>
+            <h2 className="blog-title">Son Yazılarımız</h2>
+            <p className="blog-description">
+              Moda ve tekstil dünyasından son gelişmeleri, tasarımları ve ipuçlarını sizlerle paylaşıyoruz.
+            </p>
+          </div>
+        )}
 
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
@@ -72,13 +93,13 @@ export default function Blog({ homePage = false }) {
           <Box sx={{ textAlign: 'center', py: 5, color: 'error.main' }}>
             <Typography>{error}</Typography>
           </Box>
-        ) : posts.length === 0 ? (
+        ) : postsToDisplay.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 5 }}>
-            <Typography>Henüz blog yazısı bulunmuyor.</Typography>
+            <Typography>Bu kategoride henüz blog yazısı bulunmuyor.</Typography>
           </Box>
         ) : (
           <div className="blog-grid">
-            {posts.map(post => (
+            {postsToDisplay.map(post => (
               <article key={post.id} className="blog-post">
                 <div className="blog-image-container">
                   <img

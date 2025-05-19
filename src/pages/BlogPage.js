@@ -14,11 +14,14 @@ export default function BlogPage() {
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoading(true);
       try {
         const response = await axios.get('http://localhost:6767/api/categories');
         setCategories(response.data);
       } catch (error) {
         console.error('Kategoriler yüklenirken hata oluştu:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -31,6 +34,15 @@ export default function BlogPage() {
     setSelectedCategory(categoryId === selectedCategory ? null : categoryId);
   };
 
+  // Seçili kategori adını bul
+  const getSelectedCategoryName = () => {
+    if (!selectedCategory) return null;
+    const category = categories.find(cat => cat.id === selectedCategory);
+    return category ? category.name : null;
+  };
+
+  const selectedCategoryName = getSelectedCategoryName();
+
   return (
     <>
       <Navbar />
@@ -38,16 +50,16 @@ export default function BlogPage() {
       {/* Banner bölümü */}
       <div className="blog-banner">
         <div className="banner-heading">
-          <p className="banner-subtitle">Blog</p>
+          <p className="banner-subtitle">BLOG</p>
         </div>
       </div>
       
       <Container maxWidth="lg">
         {/* Kategori kartı */}
         <div className="category-container">
-          <Typography variant="h6" className="category-title">
+          <h2 className="category-title">
             Kategorilere Göre Keşfedin
-          </Typography>
+          </h2>
           
           <div className="category-chips">
             <Chip 
@@ -69,8 +81,8 @@ export default function BlogPage() {
         </div>
       </Container>
       
-      {/* Blog listesi */}
-      <Blog homePage={false} />
+      {/* Blog listesi - seçilen kategori bilgisini iletiyoruz */}
+      <Blog homePage={false} selectedCategory={selectedCategory} />
       
       <Footer />
     </>

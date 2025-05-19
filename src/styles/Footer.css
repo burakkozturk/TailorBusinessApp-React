@@ -113,7 +113,7 @@
 
 /* MAP COLUMN */
 .map-col .map-wrapper {
-  width: 420px;
+  width: 100%;
   height: 170px;         /* haritayı biraz büyüttük */
   border-radius: 6px;
   overflow: hidden;
@@ -135,18 +135,111 @@
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
+  .footer-cta {
+    margin: 0 20px 50px;
+  }
+  
   .footer-cta-content {
-    margin-left: 0;
+    padding: 50px 20px;
+    max-width: 380px;
+    margin-left: 40%;
+  }
+  
+  .map-col .map-wrapper {
+    width: 100%;
+  }
+}
+
+@media (max-width: 992px) {
+  .footer-cta-content {
+    padding: 40px 20px;
+    max-width: 340px;
+    margin-left: 30%;
+  }
+  
+  .footer-info {
+    gap: 30px;
+  }
+  
+  .info-col {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-cta {
+    margin: 0 20px 40px;
+  }
+  
+  .footer-cta-content {
+    margin: 0 auto;
     text-align: center;
     max-width: 100%;
+    padding: 50px 20px;
   }
+  
   .footer-info {
     flex-direction: column;
     text-align: center;
+    gap: 30px;
   }
+  
+  .info-col ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .info-col ul li + li {
+    margin-top: 0;
+  }
+  
   .map-col .map-wrapper {
-    height: 200px;
-    margin-top: 12px;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-cta {
+    margin: 0 15px 30px;
+  }
+  
+  .footer-cta-content {
+    padding: 40px 15px;
+  }
+  
+  .footer-cta-title {
+    font-size: 1.3rem;
+  }
+  
+  .footer-form {
+    flex-direction: column;
+  }
+  
+  .footer-form input {
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .footer-form button {
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .footer-info {
+    padding: 0 15px;
+    gap: 25px;
+  }
+  
+  .info-col h5 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  
+  .map-col .map-wrapper {
+    height: 150px;
   }
 }

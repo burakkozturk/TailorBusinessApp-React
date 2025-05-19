@@ -122,17 +122,114 @@
 }
 
 /* === Responsive düzenlemeler === */
+@media screen and (max-width: 1024px) {
+  .hero-content {
+    margin-left: 7%;
+    max-width: 550px;
+  }
+
+  .hero-title {
+    font-size: 48px;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .hero-content {
     margin-left: 5%;
     max-width: 90%;
+    padding: 0 20px;
   }
 
   .hero-title {
-    font-size: 36px;
+    font-size: 40px;
   }
 
   .hero-description {
     font-size: 16px;
+    margin-bottom: 25px;
+  }
+  
+  .hero-overlay {
+    background: linear-gradient(to right, rgba(0, 0, 30, 0.85), rgba(0, 0, 30, 0.65));
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .hero-slider-wrapper {
+    height: 90vh;
+  }
+  
+  .hero-content {
+    height: 90vh;
+    justify-content: center;
+    margin-left: 0;
+    width: 100%;
+    padding: 0 20px;
+    text-align: center;
+    align-items: center;
+  }
+  
+  .hero-title {
+    font-size: 32px;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .hero-subtitle {
+    font-size: 12px;
+  }
+  
+  .hero-description {
+    font-size: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .hero-button {
+    padding: 12px 20px;
+  }
+  
+  .hero-overlay {
+    background: linear-gradient(to bottom, rgba(0, 0, 30, 0.9), rgba(0, 0, 30, 0.7));
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .hero-slider-wrapper {
+    height: 85vh;
+  }
+  
+  .hero-content {
+    height: 85vh;
+    padding: 0 15px;
+  }
+  
+  .hero-title {
+    font-size: 30px;
+    margin-bottom: 15px;
+  }
+  
+  .hero-description {
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .hero-content {
+    width: 100%;
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+  
+  .hero-title {
+    font-size: 28px;
+    width: 100%;
+  }
+  
+  .hero-description {
+    font-size: 14px;
+    width: 100%;
   }
 }

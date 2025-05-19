@@ -200,7 +200,7 @@ const SideBar = ({ onToggle }) => {
     },
     { path: 'blog', label: 'Blog', icon: <FaBlog size={18} />, roles: ['ADMIN'] },
     { path: 'categories', label: 'Kategoriler', icon: <FaTags size={18} />, roles: ['ADMIN'] },
-    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN'] },
+    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN', 'MANAGER'] },
   ];
 
   // Kullanıcının rolüne göre menü öğelerini filtrele
@@ -256,38 +256,50 @@ const SideBar = ({ onToggle }) => {
           ))}
         </NavList>
       </ScrollBox>
-
+      
       <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
       
       <ProfileSection iscollapsed={isCollapsed ? 'true' : 'false'}>
-        {!isCollapsed && (
-          <Box sx={{ ml: 1.5, mr: 2 }}>
-            <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: '500' }}>
-              {user?.username || ''}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-              {user?.role === 'ADMIN' ? 'Admin' : 'Yönetici'}
-            </Typography>
-          </Box>
+        {isCollapsed ? (
+          <Tooltip title="Çıkış Yap" placement="right">
+            <IconButton 
+              sx={{ 
+                color: 'white', 
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' } 
+              }}
+              onClick={handleLogout}
+            >
+              <FaSignOutAlt size={18} />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <>
+            <Box sx={{ mr: 2 }}>
+              <ProfileAvatar>{user?.username?.charAt(0) || 'U'}</ProfileAvatar>
+            </Box>
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'white' }}>
+                {user?.username || 'Kullanıcı'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                {user?.role === 'ADMIN' ? 'Yönetici' : 'Kullanıcı'}
+              </Typography>
+            </Box>
+            <Tooltip title="Çıkış Yap">
+              <IconButton 
+                sx={{ 
+                  color: 'white', 
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' } 
+                }}
+                onClick={handleLogout}
+              >
+                <FaSignOutAlt size={18} />
+              </IconButton>
+            </Tooltip>
+          </>
         )}
-        
-        <IconButton 
-          sx={{ 
-            color: '#f44336', 
-            backgroundColor: 'rgba(244, 67, 54, 0.1)', 
-            borderRadius: '8px',
-            padding: '8px',
-            '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.15)' } 
-          }}
-          onClick={handleLogout}
-        >
-          <FaSignOutAlt size={isCollapsed ? 18 : 16} />
-          {!isCollapsed && (
-            <Typography sx={{ ml: 1, fontSize: '0.8rem', fontWeight: '500', color: '#f44336' }}>
-              Çıkış
-            </Typography>
-          )}
-        </IconButton>
       </ProfileSection>
     </SidebarContainer>
   );

@@ -1,7 +1,6 @@
-
-
 .about-page {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
 }
 
 .about-hero-minimal {
@@ -69,6 +68,7 @@
 .about-text {
   flex: 1;
   padding: 20px;
+  min-width: 300px;
 }
 
 .about-text h2 {
@@ -88,6 +88,7 @@
   border-radius: 10px;
   background-size: cover;
   background-position: center;
+  min-width: 300px;
 }
 
 /* Görsellerin stilleri */
@@ -103,4 +104,144 @@
   background-color: #f9f9f9;
   padding: 80px 20px;
   border-top: 1px solid #ddd;
+}
+
+/* Responsive Tasarım - Büyük Tabletler */
+@media screen and (max-width: 1024px) {
+  .about-section {
+    padding: 60px 20px;
+  }
+  
+  .about-text h2 {
+    font-size: 26px;
+  }
+  
+  .about-text p {
+    font-size: 16px;
+  }
+  
+  .about-image {
+    min-height: 320px;
+  }
+  
+  .banner-subtitle {
+    font-size: 20px;
+  }
+  
+  .banner-title {
+    font-size: 32px;
+  }
+}
+
+/* Responsive Tasarım - Tabletler */
+@media screen and (max-width: 768px) {
+  .about-banner {
+    height: 35vh;
+    padding: 0 40px 25px 0;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .banner-heading {
+    text-align: center;
+  }
+  
+  .about-section {
+    padding: 50px 20px;
+    flex-direction: column;
+  }
+  
+  .about-section.alt {
+    flex-direction: column;
+  }
+  
+  .about-text {
+    order: 2;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .about-image {
+    order: 1;
+    min-height: 300px;
+    width: 100%;
+  }
+  
+  .about-testimonials-wrapper {
+    padding: 50px 15px;
+  }
+}
+
+/* Responsive Tasarım - Mobil Cihazlar */
+@media screen and (max-width: 576px) {
+  .about-banner {
+    height: 30vh;
+    padding: 0 20px 20px 20px;
+  }
+  
+  .banner-heading {
+    padding: 10px 15px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .banner-subtitle {
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+  
+  .banner-title {
+    font-size: 26px;
+  }
+  
+  .about-section {
+    padding: 40px 15px;
+    gap: 20px;
+  }
+  
+  .about-text h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+  }
+  
+  .about-text p {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  
+  .about-image {
+    min-height: 250px;
+  }
+  
+  .about-testimonials-wrapper {
+    padding: 40px 10px;
+  }
+}
+
+/* Küçük Mobil Cihazlar */
+@media screen and (max-width: 375px) {
+  .about-banner {
+    height: 25vh;
+  }
+  
+  .banner-subtitle {
+    font-size: 16px;
+  }
+  
+  .about-section {
+    padding: 30px 10px;
+  }
+  
+  .about-text h2 {
+    font-size: 20px;
+  }
+  
+  .about-text p {
+    font-size: 14px;
+  }
+  
+  .about-image {
+    min-height: 200px;
+  }
 }

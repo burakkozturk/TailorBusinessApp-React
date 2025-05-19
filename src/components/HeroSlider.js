@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/HeroSlider.css';
 
 const slides = [
@@ -39,6 +40,8 @@ function HeroSlider() {
           key={index}
           className={`hero-slide ${index === current ? 'active' : ''}`}
           style={{ backgroundImage: `url(${slide.image})` }}
+          role="img"
+          aria-label={`Erdal Güda - ${slide.title}`}
         />
       ))}
       <div className="hero-overlay"></div>
@@ -46,7 +49,7 @@ function HeroSlider() {
         <h2 className="hero-subtitle">{slides[current].subtitle}</h2>
         <h1 className="hero-title">{slides[current].title}</h1>
         <p className="hero-description">{slides[current].description}</p>
-        <button className="hero-button">Randevu Al</button>
+        <Link to="/contact" className="hero-button">RANDEVU AL</Link>
       </div>
     </div>
   );
