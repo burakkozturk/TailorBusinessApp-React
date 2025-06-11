@@ -17,14 +17,14 @@ const BlogPostPage = () => {
     const fetchBlogPost = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:6767/api/blogs/slug/${slug}`);
+        const response = await axios.get(`https://erdalguda.online/api/blogs/slug/${slug}`);
         setPost(response.data);
         setError(null);
 
         // Eğer post'un kategorileri varsa, ilgili yazıları getir
         if (response.data.categories && response.data.categories.length > 0) {
           const categoryId = response.data.categories[0].id;
-          const relatedResponse = await axios.get(`http://localhost:6767/api/blogs/category/${categoryId}`);
+          const relatedResponse = await axios.get(`https://erdalguda.online/api/blogs/category/${categoryId}`);
           
           // Aynı yazıyı hariç tut ve en fazla 3 ilgili yazı göster
           const filtered = relatedResponse.data

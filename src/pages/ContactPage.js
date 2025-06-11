@@ -28,7 +28,7 @@ function ContactPage() {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:6767/api/messages', formData);
+      await axios.post('https://erdalguda.online/api/messages', formData);
       setSuccessOpen(true);
       setFormData({ name: '', email: '', content: '' });
     } catch (error) {
@@ -100,7 +100,7 @@ function ContactPage() {
               onChange={handleChange}
               aria-label="Mesajınız"
             ></textarea>
-            <button type="submit" disabled={loading}>
+            <button type="submit" disabled={loading} className={`btn-primary ${loading ? 'btn-loading' : ''}`}>
               {loading ? <CircularProgress size={24} color="inherit" /> : 'Gönder'}
             </button>
           </form>

@@ -20,7 +20,7 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
           endpoint = '/api/blogs/top/2'; // Ana sayfada sadece 2 blog göster
         }
         
-        const response = await axios.get(`http://localhost:6767${endpoint}`);
+        const response = await axios.get(`https://erdalguda.online${endpoint}`);
         setPosts(response.data);
         setError(null);
       } catch (err) {
@@ -129,7 +129,7 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
         {/* Ana sayfada olup olmadığına göre tüm blog yazıları butonunu göster/gizle */}
         {homePage && (
           <div className="blog-view-all">
-            <Link to="/blog" className="blog-view-all-button">
+            <Link to="/blog" className="btn-primary">
               TÜM BLOG YAZILARI
             </Link>
           </div>

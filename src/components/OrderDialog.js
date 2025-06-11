@@ -37,30 +37,20 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:6767/api/customers');
-      const data = Array.isArray(response.data) 
-        ? response.data 
-        : (Array.isArray(response.data.customers) ? response.data.customers : []);
-      setCustomers(data);
-      setError('');
+      const response = await axios.get('https://erdalguda.online/api/customers');
+      setCustomers(response.data);
     } catch (error) {
-      console.error('Müşteriler yüklenirken hata oluştu:', error);
-      setCustomers([]);
-      setError('Müşteriler yüklenirken bir hata oluştu');
+      console.error('Müşteri bilgileri çekilirken hata:', error);
     }
   };
   
 
   const fetchFabrics = async () => {
     try {
-      const response = await axios.get('http://localhost:6767/api/fabrics');
-      const data = Array.isArray(response.data) ? response.data : [];
-      setFabrics(data);
-      setError('');
+      const response = await axios.get('https://erdalguda.online/api/fabrics');
+      setFabrics(response.data);
     } catch (error) {
-      console.error('Kumaşlar yüklenirken hata oluştu:', error);
-      setFabrics([]);
-      setError('Kumaşlar yüklenirken bir hata oluştu');
+      console.error('Kumaş bilgileri çekilirken hata:', error);
     }
   };
 
@@ -79,28 +69,38 @@ const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) =
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      setError('');
+      if (!formData.customer) {
+        setError('Lütfen bir müşteri seçin');
+        setLoading(false);
+        return;
+      }
       
-      const orderData = {
-        ...formData,
-        customer: { id: formData.customer }
-      };
-
-      const response = await axios[order ? 'put' : 'post'](
-        `http://localhost:6767/api/orders${order ? `/${order.id}` : ''}`,
-        orderData
-      );
-
-      onSave(response.data);
+      if (formData.status === 'Tamamlandı' && !formData.estimatedDeliveryDate) {
+        formData.estimatedDeliveryDate = new Date().toISOString().split('T')[0];
+      }
+      
+      const response = await axios({
+        method: order ? 'put' : 'post',
+        url: `https://erdalguda.online/api/orders${order ? `/${order.id}` : ''}`,
+        data: formData
+      });
+      
+      setLoading(false);
+      if (order) {
+        onSave(response.data);
+      } else {
+        onSave(response.data);
+      }
       onClose();
     } catch (error) {
-      console.error('Sipariş kaydedilirken hata oluştu:', error);
-      setError('Sipariş kaydedilirken bir hata oluştu');
-    } finally {
       setLoading(false);
+      console.error('Sipariş kaydedilirken hata:', error);
+      setError('Sipariş kaydedilirken bir hata oluştu');
     }
   };
 

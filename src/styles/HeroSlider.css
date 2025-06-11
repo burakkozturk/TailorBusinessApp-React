@@ -1,13 +1,11 @@
-/* === Ana slider konteyneri === */
+/* === Hero Slider Stilleri === */
 .hero-slider-wrapper {
   position: relative;
-  width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-color: #000; /* yedek olarak siyah */
+  background-color: #000;
 }
 
-/* === Her bir görsel slide === */
 .hero-slide {
   position: absolute;
   top: 0;
@@ -18,8 +16,8 @@
   background-position: center;
   background-repeat: no-repeat;
   opacity: 0;
+  transition: opacity 1.5s ease-in-out;
   z-index: 1;
-  transition: opacity 0.9s ease-in-out;
 }
 
 .hero-slide.active {
@@ -27,7 +25,6 @@
   z-index: 2;
 }
 
-/* === Arka plan overlay === */
 .hero-overlay {
   position: absolute;
   top: 0;
@@ -38,75 +35,47 @@
   z-index: 3;
 }
 
-/* === İçerik kutusu === */
 .hero-content {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  transform: translateY(-50%);
+  color: white;
   z-index: 4;
   max-width: 600px;
-  margin-left: 10%;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100vh;
+  padding: 0 20px;
 }
 
-/* === Metinler ve buton === */
 .hero-subtitle {
   font-size: 14px;
-  letter-spacing: 4px;
-  font-weight: 400;
-  color: #d4af37;
-  margin-bottom: 10px;
-  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 15px;
+  color: #f5e6b0;
+  font-weight: 500;
   opacity: 0;
   animation: fadeIn 1s ease forwards;
-  animation-delay: 0.3s;
+  animation-delay: 0.5s;
 }
 
 .hero-title {
   font-size: 56px;
   font-weight: 700;
-  font-family: 'Georgia', serif;
   margin-bottom: 20px;
   line-height: 1.2;
-  color: #fff;
+  font-family: 'Playfair Display', serif;
   opacity: 0;
   animation: fadeIn 1s ease forwards;
-  animation-delay: 0.6s;
+  animation-delay: 0.7s;
 }
 
 .hero-description {
   font-size: 18px;
-  font-weight: 300;
-  color: rgba(255, 255, 255, 0.85);
-  margin-bottom: 30px;
   line-height: 1.6;
-  max-width: 500px;
+  margin-bottom: 35px;
+  color: #e0e0e0;
   opacity: 0;
   animation: fadeIn 1s ease forwards;
   animation-delay: 0.9s;
-}
-
-.hero-button {
-  padding: 14px 22px;
-  font-size: 11px;
-  background-color: transparent;
-  border: 2px solid #d4af37;
-  color: #d4af37;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  transition: all 0.3s ease;
-  opacity: 0;
-  animation: fadeIn 1s ease forwards;
-  animation-delay: 1.2s;
-}
-
-.hero-button:hover {
-  background-color: #d4af37;
-  color: #0c1e35;
-  box-shadow: 0 5px 20px rgba(212, 175, 55, 0.5);
 }
 
 /* === Fade-in animasyonu === */
@@ -186,10 +155,6 @@
     max-width: 100%;
   }
   
-  .hero-button {
-    padding: 12px 20px;
-  }
-  
   .hero-overlay {
     background: linear-gradient(to bottom, rgba(0, 0, 30, 0.9), rgba(0, 0, 30, 0.7));
   }
@@ -202,34 +167,27 @@
   
   .hero-content {
     height: 85vh;
-    padding: 0 15px;
   }
   
   .hero-title {
-    font-size: 30px;
-    margin-bottom: 15px;
+    font-size: 28px;
   }
   
   .hero-description {
     font-size: 14px;
-    margin-bottom: 15px;
   }
 }
 
 @media screen and (max-width: 380px) {
   .hero-content {
-    width: 100%;
     padding: 0 15px;
-    box-sizing: border-box;
   }
   
   .hero-title {
-    font-size: 28px;
-    width: 100%;
+    font-size: 24px;
   }
   
   .hero-description {
-    font-size: 14px;
-    width: 100%;
+    font-size: 13px;
   }
 }

@@ -85,25 +85,13 @@
   display: none;
 }
 
-.login-icon {
-  color: #fff;
-  margin-left: 16px;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s ease;
-}
-
-.login-icon:hover {
-  color: #d4af37;
-}
-
-/* Scroll Effect */
+/* === Scroll Effect === */
 .navbar.scrolled {
   background-color: #0c1e35;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive tasarım */
+/* === Responsive === */
 @media screen and (max-width: 960px) {
   .navbar-container {
     padding: 0 25px;
@@ -180,11 +168,6 @@
     position: relative;
   }
   
-  .login-icon {
-    z-index: 300;
-    margin-left: 0;
-  }
-  
   /* Navbar içindeki öğelerin konumlandırılması için flex kullanımı */
   .navbar-container {
     display: flex;
@@ -237,3 +220,22 @@
     margin-right: 10px;
   }
 }
+
+.login-icon {
+  color: #fff;
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.login-icon:hover {
+  color: #d4af37;
+}
+
+.login-icon {
+  z-index: 300;
+  margin-left: 0;
+}
+
+/* Navbar içindeki öğelerin konumlandırılması için flex kullanımı */

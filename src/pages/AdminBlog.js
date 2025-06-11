@@ -30,14 +30,14 @@ function AdminBlog() {
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const fetchBlogs = async () => {
-    setLoading(true);
     try {
-      const res = await axios.get('http://localhost:6767/api/blogs');
+      setLoading(true);
+      const res = await axios.get('https://erdalguda.online/api/blogs');
       setBlogs(res.data);
-      setError('');
-    } catch (err) {
-      setError('Bloglar yüklenemedi');
-      console.error(err);
+      setSelectedCategories(res.data.map(blog => blog.categories || []));
+    } catch (error) {
+      console.error('Blog verileri çekilirken hata:', error);
+      setError('Blog verileri yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -45,10 +45,11 @@ function AdminBlog() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:6767/api/categories');
+      const res = await axios.get('https://erdalguda.online/api/categories');
       setCategories(res.data);
-    } catch (err) {
-      console.error('Kategoriler yüklenemedi:', err);
+    } catch (error) {
+      console.error('Kategoriler çekilirken hata:', error);
+      setError('Kategoriler yüklenirken bir hata oluştu');
     }
   };
 
@@ -126,60 +127,94 @@ function AdminBlog() {
     setImagePreview(null);
   };
 
-  const handleCreateOrUpdate = async (e) => {
-    e.preventDefault();
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Resim formatı ve boyut kontrolü yap
+    if (!file.type.match('image.*')) {
+      setError('Lütfen bir resim dosyası seçin');
+      return;
+    }
+    
+    if (file.size > 5242880) { // 5MB
+      setError('Dosya boyutu 5MB\'dan küçük olmalıdır');
+      return;
+    }
+    
     setLoading(true);
-
+    const formData = new FormData();
+    formData.append('file', file);
+    
     try {
-      let imageUrl = newBlog.imageUrl;
-      if (image) {
-        // Görseli S3'e yüklemek için formData oluşturulması
-        const formData = new FormData();
-        formData.append('file', image);
-        
-        const uploadRes = await axios.post('http://localhost:6767/api/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        
-        imageUrl = uploadRes.data.url;
+      const uploadRes = await axios.post('https://erdalguda.online/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      if (uploadRes.data && uploadRes.data.url) {
+        setNewBlog(prev => ({ ...prev, imageUrl: uploadRes.data.url }));
+        setError('');
+      } else {
+        throw new Error('Resim URL\'i alınamadı');
       }
+    } catch (error) {
+      console.error('Resim yüklenirken hata:', error);
+      setError('Resim yüklenirken bir hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      
+      // Kategori ID'lerini düzenle
       const payload = {
-        title: newBlog.title,
-        content: newBlog.content,
-        imageUrl: imageUrl,
-        published: newBlog.published,
-        slug: newBlog.slug,
-        categoryIds: selectedCategories.map(cat => cat.id)
+        ...newBlog,
+        categories: Array.isArray(selectedCategories) 
+          ? selectedCategories.map(cat => typeof cat === 'object' ? cat : { id: cat })
+          : []
       };
-
+      
+      let response;
       if (editingBlog) {
-        await axios.put(`http://localhost:6767/api/blogs/${editingBlog.id}`, payload);
+        response = await axios.put(`https://erdalguda.online/api/blogs/${editingBlog.id}`, payload);
         setSuccess('Blog başarıyla güncellendi');
       } else {
-        await axios.post('http://localhost:6767/api/blogs', payload);
+        response = await axios.post('https://erdalguda.online/api/blogs', payload);
         setSuccess('Blog başarıyla oluşturuldu');
       }
-
-      closeDialog();
+      
       fetchBlogs();
+      closeDialog();
     } catch (error) {
-      console.error('Blog işlemi hatası:', error);
-      setError(`Blog ${editingBlog ? 'güncellenirken' : 'oluşturulurken'} bir hata oluştu: ${error.message}`);
+      console.error('Blog kaydedilirken hata:', error);
+      setError('Blog kaydedilirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Bu blog yazısını silmek istediğinize emin misiniz?')) return;
+    if (!window.confirm('Bu blog yazısını silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+    
     try {
-      await axios.delete(`http://localhost:6767/api/blogs/${id}`);
-      setSuccess('Blog silindi');
+      setLoading(true);
+      await axios.delete(`https://erdalguda.online/api/blogs/${id}`);
       fetchBlogs();
-    } catch (err) {
-      setError('Blog silinemedi');
-      console.error(err);
+      setSuccess('Blog silindi');
+    } catch (error) {
+      console.error('Blog silinirken hata:', error);
+      setError('Blog silinirken bir hata oluştu');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -379,7 +414,7 @@ function AdminBlog() {
         <DialogActions>
           <Button onClick={closeDialog}>İptal</Button>
           <Button 
-            onClick={handleCreateOrUpdate} 
+            onClick={handleSubmit} 
             variant="contained" 
             color="primary"
             disabled={!newBlog.title || !newBlog.content || !newBlog.slug}

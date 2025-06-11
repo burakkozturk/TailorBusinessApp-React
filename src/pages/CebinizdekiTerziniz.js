@@ -14,6 +14,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ProductSlider from '../components/ProductSlider';
 import '../styles/AboutPage.css';
 import '../styles/CebinizdekiTerziniz.css';
 
@@ -255,39 +256,20 @@ function CebinizdekiTerziniz() {
             </Typography>
             
             <Box sx={{ display: 'flex', gap: 2, mb: {xs: 4, md: 6} }}>
-              <CTAButton 
-                variant="contained" 
-                color="primary"
+              <a 
                 href="https://www.erdalguda.com"
-                className="pulse-button"
-                sx={{ 
-                  bgcolor: '#f5e6b0', 
-                  '&:hover': { bgcolor: '#e6d79e' },
-                  padding: '10px 25px',
-                  borderRadius: '30px',
-                  fontSize: '0.95rem',
-                  fontWeight: 500,
-                  color: '#0a192f'
-                }}
+                className="btn-primary btn-pulse"
+                style={{ textDecoration: 'none' }}
               >
                 Hemen Satın Al
-              </CTAButton>
-              <CTAButton 
-                variant="outlined"
-                sx={{ 
-                  borderColor: '#f5e6b0', 
-                  color: '#fff', 
-                  borderWidth: 1.5,
-                  padding: '10px 25px',
-                  borderRadius: '30px',
-                  fontSize: '0.95rem',
-                  fontWeight: 500,
-                  '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' }
-                }}
+              </a>
+              <a 
                 href="#nasil-calisir"
+                className="btn-secondary"
+                style={{ textDecoration: 'none' }}
               >
                 Nasıl Çalışır?
-              </CTAButton>
+              </a>
             </Box>
           </Box>
         </Container>
@@ -492,21 +474,33 @@ function CebinizdekiTerziniz() {
           </Grid>
           
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-            <CTAButton 
-              variant="contained"
-              sx={{ 
-                bgcolor: '#f5e6b0', 
-                '&:hover': { bgcolor: '#e6d79e' }, 
-                color: '#0a192f',
-                padding: '12px 30px',
-                borderRadius: '30px',
-                fontSize: '1rem',
-                fontWeight: 500
-              }}
-              startIcon={<GetAppIcon />}
+            <a 
+              href="https://www.erdalguda.com"
+              className="btn-primary btn-icon"
+              style={{ textDecoration: 'none' }}
             >
+              <GetAppIcon sx={{ mr: 1 }} />
               Uygulamayı İndir
-            </CTAButton>
+            </a>
+          </Box>
+        </Container>
+      </StyledSection>
+      
+      {/* Ürün Galerisi */}
+      <StyledSection sx={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #fff 100%)', py: 10 }}>
+        <Container>
+          <Box sx={{ textAlign: 'center', mb: 6 }} data-aos="fade-up">
+            <GoldenTitle variant="h3" component="h2" sx={{ fontWeight: 700, mb: 3, paddingBottom: 2 }}>
+              Ürün Galerisi
+            </GoldenTitle>
+            
+            <Typography variant="body1" sx={{ mb: 5, fontSize: '1.1rem', lineHeight: 1.8, maxWidth: 800, mx: 'auto', color: '#666' }}>
+              Erdal Güda'nın özenle hazırladığı ürün koleksiyonunu keşfedin. Her bir parça, ustalık ve kaliteyi yansıtan özel tasarımlardan oluşmaktadır.
+            </Typography>
+          </Box>
+          
+          <Box data-aos="fade-up" data-aos-delay="200">
+            <ProductSlider />
           </Box>
         </Container>
       </StyledSection>
@@ -679,23 +673,14 @@ function CebinizdekiTerziniz() {
               Erdal Güda'nın yapay zeka destekli akıllı vücut mezurası ile tüm ölçümleriniz otomatik olarak şablona dönüşsün.
             </Typography>
             
-            <CTAButton 
-              variant="contained" 
-              color="primary"
+            <a 
               href="https://www.erdalguda.com"
-              className="pulse-button"
-              sx={{ 
-                bgcolor: '#f5e6b0', 
-                '&:hover': { bgcolor: '#e6d79e' }, 
-                px: 5, 
-                py: 2, 
-                fontSize: '1.2rem',
-                color: '#0a192f'
-              }}
+              className="btn-primary btn-large btn-pulse"
+              style={{ textDecoration: 'none' }}
               data-aos="zoom-in"
             >
               Hemen Sipariş Ver
-            </CTAButton>
+            </a>
           </Box>
         </Container>
       </StyledSection>

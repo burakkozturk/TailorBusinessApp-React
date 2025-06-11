@@ -28,7 +28,7 @@ const Footer = () => {
               onChange={e => setEmail(e.target.value)}
               required
             />
-            <button type="submit">Gönder</button>
+            <button type="submit" className="btn-primary btn-small">Gönder</button>
           </form>
         </div>
       </div>
@@ -40,7 +40,7 @@ const Footer = () => {
           <p>Pzt–Cum: 08:00–20:00</p>
           <p>Cmt: 09:00–17:00</p>
           <p>Paz: Kapalı</p>
-          <button className="book-btn">Randevu Al</button>
+          <button className="btn-outline btn-small">Randevu Al</button>
         </div>
 
         <div className="info-col">

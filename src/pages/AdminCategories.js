@@ -31,19 +31,18 @@ const AdminCategories = () => {
   const [newCategory, setNewCategory] = useState({ name: '', description: '', slug: '' });
   const [editMode, setEditMode] = useState(false);
   const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:6767/api/categories');
+      const response = await axios.get('https://erdalguda.online/api/categories');
       setCategories(response.data);
     } catch (error) {
-      console.error('Kategoriler yüklenirken hata oluştu:', error);
-      setAlert({
-        open: true,
-        message: 'Kategoriler yüklenirken bir hata oluştu!',
-        severity: 'error'
-      });
+      console.error('Kategoriler yüklenirken hata:', error);
+      setError('Kategoriler yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -91,53 +90,55 @@ const AdminCategories = () => {
     setOpenDialog(true);
   };
 
-  const handleSaveCategory = async () => {
+  const handleSave = async () => {
+    if (!newCategory.name || newCategory.name.trim() === '') {
+      setError('Kategori adı boş olamaz');
+      return;
+    }
+    
+    if (!newCategory.slug || newCategory.slug.trim() === '') {
+      setError('Kategori URL değeri boş olamaz');
+      return;
+    }
+    
+    setSubmitting(true);
+    
     try {
+      setError('');
+      
       if (editMode) {
-        await axios.put(`http://localhost:6767/api/categories/${newCategory.id}`, newCategory);
-        setAlert({
-          open: true,
-          message: 'Kategori başarıyla güncellendi!',
-          severity: 'success'
-        });
+        await axios.put(`https://erdalguda.online/api/categories/${newCategory.id}`, newCategory);
+        setSuccess('Kategori başarıyla güncellendi');
       } else {
-        await axios.post('http://localhost:6767/api/categories', newCategory);
-        setAlert({
-          open: true,
-          message: 'Kategori başarıyla eklendi!',
-          severity: 'success'
-        });
+        await axios.post('https://erdalguda.online/api/categories', newCategory);
+        setSuccess('Kategori başarıyla oluşturuldu');
       }
-      handleCloseDialog();
+      
       fetchCategories();
+      handleCloseDialog();
     } catch (error) {
-      console.error('Kategori kaydedilirken hata oluştu:', error);
-      setAlert({
-        open: true,
-        message: 'Kategori kaydedilirken bir hata oluştu!',
-        severity: 'error'
-      });
+      console.error('Kategori kaydedilirken hata:', error);
+      setError('Kategori kaydedilirken bir hata oluştu');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleDeleteCategory = async (id) => {
-    if (window.confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) {
-      try {
-        await axios.delete(`http://localhost:6767/api/categories/${id}`);
-        setAlert({
-          open: true,
-          message: 'Kategori başarıyla silindi!',
-          severity: 'success'
-        });
-        fetchCategories();
-      } catch (error) {
-        console.error('Kategori silinirken hata oluştu:', error);
-        setAlert({
-          open: true,
-          message: 'Kategori silinirken bir hata oluştu!',
-          severity: 'error'
-        });
-      }
+  const handleDelete = async (id) => {
+    if (!window.confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await axios.delete(`https://erdalguda.online/api/categories/${id}`);
+      fetchCategories();
+      setSuccess('Kategori başarıyla silindi');
+    } catch (error) {
+      console.error('Kategori silinirken hata:', error);
+      setError('Kategori silinirken bir hata oluştu');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,7 +201,7 @@ const AdminCategories = () => {
                     <IconButton
                       color="error"
                       size="small"
-                      onClick={() => handleDeleteCategory(category.id)}
+                      onClick={() => handleDelete(category.id)}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -250,10 +251,10 @@ const AdminCategories = () => {
         <DialogActions>
           <Button onClick={handleCloseDialog}>İptal</Button>
           <Button 
-            onClick={handleSaveCategory} 
+            onClick={handleSave} 
             variant="contained" 
             color="primary"
-            disabled={!newCategory.name || !newCategory.slug}
+            disabled={!newCategory.name || !newCategory.slug || submitting}
           >
             {editMode ? 'Güncelle' : 'Ekle'}
           </Button>

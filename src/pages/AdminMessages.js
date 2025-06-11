@@ -49,19 +49,27 @@ const AdminMessages = () => {
   const [messageToDelete, setMessageToDelete] = useState(null);
   const [alert, setAlert] = useState({ open: false, message: '', severity: 'success' });
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
+  const [totalMessages, setTotalMessages] = useState(0);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const fetchMessages = async () => {
-    setLoading(true);
     try {
-      const response = await axios.get('http://localhost:6767/api/messages');
+      setLoading(true);
+      const response = await axios.get('https://erdalguda.online/api/messages');
       setMessages(response.data);
+      
+      // Toplam sayıları hesapla
+      const unreadCount = response.data.filter(msg => !msg.read).length;
+      setTotalUnread(unreadCount);
+      setTotalMessages(response.data.length);
+      
     } catch (error) {
-      console.error('Mesajlar yüklenirken hata oluştu:', error);
-      setAlert({
-        open: true,
-        message: 'Mesajlar yüklenirken bir hata oluştu!',
-        severity: 'error'
-      });
+      console.error('Mesajlar yüklenirken hata:', error);
+      setError('Mesajlar yüklenirken bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -87,19 +95,15 @@ const AdminMessages = () => {
 
   const markAsRead = async (messageId) => {
     try {
-      await axios.put(`http://localhost:6767/api/messages/${messageId}/read`);
+      await axios.put(`https://erdalguda.online/api/messages/${messageId}/read`);
       
-      // Mesajlar listesini güncelle
-      setMessages(messages.map(msg => 
-        msg.id === messageId ? {...msg, read: true} : msg
-      ));
+      // Başarıyla işaretlendikten sonra, mesajları tekrar getir
+      fetchMessages();
+      setSuccess('Mesaj okundu olarak işaretlendi');
       
-      // Seçili mesaj açık durumdaysa onu da güncelle
-      if (selectedMessage && selectedMessage.id === messageId) {
-        setSelectedMessage({...selectedMessage, read: true});
-      }
     } catch (error) {
-      console.error('Mesaj okundu olarak işaretlenirken hata oluştu:', error);
+      console.error('Mesaj okundu işaretlenirken hata:', error);
+      setError('Mesaj okundu olarak işaretlenemedi');
     }
   };
 
@@ -117,31 +121,24 @@ const AdminMessages = () => {
   };
 
   const handleDeleteMessage = async () => {
+    if (!messageToDelete) return;
+    
     try {
-      await axios.delete(`http://localhost:6767/api/messages/${messageToDelete.id}`);
+      setDeleteLoading(true);
+      await axios.delete(`https://erdalguda.online/api/messages/${messageToDelete.id}`);
       
-      // Listeleri güncelle
-      setMessages(messages.filter(msg => msg.id !== messageToDelete.id));
+      setDeleteDialogOpen(false);
+      setMessageToDelete(null);
       
-      // Eğer silinen mesaj açık dialog'daysa onu da kapat
-      if (selectedMessage && selectedMessage.id === messageToDelete.id) {
-        setOpenDialog(false);
-      }
+      // Silme işlemi başarılı olduktan sonra mesajları yeniden getir
+      fetchMessages();
+      setSuccess('Mesaj başarıyla silindi');
       
-      setAlert({
-        open: true,
-        message: 'Mesaj başarıyla silindi!',
-        severity: 'success'
-      });
     } catch (error) {
-      console.error('Mesaj silinirken hata oluştu:', error);
-      setAlert({
-        open: true,
-        message: 'Mesaj silinirken bir hata oluştu!',
-        severity: 'error'
-      });
+      console.error('Mesaj silinirken hata:', error);
+      setError('Mesaj silinemedi');
     } finally {
-      handleCloseDeleteDialog();
+      setDeleteLoading(false);
     }
   };
 

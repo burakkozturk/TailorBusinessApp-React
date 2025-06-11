@@ -182,25 +182,6 @@
   margin-top: 40px;
 }
 
-.blog-view-all-button {
-  display: inline-block;
-  padding: 12px 30px;
-  background-color: #1976d2;
-  color: white;
-  border-radius: 30px;
-  text-decoration: none;
-  font-weight: 600;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(25, 118, 210, 0.3);
-}
-
-.blog-view-all-button:hover {
-  background-color: #1565c0;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
-}
-
 /* Tablet için responsive düzenlemeler */
 @media (max-width: 960px) {
   .blog-grid {

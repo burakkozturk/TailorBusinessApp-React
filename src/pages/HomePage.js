@@ -5,7 +5,7 @@ import HeroSlider from '../components/HeroSlider';
 import '../styles/HomePage.css';
 import Services from '../components/Services';
 import About from '../components/About';
-import Testimonials from '../components/Testimonials';
+import HomeGallerySlider from '../components/HomeGallerySlider';
 import Blog from '../components/Blog';
 
 function HomePage() {
@@ -15,7 +15,7 @@ function HomePage() {
       <HeroSlider />
       <About />
       <Services />
-      <Testimonials />
+      <HomeGallerySlider />
       <Blog homePage={true} />
       <Footer />
     </div>

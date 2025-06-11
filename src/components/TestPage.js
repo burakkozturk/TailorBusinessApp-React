@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Paper, Grid, Divider } from '@mui/material';
 import axios from 'axios';
 
-// Token kullanmadan direkt axios çağrısı
+// Axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:6767',
-  timeout: 5000
+  baseURL: 'https://erdalguda.online',
+  timeout: 10000
 });
 
 const TestPage = () => {
@@ -92,7 +92,7 @@ const TestPage = () => {
       
       // Müşteriler
       try {
-        const customersResponse = await axios.get('http://localhost:6767/api/customers', { headers });
+        const customersResponse = await axios.get('https://erdalguda.online/api/customers', { headers });
         console.log('Gerçek müşteriler endpoint yanıtı:', customersResponse.data);
       } catch (error) {
         console.error('Gerçek müşteriler endpoint hatası:', error);
@@ -100,7 +100,7 @@ const TestPage = () => {
       
       // Siparişler
       try {
-        const ordersResponse = await axios.get('http://localhost:6767/api/orders', { headers });
+        const ordersResponse = await axios.get('https://erdalguda.online/api/orders', { headers });
         console.log('Gerçek siparişler endpoint yanıtı:', ordersResponse.data);
       } catch (error) {
         console.error('Gerçek siparişler endpoint hatası:', error);
@@ -108,7 +108,7 @@ const TestPage = () => {
       
       // Kumaşlar
       try {
-        const fabricsResponse = await axios.get('http://localhost:6767/api/fabrics', { headers });
+        const fabricsResponse = await axios.get('https://erdalguda.online/api/fabrics', { headers });
         console.log('Gerçek kumaşlar endpoint yanıtı:', fabricsResponse.data);
       } catch (error) {
         console.error('Gerçek kumaşlar endpoint hatası:', error);

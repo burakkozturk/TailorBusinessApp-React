@@ -113,7 +113,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
 
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:6767/api/measurements/${customer.id}`);
+      const response = await axios.get(`https://erdalguda.online/api/measurements/${customer.id}`);
       if (response.data) {
         setFormData(prev => ({
           ...prev,
@@ -200,7 +200,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
       };
       delete customerData.measurements;
 
-      const customerResponse = await axios.put(`http://localhost:6767/api/customers/${customer.id}`, customerData);
+      const customerResponse = await axios.put(`https://erdalguda.online/api/customers/${customer.id}`, customerData);
 
       // Ölçüleri güncelle
       const measurementData = {
@@ -219,7 +219,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
         elbowLength: formData.measurements.elbowLength ? parseFloat(formData.measurements.elbowLength) : null
       };
 
-      await axios.put(`http://localhost:6767/api/measurements/${customer.id}`, measurementData);
+      await axios.put(`https://erdalguda.online/api/measurements/${customer.id}`, measurementData);
 
       onUpdate(customerResponse.data);
       onClose();
@@ -631,8 +631,8 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const fetchCustomers = async () => {
     try {
       setSearchLoading(true);
-      const response = await axios.get('http://localhost:6767/api/customers');
-      const data = Array.isArray(response.data) ? response.data : (Array.isArray(response.data.customers) ? response.data.customers : []);
+      const response = await axios.get('https://erdalguda.online/api/customers');
+      const data = Array.isArray(response.data) ? response.data : [];
       setCustomers(data);
     } catch (error) {
       console.error('Müşteriler yüklenirken hata oluştu:', error);
@@ -643,7 +643,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
 
   const fetchFabrics = async () => {
     try {
-      const response = await axios.get('http://localhost:6767/api/fabrics');
+      const response = await axios.get('https://erdalguda.online/api/fabrics');
       setFabrics(response.data);
     } catch (error) {
       console.error('Kumaşlar yüklenirken hata oluştu:', error);
@@ -685,7 +685,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
       if (order) {
         // Güncelleme işlemi - Tüm sipariş verilerini tek seferde güncelle
         try {
-          response = await axios.put(`http://localhost:6767/api/orders/${order.id}`, orderData);
+          response = await axios.put(`https://erdalguda.online/api/orders/${order.id}`, orderData);
           console.log("Sipariş başarıyla güncellendi:", response.data);
           
           // Başarılı güncelleme durumunda state'i güncelle
@@ -708,7 +708,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
       } else {
         // Yeni oluşturma işlemi
         try {
-          response = await axios.post('http://localhost:6767/api/orders', orderData);
+          response = await axios.post('https://erdalguda.online/api/orders', orderData);
           console.log("Yeni sipariş başarıyla oluşturuldu:", response.data);
           
           // Başarılı oluşturma durumunda state'i güncelle
@@ -1120,7 +1120,7 @@ const Row = ({ customer, onDelete, onEdit }) => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:6767/api/orders/by-customer/${customer.id}`);
+      const response = await axios.get(`https://erdalguda.online/api/orders/by-customer/${customer.id}`);
       
       const data = Array.isArray(response.data) ? response.data : [];
       setOrders(data);
@@ -1135,7 +1135,7 @@ const Row = ({ customer, onDelete, onEdit }) => {
 
   const fetchMeasurements = async () => {
     try {
-      const response = await axios.get(`http://localhost:6767/api/measurements/${customer.id}`);
+      const response = await axios.get(`https://erdalguda.online/api/measurements/${customer.id}`);
       if (response.data) {
         setMeasurementValues({
           chest: response.data.chest || '',
@@ -1169,7 +1169,7 @@ const Row = ({ customer, onDelete, onEdit }) => {
     try {
       const method = orders.length > 0 ? 'put' : 'post';
       const response = await axios[method](
-        `http://localhost:6767/api/measurements/${customer.id}`,
+        `https://erdalguda.online/api/measurements/${customer.id}`,
         measurementValues
       );
       if (method === 'put') {
@@ -1658,7 +1658,7 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
         weight: parseInt(formData.weight)
       };
 
-      const response = await axios.post('http://localhost:6767/api/customers', customerData);
+      const response = await axios.post('https://erdalguda.online/api/customers', customerData);
       onAdd(response.data);
       onClose();
       setFormData({
@@ -1862,7 +1862,7 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:6767/api/customers');
+      const response = await axios.get('https://erdalguda.online/api/customers');
       const data = Array.isArray(response.data) ? response.data : (Array.isArray(response.data.customers) ? response.data.customers : []);
       setCustomers(data);
       setTotalPages(Math.ceil(data.length / customersPerPage));
@@ -1885,7 +1885,7 @@ const Customers = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:6767/api/customers/safe/${selectedCustomerId}`);
+      const response = await axios.delete(`https://erdalguda.online/api/customers/safe/${selectedCustomerId}`);
       
       if (response.status === 204) {
         setCustomers(customers.filter(c => c.id !== selectedCustomerId));

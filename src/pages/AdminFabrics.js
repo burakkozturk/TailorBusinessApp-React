@@ -57,6 +57,7 @@ const AdminFabrics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [newFabric, setNewFabric] = useState({
     name: '',
     texture: '',
@@ -69,12 +70,12 @@ const AdminFabrics = () => {
   const fetchFabrics = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:6767/api/fabrics');
+      const response = await axios.get('https://erdalguda.online/api/fabrics');
       setFabrics(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Kumaşlar yüklenirken hata oluştu', err);
-      setError('Kumaşlar yüklenemedi');
+    } catch (error) {
+      console.error('Kumaşlar yüklenirken hata:', error);
+      setError('Kumaşlar yüklenirken bir hata oluştu');
+    } finally {
       setLoading(false);
     }
   };
@@ -94,49 +95,61 @@ const AdminFabrics = () => {
   };
 
   // Yeni kumaş ekle
-  const handleAddFabric = async () => {
+  const handleSaveFabric = async () => {
+    if (!newFabric.name) {
+      setError('Kumaş adı zorunludur');
+      return;
+    }
+    
     try {
-      await axios.post('http://localhost:6767/api/fabrics', newFabric);
-      setOpenAddDialog(false);
-      setNewFabric({
-        name: '',
-        texture: '',
-        description: '',
-        imageUrl: ''
-      });
+      setSubmitting(true);
+      await axios.post('https://erdalguda.online/api/fabrics', newFabric);
       setSuccess('Kumaş başarıyla eklendi');
+      setNewFabric({ name: '', texture: '', description: '', imageUrl: '' });
+      setOpenAddDialog(false);
       fetchFabrics();
-    } catch (err) {
-      console.error('Kumaş eklenirken hata oluştu', err);
-      setError('Kumaş eklenemedi');
+    } catch (error) {
+      console.error('Kumaş eklenirken hata:', error);
+      setError('Kumaş eklenirken bir hata oluştu');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   // Kumaş düzenle
-  const handleEditFabric = async () => {
+  const handleUpdate = async () => {
+    if (!selectedFabric.name) {
+      setError('Kumaş adı zorunludur');
+      return;
+    }
+    
     try {
-      await axios.post(`http://localhost:6767/api/fabrics`, selectedFabric);
-      setOpenEditDialog(false);
-      setSelectedFabric(null);
+      setSubmitting(true);
+      await axios.post(`https://erdalguda.online/api/fabrics`, selectedFabric);
       setSuccess('Kumaş başarıyla güncellendi');
+      setOpenEditDialog(false);
       fetchFabrics();
-    } catch (err) {
-      console.error('Kumaş güncellenirken hata oluştu', err);
-      setError('Kumaş güncellenemedi');
+    } catch (error) {
+      console.error('Kumaş güncellenirken hata:', error);
+      setError('Kumaş güncellenirken bir hata oluştu');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   // Kumaş sil
-  const handleDeleteFabric = async (id) => {
-    if (window.confirm('Bu kumaşı silmek istediğinize emin misiniz?')) {
-      try {
-        await axios.delete(`http://localhost:6767/api/fabrics/${id}`);
-        setSuccess('Kumaş başarıyla silindi');
-        fetchFabrics();
-      } catch (err) {
-        console.error('Kumaş silinirken hata oluştu', err);
-        setError('Kumaş silinemedi');
-      }
+  const handleDelete = async (id) => {
+    if (!window.confirm('Bu kumaşı silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+    
+    try {
+      await axios.delete(`https://erdalguda.online/api/fabrics/${id}`);
+      setSuccess('Kumaş başarıyla silindi');
+      fetchFabrics();
+    } catch (error) {
+      console.error('Kumaş silinirken hata:', error);
+      setError('Kumaş silinirken bir hata oluştu');
     }
   };
 
@@ -225,7 +238,7 @@ const AdminFabrics = () => {
                       </IconButton>
                       <IconButton 
                         color="error" 
-                        onClick={() => handleDeleteFabric(fabric.id)} 
+                        onClick={() => handleDelete(fabric.id)} 
                         size="small"
                       >
                         <DeleteIcon />
@@ -284,7 +297,7 @@ const AdminFabrics = () => {
                         variant="outlined" 
                         color="error" 
                         startIcon={<DeleteIcon />} 
-                        onClick={() => handleDeleteFabric(fabric.id)}
+                        onClick={() => handleDelete(fabric.id)}
                       >
                         Sil
                       </Button>
@@ -359,7 +372,7 @@ const AdminFabrics = () => {
           <Button onClick={() => setOpenAddDialog(false)} color="primary">
             İptal
           </Button>
-          <Button onClick={handleAddFabric} color="primary" variant="contained">
+          <Button onClick={handleSaveFabric} color="primary" variant="contained">
             Ekle
           </Button>
         </DialogActions>
@@ -423,7 +436,7 @@ const AdminFabrics = () => {
           <Button onClick={() => setOpenEditDialog(false)} color="primary">
             İptal
           </Button>
-          <Button onClick={handleEditFabric} color="primary" variant="contained">
+          <Button onClick={handleUpdate} color="primary" variant="contained">
             Güncelle
           </Button>
         </DialogActions>

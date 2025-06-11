@@ -17,17 +17,17 @@ const CategoryPage = () => {
     const fetchCategoryAndPosts = async () => {
       setLoading(true);
       try {
-        // Kategoriyi slug'a göre getir
-        const categoryResponse = await axios.get(`http://localhost:6767/api/categories/slug/${categorySlug}`);
+        // Önce kategori bilgilerini al
+        const categoryResponse = await axios.get(`https://erdalguda.online/api/categories/slug/${categorySlug}`);
         setCategory(categoryResponse.data);
         
-        // Kategoriye ait blog yazılarını getir
-        const postsResponse = await axios.get(`http://localhost:6767/api/blogs/category/${categoryResponse.data.id}`);
+        // Sonra kategori ID'si ile blog yazılarını al
+        const postsResponse = await axios.get(`https://erdalguda.online/api/blogs/category/${categoryResponse.data.id}`);
         setPosts(postsResponse.data);
         setError(null);
       } catch (err) {
-        console.error('Veri çekilirken hata oluştu:', err);
-        setError('Kategori veya blog yazıları yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+        console.error('Veri çekilirken hata:', err);
+        setError('Kategori veya blog yazıları yüklenirken bir hata oluştu.');
       } finally {
         setLoading(false);
       }

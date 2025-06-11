@@ -21,6 +21,7 @@ import AdminMessages from './pages/AdminMessages';
 import AdminSettings from './pages/AdminSettings';
 import TestPage from './components/TestPage';
 import './styles/App.css';
+import './styles/GlobalButtons.css';
 import { AuthProvider, RequireAuth, RequireAdmin } from './context/AuthContext';
 
 function App() {

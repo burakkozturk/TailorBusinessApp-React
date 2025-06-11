@@ -5,8 +5,8 @@ const About = () => (
   <section className="about-section">
     <div className="about-container">
       <div className="about-images">
-        <img src="/img/feature1.jpg" alt="" className="about-img img-1" />
-        <img src="/img/feature2.jpg" alt="" className="about-img img-2" />
+        <img src="/img/about-1.jpeg" alt="" className="about-img img-1" />
+        <img src="/img/about-2.jpeg" alt="" className="about-img img-2" />
       </div>
       <div className="about-section-text">
         <p className="about-section-subtitle">Hakkımızda</p>
@@ -16,7 +16,7 @@ const About = () => (
           tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
           quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
         </p>
-        <button className="about-button">Daha Fazla</button>
+        <button className="btn-outline">Daha Fazla</button>
       </div>
     </div>
   </section>

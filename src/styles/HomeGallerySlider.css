@@ -1,0 +1,169 @@
+/* HomeGallerySlider Animasyonları */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+/* Slider genel stilleri */
+.home-gallery-slider {
+  position: relative;
+}
+
+/* Slide item hover efektleri */
+.slide-item {
+  transition: all 0.3s ease;
+}
+
+.slide-item:hover {
+  transform: scale(1.05) !important;
+  z-index: 2;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.slide-item:hover .image-overlay {
+  transform: translateY(0) !important;
+}
+
+/* Slider track animasyonu */
+.slider-track {
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Progress bar efektleri */
+.progress-bar {
+  box-shadow: 0 0 10px rgba(245, 230, 176, 0.5);
+}
+
+/* Responsive iyileştirmeler */
+@media (max-width: 1200px) {
+  .slide-item {
+    min-width: 280px !important;
+    margin-right: 18px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .slide-item {
+    min-width: 250px !important;
+    margin-right: 15px !important;
+  }
+  
+  .slide-counter {
+    top: 15px !important;
+    right: 15px !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+  
+  .pause-indicator {
+    top: 15px !important;
+    left: 15px !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .slide-item {
+    min-width: 200px !important;
+    margin-right: 10px !important;
+  }
+  
+  .slide-counter {
+    top: 10px !important;
+    right: 10px !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  
+  .pause-indicator {
+    top: 10px !important;
+    left: 10px !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+  
+  .image-overlay {
+    padding: 15px 10px 10px !important;
+  }
+  
+  .image-overlay .MuiTypography-body2 {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Smooth scrolling */
+.slider-wrapper {
+  scroll-behavior: smooth;
+}
+
+/* Loading state */
+.slider-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f8f9fa;
+  color: #666;
+}
+
+/* Hover overlay animasyonu */
+.slide-item .image-overlay {
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.slide-item:hover .image-overlay {
+  transform: translateY(0);
+}
+
+/* Aktif slide vurgusu */
+.slide-item.active {
+  opacity: 1 !important;
+  transform: scale(1.02);
+}
+
+.slide-item.inactive {
+  opacity: 0.7;
+}
+
+/* Geçiş animasyonları */
+.slider-enter {
+  opacity: 0;
+  transform: translateX(100px);
+}
+
+.slider-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slider-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.slider-exit-active {
+  opacity: 0;
+  transform: translateX(-100px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+} 

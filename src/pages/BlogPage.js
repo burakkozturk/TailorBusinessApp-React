@@ -16,7 +16,7 @@ export default function BlogPage() {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:6767/api/categories');
+        const response = await axios.get('https://erdalguda.online/api/categories');
         setCategories(response.data);
       } catch (error) {
         console.error('Kategoriler yüklenirken hata oluştu:', error);

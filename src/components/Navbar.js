@@ -10,12 +10,15 @@ function Navbar() {
   useEffect(() => {
     const handleScroll = () => {
       const navbar = document.querySelector('.navbar');
-      if (window.scrollY > 100) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
+      if (navbar) {
+        if (window.scrollY > 100) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
       }
     };
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -40,7 +43,7 @@ function Navbar() {
             <Link to="/blog" className="nav-links" onClick={() => setIsOpen(false)}>Blog</Link>
           </li>
           <li className="nav-item">
-            <Link to="/cebinizdeki-terziniz" className="nav-links" onClick={() => setIsOpen(false)}><i>Cebinizdeki Terziniz</i></Link>
+            <Link to="/cebinizdeki-terziniz" className="nav-links" onClick={() => setIsOpen(false)} style={{ color: '#f5e6b0' }} ><i>Cebinizdeki Terziniz</i></Link>
           </li>
           <li className="nav-item">
             <Link to="/iletisim" className="nav-links" onClick={() => setIsOpen(false)}>İletişim</Link>

@@ -49,7 +49,7 @@ function HeroSlider() {
         <h2 className="hero-subtitle">{slides[current].subtitle}</h2>
         <h1 className="hero-title">{slides[current].title}</h1>
         <p className="hero-description">{slides[current].description}</p>
-        <Link to="/contact" className="hero-button">RANDEVU AL</Link>
+        <Link to="/contact" className="btn-primary btn-large">RANDEVU AL</Link>
       </div>
     </div>
   );

@@ -350,11 +350,9 @@ const Orders = () => {
   const ordersPerPage = 8;
 
   const fetchOrders = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.get('http://localhost:6767/api/orders');
-      
-      // API'den gelen veriyi kontrol et ve diziye dönüştür
+      const response = await axios.get('https://erdalguda.online/api/orders');
       const data = Array.isArray(response.data) ? response.data : [];
       setOrders(data);
       setTotalPages(Math.ceil(data.length / ordersPerPage));
@@ -378,7 +376,7 @@ const Orders = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`http://localhost:6767/api/orders/${selectedOrderId}`);
+      const response = await axios.delete(`https://erdalguda.online/api/orders/${selectedOrderId}`);
       
       if (response.status === 204) {
         setOrders(prevOrders => prevOrders.filter(o => o.id !== selectedOrderId));
