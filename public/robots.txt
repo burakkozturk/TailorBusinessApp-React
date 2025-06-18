@@ -1,3 +1,11 @@
+# Erdal Güda - Profesyonel Terzilik Hizmetleri
 # https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /giris/
+Disallow: /kayit/
+
+# Sitemap
+Sitemap: https://erdalguda.com/sitemap.xml

@@ -14,9 +14,10 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     const username = localStorage.getItem('username');
+    const userType = localStorage.getItem('userType');
 
     if (token && role && username) {
-      setUser({ username, role, token });
+      setUser({ username, role, token, userType });
     }
     
     setLoading(false);
@@ -28,6 +29,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', userData.token);
     localStorage.setItem('role', userData.role);
     localStorage.setItem('username', userData.username);
+    localStorage.setItem('userType', userData.userType || 'USER');
   };
 
   const logout = () => {
@@ -35,6 +37,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
+    localStorage.removeItem('userType');
   };
 
   const value = {
@@ -43,8 +46,15 @@ export function AuthProvider({ children }) {
     login,
     logout,
     isAdmin: user?.role === 'ADMIN',
-    isManager: user?.role === 'MANAGER',
-    isAuthenticated: !!user
+    isUsta: user?.role === 'USTA',
+    isMuhasebeci: user?.role === 'MUHASEBECI',
+    isAuthenticated: !!user,
+    isAdminUser: user?.userType === 'ADMIN', // Admin panel kullanıcısı
+    isRegularUser: user?.userType === 'USER', // Normal kayıtlı kullanıcı
+    // Rol hiyerarşisi kontrolleri
+    hasAdminAccess: user?.role === 'ADMIN',
+    hasUstaAccess: user?.role === 'ADMIN' || user?.role === 'USTA',
+    hasMuhasebeciAccess: user?.role === 'ADMIN' || user?.role === 'USTA' || user?.role === 'MUHASEBECI'
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -52,7 +62,11 @@ export function AuthProvider({ children }) {
 
 // Auth Context hook
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
 
 // Yetkili kullanıcıların erişebileceği route'ları koruyan bileşen
@@ -91,9 +105,9 @@ export function RequireAdmin({ children }) {
   return children;
 }
 
-// Sadece Manager rolüne erişim sağlayan bileşen
-export function RequireManager({ children }) {
-  const { user, loading, isManager } = useAuth();
+// Usta ve üzeri erişim (ADMIN + USTA)
+export function RequireUsta({ children }) {
+  const { user, loading, hasUstaAccess } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -104,7 +118,27 @@ export function RequireManager({ children }) {
     return <Navigate to="/giris" state={{ from: location }} replace />;
   }
 
-  if (!isManager) {
+  if (!hasUstaAccess) {
+    return <Navigate to="/admin" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+// Muhasebeci ve üzeri erişim (ADMIN + USTA + MUHASEBECI)
+export function RequireMuhasebeci({ children }) {
+  const { user, loading, hasMuhasebeciAccess } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <div>Yükleniyor...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/giris" state={{ from: location }} replace />;
+  }
+
+  if (!hasMuhasebeciAccess) {
     return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 

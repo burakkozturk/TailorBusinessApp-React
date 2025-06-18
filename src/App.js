@@ -10,6 +10,7 @@ import CategoryPage from './pages/CategoryPage';
 import AboutPage from './pages/AboutPage';
 import CebinizdekiTerziniz from './pages/CebinizdekiTerziniz';
 import Login from './components/Login';
+import Register from './components/Register';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
@@ -19,10 +20,12 @@ import AdminCategories from './pages/AdminCategories';
 import AdminFabrics from './pages/AdminFabrics';
 import AdminMessages from './pages/AdminMessages';
 import AdminSettings from './pages/AdminSettings';
+import UserManagement from './pages/AdminManagers';
+import PendingUsers from './pages/PendingUsers';
 import TestPage from './components/TestPage';
 import './styles/App.css';
 import './styles/GlobalButtons.css';
-import { AuthProvider, RequireAuth, RequireAdmin } from './context/AuthContext';
+import { AuthProvider, RequireAuth, RequireAdmin, RequireUsta, RequireMuhasebeci } from './context/AuthContext';
 
 function App() {
   return (
@@ -39,23 +42,30 @@ function App() {
           <Route path="/hakkimizda" element={<AboutPage />} />
           <Route path="/cebinizdeki-terziniz" element={<CebinizdekiTerziniz />} />
           <Route path="/giris" element={<Login />} />
+          <Route path="/kayit" element={<Register />} />
           <Route path="/test" element={<TestPage />} />
           
           {/* Admin Dashboard - Kimlik Doğrulama Gerektirir */}
           <Route path="/admin" element={<RequireAuth><DashboardLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
             
-            {/* Manager ve Admin erişimli sayfalar */}
-            <Route path="customers" element={<Customers />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="settings" element={<AdminSettings />} />
+            {/* Muhasebeci ve üzeri erişimli sayfalar (ADMIN + USTA + MUHASEBECI) */}
+            <Route path="customers" element={<RequireMuhasebeci><Customers /></RequireMuhasebeci>} />
+            <Route path="orders" element={<RequireMuhasebeci><Orders /></RequireMuhasebeci>} />
+            
+            {/* Usta ve üzeri erişimli sayfalar (ADMIN + USTA) */}
+            <Route path="fabrics" element={<RequireUsta><AdminFabrics /></RequireUsta>} />
+            <Route path="templates" element={<RequireUsta><div>Şablonlar</div></RequireUsta>} />
             
             {/* Sadece Admin Erişimi Olan Sayfalar */}
-            <Route path="fabrics" element={<RequireAdmin><AdminFabrics /></RequireAdmin>} />
-            <Route path="templates" element={<RequireAdmin><div>Şablonlar</div></RequireAdmin>} />
             <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
+            <Route path="pending-users" element={<RequireAdmin><PendingUsers /></RequireAdmin>} />
             <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
             <Route path="categories" element={<RequireAdmin><AdminCategories /></RequireAdmin>} />
+            <Route path="user-management" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
+            
+            {/* Tüm roller erişebilir */}
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Routes>
       </Router>

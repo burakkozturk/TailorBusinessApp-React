@@ -5,8 +5,11 @@ import Footer from '../components/Footer';
 import axios from 'axios';
 import { Alert, Snackbar, CircularProgress } from '@mui/material';
 import '../styles/ContactPage.css';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function ContactPage() {
+  useDocumentTitle('İletişim');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',

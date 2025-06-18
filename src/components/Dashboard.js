@@ -46,6 +46,7 @@ import {
   Area 
 } from 'recharts';
 import axios from 'axios';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 // Stillendirilmiş bileşenler
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -139,6 +140,8 @@ const StatusChip = styled(Chip)(({ theme, statuscolor }) => ({
 const COLORS = ['#2196F3', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#45B39D', '#F39C12'];
 
 const Dashboard = () => {
+  useDocumentTitle('Genel Bakış');
+  
   const [loading, setLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
   const [stats, setStats] = useState({

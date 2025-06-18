@@ -42,7 +42,6 @@
   transition: transform 0.3s ease; /* geçiş efekti için */  
 }
 
-
 .navbar-logo a {
   color: #fff;
   text-decoration: none;
@@ -177,12 +176,6 @@
   .navbar-logo {
     flex: 1;
   }
-  
-  /* Menu icon ve login icon için konteyner */
-  .navbar-right {
-    display: flex;
-    align-items: center;
-  }
 }
 
 @media screen and (max-width: 768px) {
@@ -222,20 +215,6 @@
 }
 
 .login-icon {
-  color: #fff;
-  margin-left: 16px;
-  display: flex;
-  align-items: center;
-  transition: color 0.3s ease;
-}
-
-.login-icon:hover {
-  color: #d4af37;
-}
-
-.login-icon {
   z-index: 300;
   margin-left: 0;
 }
-
-/* Navbar içindeki öğelerin konumlandırılması için flex kullanımı */

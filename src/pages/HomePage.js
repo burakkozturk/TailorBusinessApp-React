@@ -7,8 +7,11 @@ import Services from '../components/Services';
 import About from '../components/About';
 import HomeGallerySlider from '../components/HomeGallerySlider';
 import Blog from '../components/Blog';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function HomePage() {
+  useDocumentTitle('Ana Sayfa');
+  
   return (
     <div className="home-page">
       <Navbar />

@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Erdal Güda",
+  "name": "Erdal Güda - Profesyonel Terzilik Hizmetleri",
+  "description": "Kaliteli kumaşlar, özel tasarımlar ve mükemmel işçilik ile hayalinizdeki kıyafetleri gerçekleştiriyoruz.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,8 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#1A2C42",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "shopping", "business"]
 }

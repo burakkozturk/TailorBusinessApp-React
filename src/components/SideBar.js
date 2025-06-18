@@ -13,7 +13,8 @@ import {
   FaChevronRight,
   FaEnvelope,
   FaTags,
-  FaUsersCog
+  FaUsersCog,
+  FaUserClock
 } from 'react-icons/fa';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Tooltip, Avatar, IconButton, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -157,6 +158,7 @@ const SideBar = ({ onToggle }) => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingUsersCount, setPendingUsersCount] = useState(0);
   const { user, logout, isAdmin } = useAuth();
 
   const handleLogout = (e) => {
@@ -176,19 +178,38 @@ const SideBar = ({ onToggle }) => {
       }
     };
 
+    const fetchPendingUsersCount = async () => {
+      try {
+        const response = await api.get('/auth/admin/pending-users/count');
+        setPendingUsersCount(response.data.pendingCount);
+      } catch (error) {
+        console.error('Onay bekleyen kullanıcı sayısı alınamadı:', error);
+      }
+    };
+
     fetchUnreadCount();
+    if (user?.role === 'ADMIN') {
+      fetchPendingUsersCount();
+    }
+    
     // Her 1 dakikada bir güncelle
-    const interval = setInterval(fetchUnreadCount, 60000);
+    const interval = setInterval(() => {
+      fetchUnreadCount();
+      if (user?.role === 'ADMIN') {
+        fetchPendingUsersCount();
+      }
+    }, 60000);
+    
     return () => clearInterval(interval);
-  }, []);
+  }, [user?.role]);
 
   // Rol bazlı menü öğeleri
   const allMenuItems = [
-    { path: '', label: 'Genel Bakış', icon: <FaHome size={18} />, roles: ['ADMIN', 'MANAGER'] },
-    { path: 'customers', label: 'Müşteriler', icon: <FaUser size={18} />, roles: ['ADMIN', 'MANAGER'] },
-    { path: 'orders', label: 'Siparişler', icon: <FaTshirt size={18} />, roles: ['ADMIN', 'MANAGER'] },
-    { path: 'fabrics', label: 'Kumaşlar', icon: <FaLayerGroup size={18} />, roles: ['ADMIN'] },
-    { path: 'templates', label: 'Şablonlar', icon: <FaTools size={18} />, roles: ['ADMIN'] },
+    { path: '', label: 'Genel Bakış', icon: <FaHome size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
+    { path: 'customers', label: 'Müşteriler', icon: <FaUser size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
+    { path: 'orders', label: 'Siparişler', icon: <FaTshirt size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
+    { path: 'fabrics', label: 'Kumaşlar', icon: <FaLayerGroup size={18} />, roles: ['ADMIN', 'USTA'] },
+    { path: 'templates', label: 'Şablonlar', icon: <FaTools size={18} />, roles: ['ADMIN', 'USTA'] },
     { 
       path: 'messages', 
       label: 'Mesajlar', 
@@ -198,9 +219,19 @@ const SideBar = ({ onToggle }) => {
         </Badge>,
       roles: ['ADMIN']
     },
+    { 
+      path: 'pending-users', 
+      label: 'Onay Bekleyen Kullanıcılar', 
+      icon: 
+        <Badge badgeContent={pendingUsersCount} color="warning" max={99} sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }}>
+          <FaUserClock size={18} />
+        </Badge>,
+      roles: ['ADMIN']
+    },
     { path: 'blog', label: 'Blog', icon: <FaBlog size={18} />, roles: ['ADMIN'] },
     { path: 'categories', label: 'Kategoriler', icon: <FaTags size={18} />, roles: ['ADMIN'] },
-    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN', 'MANAGER'] },
+    { path: 'user-management', label: 'Kullanıcı Yönetimi', icon: <FaUsersCog size={18} />, roles: ['ADMIN'] },
+    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
   ];
 
   // Kullanıcının rolüne göre menü öğelerini filtrele
@@ -283,7 +314,10 @@ const SideBar = ({ onToggle }) => {
                 {user?.username || 'Kullanıcı'}
               </Typography>
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                {user?.role === 'ADMIN' ? 'Yönetici' : 'Kullanıcı'}
+                {user?.userType === 'ADMIN' 
+                  ? (user?.role === 'ADMIN' ? 'Yönetici' : user?.role === 'USTA' ? 'Usta' : 'Muhasebeci')
+                  : 'Kullanıcı'
+                }
               </Typography>
             </Box>
             <Tooltip title="Çıkış Yap">

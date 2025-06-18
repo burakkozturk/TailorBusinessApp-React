@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Axios instance oluşturma
 const api = axios.create({
-  baseURL: 'https://erdalguda.online',
+  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:6767' : 'https://erdalguda.online',
   timeout: 15000,  // 15 saniye zaman aşımı
   headers: {
     'Content-Type': 'application/json',
