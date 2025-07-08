@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import { Alert, Snackbar, CircularProgress } from '@mui/material';
 import '../styles/ContactPage.css';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -31,7 +31,7 @@ function ContactPage() {
     setLoading(true);
 
     try {
-      await axios.post('https://erdalguda.online/api/messages', formData);
+      await apiService.messages.create(formData);
       setSuccessOpen(true);
       setFormData({ name: '', email: '', content: '' });
     } catch (error) {

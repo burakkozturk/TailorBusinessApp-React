@@ -12,9 +12,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaEnvelope,
-  FaTags,
-  FaUsersCog,
-  FaUserClock
+  FaUsersCog
 } from 'react-icons/fa';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Tooltip, Avatar, IconButton, Badge } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -208,8 +206,6 @@ const SideBar = ({ onToggle }) => {
     { path: '', label: 'Genel Bakış', icon: <FaHome size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
     { path: 'customers', label: 'Müşteriler', icon: <FaUser size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
     { path: 'orders', label: 'Siparişler', icon: <FaTshirt size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
-    { path: 'fabrics', label: 'Kumaşlar', icon: <FaLayerGroup size={18} />, roles: ['ADMIN', 'USTA'] },
-    { path: 'templates', label: 'Şablonlar', icon: <FaTools size={18} />, roles: ['ADMIN', 'USTA'] },
     { 
       path: 'messages', 
       label: 'Mesajlar', 
@@ -220,17 +216,15 @@ const SideBar = ({ onToggle }) => {
       roles: ['ADMIN']
     },
     { 
-      path: 'pending-users', 
-      label: 'Onay Bekleyen Kullanıcılar', 
+      path: 'user-management', 
+      label: 'Kullanıcı Yönetimi', 
       icon: 
         <Badge badgeContent={pendingUsersCount} color="warning" max={99} sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }}>
-          <FaUserClock size={18} />
+          <FaUsersCog size={18} />
         </Badge>,
       roles: ['ADMIN']
     },
-    { path: 'blog', label: 'Blog', icon: <FaBlog size={18} />, roles: ['ADMIN'] },
-    { path: 'categories', label: 'Kategoriler', icon: <FaTags size={18} />, roles: ['ADMIN'] },
-    { path: 'user-management', label: 'Kullanıcı Yönetimi', icon: <FaUsersCog size={18} />, roles: ['ADMIN'] },
+    { path: 'blog', label: 'Blog Yönetimi', icon: <FaBlog size={18} />, roles: ['ADMIN'] },
     { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
   ];
 

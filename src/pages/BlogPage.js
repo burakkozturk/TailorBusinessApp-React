@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Blog from '../components/Blog';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import { Typography, Box, Chip, Container, Grid, CircularProgress, Card, CardContent } from '@mui/material';
 import '../styles/AboutPage.css';
 import '../styles/BlogPage.css';
@@ -16,7 +16,7 @@ export default function BlogPage() {
     const fetchCategories = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://erdalguda.online/api/categories');
+        const response = await apiService.categories.getAll();
         setCategories(response.data);
       } catch (error) {
         console.error('Kategoriler yüklenirken hata oluştu:', error);

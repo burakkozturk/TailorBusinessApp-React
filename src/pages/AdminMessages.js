@@ -22,25 +22,109 @@ import {
   Chip,
   Tooltip,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Card,
+  CardContent,
+  Avatar,
+  Divider,
+  Badge,
+  Stack
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReadMoreIcon from '@mui/icons-material/ReadMore';
-import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
-import MailIcon from '@mui/icons-material/Mail';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import axios from 'axios';
+import { styled, alpha } from '@mui/material/styles';
+import {
+  Delete,
+  ReadMore,
+  MarkEmailRead,
+  Mail,
+  CheckCircle,
+  Schedule,
+  Person,
+  Email,
+  Phone,
+  CalendarToday,
+  Refresh
+} from '@mui/icons-material';
+import apiService from '../services/apiService';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
+// Styled Components
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: 'bold',
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.common.white,
+  padding: theme.spacing(2),
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(even)': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.04),
+  },
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    transition: 'background-color 0.2s ease',
+    cursor: 'pointer',
+  },
+  '& td': {
+    padding: theme.spacing(2),
+  }
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  borderRadius: '8px',
+  padding: '8px 16px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  transition: 'transform 0.2s, box-shadow 0.2s',
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)',
+  },
+}));
+
+const StatusChip = styled(Chip)(({ theme, status }) => ({
+  backgroundColor: status === 'read' 
+    ? alpha(theme.palette.success.main, 0.1) 
+    : alpha(theme.palette.warning.main, 0.1),
+  color: status === 'read' 
+    ? theme.palette.success.main 
+    : theme.palette.warning.main,
+  fontWeight: 'bold',
+  borderRadius: '16px',
+  '& .MuiChip-icon': {
+    color: 'inherit'
+  }
+}));
+
+const MessageAvatar = styled(Avatar)(({ theme, status }) => ({
+  backgroundColor: status === 'read' 
+    ? theme.palette.success.main 
+    : theme.palette.warning.main,
+  width: 40,
+  height: 40,
+}));
+
+const InfoCard = styled(Card)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  borderRadius: '12px',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: 'white',
+}));
+
+const StatsCard = styled(Card)(({ theme }) => ({
+  borderRadius: '12px',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  transition: 'transform 0.2s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+  }
 }));
 
 const AdminMessages = () => {
+  useDocumentTitle('Mesaj Yönetimi');
+  
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
@@ -51,15 +135,12 @@ const AdminMessages = () => {
   const [showOnlyUnread, setShowOnlyUnread] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
   const [totalMessages, setTotalMessages] = useState(0);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://erdalguda.online/api/messages');
+      const response = await apiService.messages.getAll();
       setMessages(response.data);
       
       // Toplam sayıları hesapla
@@ -69,7 +150,11 @@ const AdminMessages = () => {
       
     } catch (error) {
       console.error('Mesajlar yüklenirken hata:', error);
-      setError('Mesajlar yüklenirken bir hata oluştu');
+      setAlert({
+        open: true,
+        message: 'Mesajlar yüklenirken bir hata oluştu',
+        severity: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -95,15 +180,23 @@ const AdminMessages = () => {
 
   const markAsRead = async (messageId) => {
     try {
-      await axios.put(`https://erdalguda.online/api/messages/${messageId}/read`);
+      await apiService.messages.markAsRead(messageId);
       
       // Başarıyla işaretlendikten sonra, mesajları tekrar getir
       fetchMessages();
-      setSuccess('Mesaj okundu olarak işaretlendi');
+      setAlert({
+        open: true,
+        message: 'Mesaj okundu olarak işaretlendi',
+        severity: 'success'
+      });
       
     } catch (error) {
       console.error('Mesaj okundu işaretlenirken hata:', error);
-      setError('Mesaj okundu olarak işaretlenemedi');
+      setAlert({
+        open: true,
+        message: 'Mesaj okundu olarak işaretlenemedi',
+        severity: 'error'
+      });
     }
   };
 
@@ -125,18 +218,26 @@ const AdminMessages = () => {
     
     try {
       setDeleteLoading(true);
-      await axios.delete(`https://erdalguda.online/api/messages/${messageToDelete.id}`);
+      await apiService.messages.delete(messageToDelete.id);
       
-      setDeleteDialogOpen(false);
+      setOpenDeleteDialog(false);
       setMessageToDelete(null);
       
       // Silme işlemi başarılı olduktan sonra mesajları yeniden getir
       fetchMessages();
-      setSuccess('Mesaj başarıyla silindi');
+      setAlert({
+        open: true,
+        message: 'Mesaj başarıyla silindi',
+        severity: 'success'
+      });
       
     } catch (error) {
       console.error('Mesaj silinirken hata:', error);
-      setError('Mesaj silinemedi');
+      setAlert({
+        open: true,
+        message: 'Mesaj silinemedi',
+        severity: 'error'
+      });
     } finally {
       setDeleteLoading(false);
     }
@@ -169,221 +270,385 @@ const AdminMessages = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, alignItems: 'center' }}>
-        <Typography variant="h4" component="h1" sx={{ 
+    <Box>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h6" component="h2" sx={{ 
           fontWeight: 'bold',
-          position: 'relative',
-          display: 'inline-block',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            width: '60px',
-            height: '4px',
-            bottom: '-10px',
-            left: '0',
-            backgroundColor: '#1976d2',
-            borderRadius: '10px'
-          }
+          display: 'flex',
+          alignItems: 'center',
+          '& svg': { mr: 1 }
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <MailIcon /> Mesaj Yönetimi
-          </Box>
+          <Mail color="primary" />
+          Mesaj Yönetimi
         </Typography>
-        <FormControlLabel
-          control={
-            <Switch 
-              checked={showOnlyUnread}
-              onChange={(e) => setShowOnlyUnread(e.target.checked)}
-              color="primary"
-            />
-          }
-          label="Sadece Okunmamış Mesajlar"
-        />
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch 
+                checked={showOnlyUnread}
+                onChange={(e) => setShowOnlyUnread(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Sadece Okunmayanlar"
+          />
+          <StyledButton 
+            variant="outlined" 
+            startIcon={<Refresh />}
+            onClick={fetchMessages}
+            disabled={loading}
+          >
+            Yenile
+          </StyledButton>
+        </Box>
       </Box>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: 3, mb: 4 }}>
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Stats Cards */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3, mb: 4 }}>
+        <StatsCard>
+          <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                {totalMessages}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Toplam Mesaj
+              </Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
+              <Mail />
+            </Avatar>
+          </CardContent>
+        </StatsCard>
+
+        <StatsCard>
+          <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                {totalUnread}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Okunmamış Mesaj
+              </Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
+              <Schedule />
+            </Avatar>
+          </CardContent>
+        </StatsCard>
+
+        <StatsCard>
+          <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                {((totalMessages - totalUnread) / Math.max(totalMessages, 1) * 100).toFixed(0)}%
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Okunma Oranı
+              </Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'success.main', width: 56, height: 56 }}>
+              <CheckCircle />
+            </Avatar>
+          </CardContent>
+        </StatsCard>
+      </Box>
+
+      {/* Messages Table */}
+      <TableContainer component={Paper} sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
         <Table>
           <TableHead>
             <TableRow>
-              <StyledTableCell width="5%">ID</StyledTableCell>
-              <StyledTableCell width="15%">Gönderen</StyledTableCell>
-              <StyledTableCell width="20%">E-posta</StyledTableCell>
-              <StyledTableCell width="30%">Mesaj</StyledTableCell>
-              <StyledTableCell width="15%">Tarih</StyledTableCell>
-              <StyledTableCell width="5%">Durumu</StyledTableCell>
-              <StyledTableCell width="10%" align="center">İşlemler</StyledTableCell>
+              <StyledTableCell>Gönderen</StyledTableCell>
+              <StyledTableCell>Konu</StyledTableCell>
+              <StyledTableCell>Tarih</StyledTableCell>
+              <StyledTableCell>Durum</StyledTableCell>
+              <StyledTableCell align="right">İşlemler</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredMessages.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  {showOnlyUnread ? "Okunmamış mesaj bulunamadı" : "Henüz mesaj bulunmuyor"}
+            {loading ? (
+              <StyledTableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                  <CircularProgress />
                 </TableCell>
-              </TableRow>
+              </StyledTableRow>
+            ) : filteredMessages.length === 0 ? (
+              <StyledTableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                  <Typography variant="body1" color="textSecondary">
+                    {showOnlyUnread ? 'Okunmamış mesaj bulunmuyor' : 'Henüz mesaj bulunmuyor'}
+                  </Typography>
+                </TableCell>
+              </StyledTableRow>
             ) : (
               filteredMessages.map((message) => (
-                <TableRow 
+                <StyledTableRow 
                   key={message.id}
-                  sx={{ 
-                    backgroundColor: message.read ? 'inherit' : 'rgba(76, 175, 80, 0.08)',
-                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-                  }}
+                  onClick={() => handleOpenMessage(message)}
                 >
-                  <TableCell>{message.id}</TableCell>
-                  <TableCell>{message.name}</TableCell>
-                  <TableCell>{message.email}</TableCell>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                      }}
-                    >
-                      {message.content}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <MessageAvatar status={message.read ? 'read' : 'unread'}>
+                        {message.name?.charAt(0) || <Person />}
+                      </MessageAvatar>
+                      <Box sx={{ ml: 2 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                          {message.name || 'İsimsiz'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {message.email || 'E-posta yok'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2" sx={{ 
+                      fontWeight: message.read ? 'normal' : 'bold',
+                      display: '-webkit-box',
+                      WebkitBoxOrient: 'vertical',
+                      WebkitLineClamp: 2,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      {message.subject || 'Konu belirtilmemiş'}
                     </Typography>
                   </TableCell>
-                  <TableCell>{formatDate(message.createdAt)}</TableCell>
                   <TableCell>
-                    {message.read ? (
-                      <Chip 
-                        size="small" 
-                        color="success" 
-                        variant="outlined"
-                        icon={<CheckCircleIcon fontSize="small" />}
-                        label="Okundu" 
-                      />
-                    ) : (
-                      <Chip 
-                        size="small" 
-                        color="primary" 
-                        icon={<MailIcon fontSize="small" />}
-                        label="Yeni" 
-                      />
-                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CalendarToday sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                      <Typography variant="body2">
+                        {formatDate(message.createdAt)}
+                      </Typography>
+                    </Box>
                   </TableCell>
-                  <TableCell align="center">
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                      <Tooltip title="Mesajı Oku">
-                        <IconButton 
-                          color="primary" 
-                          size="small" 
-                          onClick={() => handleOpenMessage(message)}
-                          sx={{ mr: 1 }}
-                        >
-                          <ReadMoreIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                  <TableCell>
+                    <StatusChip 
+                      status={message.read ? 'read' : 'unread'}
+                      icon={message.read ? <CheckCircle fontSize="small" /> : <Schedule fontSize="small" />}
+                      label={message.read ? 'Okundu' : 'Okunmamış'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
                       {!message.read && (
-                        <Tooltip title="Okundu İşaretle">
+                        <Tooltip title="Okundu İşaretle" arrow>
                           <IconButton 
-                            color="success" 
-                            size="small" 
-                            onClick={() => markAsRead(message.id)}
-                            sx={{ mr: 1 }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(message.id);
+                            }}
+                            sx={{ 
+                              backgroundColor: alpha('#4caf50', 0.1),
+                              '&:hover': {
+                                backgroundColor: alpha('#4caf50', 0.2),
+                              }
+                            }}
                           >
-                            <MarkEmailReadIcon fontSize="small" />
+                            <MarkEmailRead />
                           </IconButton>
                         </Tooltip>
                       )}
-                      <Tooltip title="Mesajı Sil">
+                      <Tooltip title="Mesajı Sil" arrow>
                         <IconButton 
-                          color="error" 
-                          size="small" 
+                          color="error"
                           onClick={(e) => handleOpenDeleteDialog(message, e)}
+                          sx={{ 
+                            backgroundColor: alpha('#f44336', 0.1),
+                            '&:hover': {
+                              backgroundColor: alpha('#f44336', 0.2),
+                            }
+                          }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <Delete />
                         </IconButton>
                       </Tooltip>
                     </Box>
                   </TableCell>
-                </TableRow>
+                </StyledTableRow>
               ))
             )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Mesaj detay dialog */}
+      {/* Message Detail Dialog */}
       <Dialog 
         open={openDialog} 
         onClose={handleCloseDialog}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)'
+          }
+        }}
       >
-        {selectedMessage && (
-          <>
-            <DialogTitle>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6">{selectedMessage.name}</Typography>
-                <Chip 
-                  size="small" 
-                  color={selectedMessage.read ? "success" : "primary"}
-                  variant={selectedMessage.read ? "outlined" : "filled"}
-                  label={selectedMessage.read ? "Okundu" : "Yeni"}
-                  icon={selectedMessage.read ? <CheckCircleIcon fontSize="small" /> : <MailIcon fontSize="small" />}
-                />
-              </Box>
-            </DialogTitle>
-            <DialogContent dividers>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>E-posta:</strong> {selectedMessage.email}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  <strong>Tarih:</strong> {formatDate(selectedMessage.createdAt)}
-                </Typography>
-              </Box>
-              <Paper sx={{ p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
-                <DialogContentText sx={{ whiteSpace: 'pre-wrap' }}>
-                  {selectedMessage.content}
-                </DialogContentText>
-              </Paper>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseDialog} color="primary">
-                Kapat
-              </Button>
-              <Button 
-                onClick={() => handleOpenDeleteDialog(selectedMessage)} 
-                color="error"
-                variant="outlined"
-                startIcon={<DeleteIcon />}
-              >
-                Sil
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+        <DialogTitle sx={{ borderBottom: '1px solid #eee', pb: 2 }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box display="flex" alignItems="center">
+              <ReadMore color="primary" sx={{ mr: 1 }} />
+              <Typography variant="h6">Mesaj Detayı</Typography>
+            </Box>
+            {selectedMessage && (
+              <StatusChip 
+                status={selectedMessage.read ? 'read' : 'unread'}
+                icon={selectedMessage.read ? <CheckCircle fontSize="small" /> : <Schedule fontSize="small" />}
+                label={selectedMessage.read ? 'Okundu' : 'Okunmamış'}
+                size="small"
+              />
+            )}
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          {selectedMessage && (
+            <Box>
+              {/* Sender Info */}
+              <Card sx={{ mb: 3, backgroundColor: '#f8fafc' }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Person sx={{ mr: 1, color: 'primary.main' }} />
+                    Gönderen Bilgileri
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', minWidth: 80 }}>Ad:</Typography>
+                      <Typography variant="body2">{selectedMessage.name || 'Belirtilmemiş'}</Typography>
+                    </Box>
+                    {selectedMessage.email && (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Email sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                        <Typography variant="body2">{selectedMessage.email}</Typography>
+                      </Box>
+                    )}
+                    {selectedMessage.phone && (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Phone sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                        <Typography variant="body2">{selectedMessage.phone}</Typography>
+                      </Box>
+                    )}
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CalendarToday sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                      <Typography variant="body2">{formatDate(selectedMessage.createdAt)}</Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
 
-      {/* Silme onay dialog */}
-      <Dialog
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-      >
-        <DialogTitle>Mesajı Sil</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {messageToDelete && `${messageToDelete.name} tarafından gönderilen mesajı silmek istediğinizden emin misiniz?`}
-          </DialogContentText>
+              {/* Message Content */}
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Konu: {selectedMessage.subject || 'Konu belirtilmemiş'}
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body1" sx={{ 
+                  lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap',
+                  backgroundColor: '#f9f9f9',
+                  padding: 2,
+                  borderRadius: 1,
+                  border: '1px solid #e0e0e0'
+                }}>
+                  {selectedMessage.message || 'Mesaj içeriği bulunmuyor'}
+                </Typography>
+              </Box>
+            </Box>
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">İptal</Button>
-          <Button onClick={handleDeleteMessage} color="error" variant="contained">
-            Sil
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
+          <Button 
+            onClick={handleCloseDialog}
+            sx={{ borderRadius: '8px', fontWeight: 'bold' }}
+          >
+            Kapat
           </Button>
+          {selectedMessage && !selectedMessage.read && (
+            <StyledButton 
+              onClick={() => {
+                markAsRead(selectedMessage.id);
+                handleCloseDialog();
+              }}
+              variant="contained"
+              color="success"
+              sx={{ fontWeight: 'bold' }}
+            >
+              Okundu İşaretle
+            </StyledButton>
+          )}
         </DialogActions>
       </Dialog>
 
-      {/* Bildirim */}
-      <Snackbar open={alert.open} autoHideDuration={5000} onClose={handleCloseAlert}>
-        <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ borderBottom: '1px solid #eee', pb: 2 }}>
+          <Box display="flex" alignItems="center">
+            <Delete color="error" sx={{ mr: 1 }} />
+            <Typography variant="h6">Mesajı Sil</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          <DialogContentText>
+            Bu mesajı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+          </DialogContentText>
+          {messageToDelete && (
+            <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+              <Typography variant="body2"><strong>Gönderen:</strong> {messageToDelete.name}</Typography>
+              <Typography variant="body2"><strong>Konu:</strong> {messageToDelete.subject}</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
+          <Button 
+            onClick={handleCloseDeleteDialog}
+            sx={{ borderRadius: '8px', fontWeight: 'bold' }}
+          >
+            İptal
+          </Button>
+          <StyledButton 
+            onClick={handleDeleteMessage}
+            variant="contained"
+            color="error"
+            disabled={deleteLoading}
+            sx={{ fontWeight: 'bold' }}
+          >
+            {deleteLoading ? <CircularProgress size={20} /> : 'Sil'}
+          </StyledButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Alert Snackbar */}
+      <Snackbar 
+        open={alert.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseAlert} 
+          severity={alert.severity} 
+          variant="filled"
+          sx={{ 
+            width: '100%',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            borderRadius: '8px'
+          }}
+        >
           {alert.message}
         </Alert>
       </Snackbar>

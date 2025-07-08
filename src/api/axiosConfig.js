@@ -2,8 +2,9 @@ import axios from 'axios';
 
 // Axios instance oluşturma
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'development' ? 'http://localhost:6767' : 'https://erdalguda.online',
-  timeout: 15000,  // 15 saniye zaman aşımı
+  baseURL: process.env.REACT_APP_API_BASE_URL || 
+           (process.env.NODE_ENV === 'development' ? 'http://localhost:6767' : 'https://erdalguda.online'),
+  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 15000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

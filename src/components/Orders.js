@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import {
   Table,
   TableBody,
@@ -29,7 +29,8 @@ import {
   CardContent,
   Avatar,
   CircularProgress,
-  Grid
+  Grid,
+  Badge
 } from '@mui/material';
 import {
   Edit,
@@ -41,9 +42,12 @@ import {
   Event,
   LocalShipping,
   FilterList,
-  Update
+  Update,
+  Refresh,
+  Assignment
 } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Orders.css';
 import { Order } from '../constants/orderTypes';
 import { OrderDialog } from './Customers';
@@ -317,11 +321,6 @@ const Row = ({ order, onDelete, onEdit }) => {
                           <Typography sx={{ fontSize: '0.95rem' }}>
                             <strong>Kalıp:</strong> {Order.FitType[order.fitType]?.displayName || order.fitType}
                           </Typography>
-                          {order.fabric && (
-                            <Typography sx={{ fontSize: '0.95rem' }}>
-                              <strong>Kumaş:</strong> {order.fabric.name}
-                            </Typography>
-                          )}
                         </Stack>
                       </CardContent>
                     </Card>
@@ -337,6 +336,8 @@ const Row = ({ order, onDelete, onEdit }) => {
 };
 
 const Orders = () => {
+  useDocumentTitle('Sipariş Yönetimi');
+  
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -352,7 +353,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://erdalguda.online/api/orders');
+      const response = await apiService.orders.getAll();
       const data = Array.isArray(response.data) ? response.data : [];
       setOrders(data);
       setTotalPages(Math.ceil(data.length / ordersPerPage));
@@ -376,7 +377,7 @@ const Orders = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`https://erdalguda.online/api/orders/${selectedOrderId}`);
+      const response = await apiService.orders.delete(selectedOrderId);
       
       if (response.status === 204) {
         setOrders(prevOrders => prevOrders.filter(o => o.id !== selectedOrderId));
@@ -479,48 +480,101 @@ const Orders = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 'bold',
-          position: 'relative',
-          display: 'inline-block',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            width: '60px',
-            height: '4px',
-            bottom: '-10px',
-            left: '0',
-            backgroundColor: '#1976d2',
-            borderRadius: '10px'
-          }
-        }}>
-          Siparişler
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <StyledTextField
-            placeholder="Müşteri adı veya telefon ara..."
-            size="small"
-            value={searchTerm}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ minWidth: 300 }}
-          />
-          <StyledButton
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={() => setOrderDialogOpen(true)}
-          >
-            Yeni Sipariş
-          </StyledButton>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
+      {/* Header Card */}
+      <Card sx={{ 
+        mb: 4, 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+        color: 'white',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        <CardContent sx={{ py: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center' }}>
+                <Assignment sx={{ mr: 2, fontSize: '2.5rem' }} />
+                Sipariş Yönetimi
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
+                Siparişleri görüntüleyin, düzenleyin ve yeni siparişler oluşturun
+              </Typography>
+            </Box>
+            <Avatar sx={{ 
+              width: 80, 
+              height: 80, 
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <Assignment sx={{ fontSize: '2.5rem' }} />
+            </Avatar>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Stats and Actions Bar */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Badge badgeContent={orders.length} color="primary" max={999}>
+              <Chip 
+                icon={<Assignment />} 
+                label="Toplam Sipariş" 
+                color="primary" 
+                variant="outlined" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: '0.9rem',
+                  px: 1,
+                  '& .MuiChip-icon': { fontSize: '1.2rem' }
+                }} 
+              />
+            </Badge>
+            {searchTerm && (
+              <Chip 
+                label={`${filteredOrders.length} sonuç`}
+                color="secondary" 
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <StyledTextField
+              placeholder="Müşteri adı veya telefon ile ara..."
+              size="small"
+              value={searchTerm}
+              onChange={handleSearch}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ minWidth: 280 }}
+            />
+            
+            <StyledButton
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={fetchOrders}
+              disabled={loading}
+            >
+              Yenile
+            </StyledButton>
+            
+            <StyledButton
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={() => setOrderDialogOpen(true)}
+            >
+              Yeni Sipariş
+            </StyledButton>
+          </Box>
         </Box>
       </Box>
 

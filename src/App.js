@@ -16,12 +16,9 @@ import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
 import Orders from './components/Orders';
 import AdminBlog from './pages/AdminBlog';
-import AdminCategories from './pages/AdminCategories';
-import AdminFabrics from './pages/AdminFabrics';
 import AdminMessages from './pages/AdminMessages';
 import AdminSettings from './pages/AdminSettings';
 import UserManagement from './pages/AdminManagers';
-import PendingUsers from './pages/PendingUsers';
 import TestPage from './components/TestPage';
 import './styles/App.css';
 import './styles/GlobalButtons.css';
@@ -53,15 +50,9 @@ function App() {
             <Route path="customers" element={<RequireMuhasebeci><Customers /></RequireMuhasebeci>} />
             <Route path="orders" element={<RequireMuhasebeci><Orders /></RequireMuhasebeci>} />
             
-            {/* Usta ve üzeri erişimli sayfalar (ADMIN + USTA) */}
-            <Route path="fabrics" element={<RequireUsta><AdminFabrics /></RequireUsta>} />
-            <Route path="templates" element={<RequireUsta><div>Şablonlar</div></RequireUsta>} />
-            
             {/* Sadece Admin Erişimi Olan Sayfalar */}
             <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
-            <Route path="pending-users" element={<RequireAdmin><PendingUsers /></RequireAdmin>} />
             <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
-            <Route path="categories" element={<RequireAdmin><AdminCategories /></RequireAdmin>} />
             <Route path="user-management" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
             
             {/* Tüm roller erişebilir */}

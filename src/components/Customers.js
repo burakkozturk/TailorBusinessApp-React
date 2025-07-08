@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import {
   Table,
   TableBody,
@@ -34,10 +34,14 @@ import {
   Chip,
   Autocomplete,
   CircularProgress,
-  InputBase
+  InputBase,
+  Card,
+  CardContent,
+  Badge
 } from '@mui/material';
-import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person } from '@mui/icons-material';
-import { styled } from '@mui/material/styles';
+import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person, Refresh, Groups } from '@mui/icons-material';
+import { styled, alpha } from '@mui/material/styles';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Customers.css';
 import { Order } from '../constants/orderTypes';
 
@@ -87,6 +91,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
     firstName: '',
     lastName: '',
     phone: '',
+    email: '',
     height: '',
     weight: '',
     address: '',
@@ -113,7 +118,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
 
     try {
       setLoading(true);
-      const response = await axios.get(`https://erdalguda.online/api/measurements/${customer.id}`);
+      const response = await apiService.measurements.getByCustomer(customer.id);
       if (response.data) {
         setFormData(prev => ({
           ...prev,
@@ -146,6 +151,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
         firstName: customer.firstName || '',
         lastName: customer.lastName || '',
         phone: customer.phone || '',
+        email: customer.email || '',
         height: customer.height || '',
         weight: customer.weight || '',
         address: customer.address || '',
@@ -200,7 +206,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
       };
       delete customerData.measurements;
 
-      const customerResponse = await axios.put(`https://erdalguda.online/api/customers/${customer.id}`, customerData);
+      const customerResponse = await apiService.customers.update(customer.id, customerData);
 
       // Ölçüleri güncelle
       const measurementData = {
@@ -219,7 +225,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
         elbowLength: formData.measurements.elbowLength ? parseFloat(formData.measurements.elbowLength) : null
       };
 
-      await axios.put(`https://erdalguda.online/api/measurements/${customer.id}`, measurementData);
+      await apiService.measurements.update(customer.id, measurementData);
 
       onUpdate(customerResponse.data);
       onClose();
@@ -318,6 +324,18 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
               required
               variant="outlined"
               sx={inputStyle}
+            />
+
+            <TextField
+              name="email"
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              fullWidth
+              variant="outlined"
+              sx={inputStyle}
+              helperText="Sipariş durum güncellemeleri için gerekli"
             />
 
             <Grid container spacing={2}>
@@ -580,22 +598,18 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
     estimatedDeliveryDate: order?.estimatedDeliveryDate || '',
     notes: order?.notes || '',
     totalPrice: order?.totalPrice || '',
-    fabric: order?.fabric || null,
     customer: customer || null,
     deliveryDate: order?.deliveryDate || ''
   });
 
   const [customers, setCustomers] = useState([]);
-  const [fabrics, setFabrics] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [customerInputValue, setCustomerInputValue] = useState('');
-  const [fabricInputValue, setFabricInputValue] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
-    fetchFabrics();
   }, []);
 
   useEffect(() => {
@@ -608,7 +622,6 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
         estimatedDeliveryDate: order.estimatedDeliveryDate || '',
         notes: order.notes || '',
         totalPrice: order.totalPrice || '',
-        fabric: order.fabric || null,
         customer: order.customer || null,
         deliveryDate: order.deliveryDate || ''
       });
@@ -621,7 +634,6 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
         estimatedDeliveryDate: '',
         notes: '',
         totalPrice: '',
-        fabric: null,
         customer: customer || null,
         deliveryDate: ''
       });
@@ -631,7 +643,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const fetchCustomers = async () => {
     try {
       setSearchLoading(true);
-      const response = await axios.get('https://erdalguda.online/api/customers');
+      const response = await apiService.customers.getAll();
       const data = Array.isArray(response.data) ? response.data : [];
       setCustomers(data);
     } catch (error) {
@@ -641,14 +653,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
     }
   };
 
-  const fetchFabrics = async () => {
-    try {
-      const response = await axios.get('https://erdalguda.online/api/fabrics');
-      setFabrics(response.data);
-    } catch (error) {
-      console.error('Kumaşlar yüklenirken hata oluştu:', error);
-    }
-  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -685,7 +690,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
       if (order) {
         // Güncelleme işlemi - Tüm sipariş verilerini tek seferde güncelle
         try {
-          response = await axios.put(`https://erdalguda.online/api/orders/${order.id}`, orderData);
+          response = await apiService.orders.update(order.id, orderData);
           console.log("Sipariş başarıyla güncellendi:", response.data);
           
           // Başarılı güncelleme durumunda state'i güncelle
@@ -708,7 +713,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
       } else {
         // Yeni oluşturma işlemi
         try {
-          response = await axios.post('https://erdalguda.online/api/orders', orderData);
+          response = await apiService.orders.create(orderData);
           console.log("Yeni sipariş başarıyla oluşturuldu:", response.data);
           
           // Başarılı oluşturma durumunda state'i güncelle
@@ -744,12 +749,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
            (c.phone && c.phone.includes(customerInputValue));
   });
 
-  // Filtrelenmiş kumaşlar
-  const filteredFabrics = fabrics.filter(f => {
-    const searchLower = (fabricInputValue || '').toLowerCase();
-    return f.name.toLowerCase().includes(searchLower) || 
-           (f.texture && f.texture.toLowerCase().includes(searchLower));
-  });
+
 
   return (
     <Dialog
@@ -958,65 +958,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
             />
           )}
 
-          <FormControl fullWidth>
-            <Autocomplete
-              id="fabric-search"
-              options={filteredFabrics}
-              getOptionLabel={(option) => `${option.name}${option.texture ? ` - ${option.texture}` : ''}`}
-              value={fabrics.find(f => f.id === formData.fabric?.id) || null}
-              onChange={(event, newValue) => {
-                setFormData(prev => ({
-                  ...prev,
-                  fabric: newValue
-                }));
-              }}
-              inputValue={fabricInputValue}
-              onInputChange={(event, newInputValue) => {
-                setFabricInputValue(newInputValue);
-              }}
-              disabled={order !== null} // Düzenleme modunda değiştirilemez
-              renderInput={(params) => (
-                <TextField 
-                  {...params} 
-                  label="Kumaş Ara" 
-                  variant="outlined"
-                />
-              )}
-              renderOption={(props, option) => (
-                <li {...props}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    {option.imageUrl && (
-                      <Box 
-                        component="img" 
-                        src={option.imageUrl}
-                        alt={option.name}
-                        sx={{ 
-                          width: 40, 
-                          height: 40, 
-                          borderRadius: 1, 
-                          mr: 2,
-                          objectFit: 'cover',
-                          border: '1px solid #eee'
-                        }}
-                      />
-                    )}
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {option.name}
-                      </Typography>
-                      {option.texture && (
-                        <Typography variant="caption" color="text.secondary">
-                          {option.texture}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                </li>
-              )}
-              noOptionsText="Kumaş bulunamadı"
-              sx={{ width: '100%' }}
-            />
-          </FormControl>
+
 
           <TextField
             name="totalPrice"
@@ -1120,7 +1062,7 @@ const Row = ({ customer, onDelete, onEdit }) => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`https://erdalguda.online/api/orders/by-customer/${customer.id}`);
+      const response = await apiService.orders.getByCustomer(customer.id);
       
       const data = Array.isArray(response.data) ? response.data : [];
       setOrders(data);
@@ -1135,7 +1077,7 @@ const Row = ({ customer, onDelete, onEdit }) => {
 
   const fetchMeasurements = async () => {
     try {
-      const response = await axios.get(`https://erdalguda.online/api/measurements/${customer.id}`);
+      const response = await apiService.measurements.getByCustomer(customer.id);
       if (response.data) {
         setMeasurementValues({
           chest: response.data.chest || '',
@@ -1168,10 +1110,9 @@ const Row = ({ customer, onDelete, onEdit }) => {
   const handleMeasurementSubmit = async () => {
     try {
       const method = orders.length > 0 ? 'put' : 'post';
-      const response = await axios[method](
-        `https://erdalguda.online/api/measurements/${customer.id}`,
-        measurementValues
-      );
+      const response = method === 'put' 
+        ? await apiService.measurements.update(customer.id, measurementValues)
+        : await apiService.measurements.create(measurementValues);
       if (method === 'put') {
         setOrders(prevOrders =>
           prevOrders.map(o => o.id === response.data.id ? response.data : o)
@@ -1637,6 +1578,7 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
     firstName: '',
     lastName: '',
     phone: '',
+    email: '',
     height: '',
     weight: '',
     address: ''
@@ -1658,13 +1600,14 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
         weight: parseInt(formData.weight)
       };
 
-      const response = await axios.post('https://erdalguda.online/api/customers', customerData);
+      const response = await apiService.customers.create(customerData);
       onAdd(response.data);
       onClose();
       setFormData({
         firstName: '',
         lastName: '',
         phone: '',
+        email: '',
         height: '',
         weight: '',
         address: ''
@@ -1756,6 +1699,19 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
             sx={inputStyle}
           />
 
+          {/* Email */}
+          <TextField
+            name="email"
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            fullWidth
+            variant="outlined"
+            sx={inputStyle}
+            helperText="Sipariş durum güncellemeleri için gerekli"
+          />
+
           {/* Boy Kilo */}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
@@ -1845,6 +1801,8 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
 };
 
 const Customers = () => {
+  useDocumentTitle('Müşteri Yönetimi');
+  
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -1862,7 +1820,7 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://erdalguda.online/api/customers');
+      const response = await apiService.customers.getAll();
       const data = Array.isArray(response.data) ? response.data : (Array.isArray(response.data.customers) ? response.data.customers : []);
       setCustomers(data);
       setTotalPages(Math.ceil(data.length / customersPerPage));
@@ -1885,7 +1843,7 @@ const Customers = () => {
 
   const confirmDelete = async () => {
     try {
-      const response = await axios.delete(`https://erdalguda.online/api/customers/safe/${selectedCustomerId}`);
+      const response = await apiService.customers.delete(selectedCustomerId);
       
       if (response.status === 204) {
         setCustomers(customers.filter(c => c.id !== selectedCustomerId));
@@ -1980,41 +1938,70 @@ const Customers = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
+      {/* Header Card */}
+      <Card sx={{ 
+        mb: 4, 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+        color: 'white',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        <CardContent sx={{ py: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center' }}>
+                <Groups sx={{ mr: 2, fontSize: '2.5rem' }} />
+                Müşteri Yönetimi
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
+                Müşteri bilgilerini görüntüleyin, düzenleyin ve yeni siparişler oluşturun
+              </Typography>
+            </Box>
+            <Avatar sx={{ 
+              width: 80, 
+              height: 80, 
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              backdropFilter: 'blur(10px)'
+            }}>
+              <Groups sx={{ fontSize: '2.5rem' }} />
+            </Avatar>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Stats and Actions Bar */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 'bold',
-          position: 'relative',
-          display: 'inline-block',
-          mb: 4,
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            width: '60px',
-            height: '4px',
-            bottom: '-10px',
-            left: '0',
-            backgroundColor: '#1976d2',
-            borderRadius: '10px'
-          }
-        }}>
-          Müşteri Listesi
-        </Typography>
-        
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Chip 
-              icon={<Person />} 
-              label={`Toplam: ${customers.length} Müşteri`} 
-              color="primary" 
-              variant="outlined" 
-              sx={{ mr: 2, fontWeight: 'bold' }} 
-            />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Badge badgeContent={customers.length} color="primary" max={999}>
+              <Chip 
+                icon={<Groups />} 
+                label="Toplam Müşteri" 
+                color="primary" 
+                variant="outlined" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: '0.9rem',
+                  px: 1,
+                  '& .MuiChip-icon': { fontSize: '1.2rem' }
+                }} 
+              />
+            </Badge>
+            {searchTerm && (
+              <Chip 
+                label={`${filteredCustomers.length} sonuç`}
+                color="secondary" 
+                size="small"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
           </Box>
           
           <Box sx={{ display: 'flex', gap: 2 }}>
             <StyledTextField
               variant="outlined"
-              placeholder="Müşteri Ara..."
+              placeholder="Ad, soyad veya telefon ile ara..."
               value={searchTerm}
               onChange={handleSearch}
               size="small"
@@ -2025,8 +2012,17 @@ const Customers = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ minWidth: '250px' }}
+              sx={{ minWidth: '280px' }}
             />
+            
+            <StyledButton
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={fetchCustomers}
+              disabled={loading}
+            >
+              Yenile
+            </StyledButton>
             
             <StyledButton
               variant="contained"

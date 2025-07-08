@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import { Box, Typography, Container, Grid, Card, CardMedia, CardContent, CircularProgress, Paper, Breadcrumbs, Divider } from '@mui/material';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -18,11 +18,11 @@ const CategoryPage = () => {
       setLoading(true);
       try {
         // Önce kategori bilgilerini al
-        const categoryResponse = await axios.get(`https://erdalguda.online/api/categories/slug/${categorySlug}`);
+        const categoryResponse = await apiService.categories.getBySlug(categorySlug);
         setCategory(categoryResponse.data);
         
         // Sonra kategori ID'si ile blog yazılarını al
-        const postsResponse = await axios.get(`https://erdalguda.online/api/blogs/category/${categoryResponse.data.id}`);
+        const postsResponse = await apiService.blogs.getByCategory(categoryResponse.data.id);
         setPosts(postsResponse.data);
         setError(null);
       } catch (err) {

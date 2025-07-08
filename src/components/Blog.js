@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import apiService from '../services/apiService';
 import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress } from '@mui/material';
 import '../styles/Blog.css';
 
@@ -14,13 +14,13 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        let endpoint = '/api/blogs/published';
+        let response;
         
         if (homePage) {
-          endpoint = '/api/blogs/top/2'; // Ana sayfada sadece 2 blog göster
+          response = await apiService.blogs.getTop(2); // Ana sayfada sadece 2 blog göster
+        } else {
+          response = await apiService.blogs.getAllPublished();
         }
-        
-        const response = await axios.get(`https://erdalguda.online${endpoint}`);
         setPosts(response.data);
         setError(null);
       } catch (err) {

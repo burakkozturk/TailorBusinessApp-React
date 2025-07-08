@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Paper, Grid, Divider } from '@mui/material';
 import axios from 'axios';
+import apiService from '../services/apiService';
 
 // Axios instance
 const api = axios.create({
@@ -92,7 +93,7 @@ const TestPage = () => {
       
       // Müşteriler
       try {
-        const customersResponse = await axios.get('https://erdalguda.online/api/customers', { headers });
+        const customersResponse = await apiService.customers.getAll();
         console.log('Gerçek müşteriler endpoint yanıtı:', customersResponse.data);
       } catch (error) {
         console.error('Gerçek müşteriler endpoint hatası:', error);
@@ -100,13 +101,13 @@ const TestPage = () => {
       
       // Siparişler
       try {
-        const ordersResponse = await axios.get('https://erdalguda.online/api/orders', { headers });
+        const ordersResponse = await apiService.orders.getAll();
         console.log('Gerçek siparişler endpoint yanıtı:', ordersResponse.data);
       } catch (error) {
         console.error('Gerçek siparişler endpoint hatası:', error);
       }
       
-      // Kumaşlar
+      // Kumaşlar (keeping original axios call since fabrics endpoint doesn't exist in our service)
       try {
         const fabricsResponse = await axios.get('https://erdalguda.online/api/fabrics', { headers });
         console.log('Gerçek kumaşlar endpoint yanıtı:', fabricsResponse.data);

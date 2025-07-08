@@ -3,19 +3,18 @@ import {
   Typography, 
   Box, 
   Grid, 
-  Card, 
-  CardContent, 
-  Divider, 
   CircularProgress, 
-  Paper, 
   Container,
   Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Chip,
-  LinearProgress,
-  IconButton,
-  Menu,
-  MenuItem,
-  Tooltip
+  Divider
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import { 
@@ -23,282 +22,189 @@ import {
   FaShoppingBag, 
   FaMoneyBillWave, 
   FaCheckCircle, 
-  FaCut,
   FaTshirt, 
   FaClipboardCheck, 
   FaArrowUp, 
   FaArrowDown 
 } from 'react-icons/fa';
-import { BsThreeDotsVertical } from 'react-icons/bs';
 import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
   BarChart, 
   Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip as RechartsTooltip, 
-  Legend as RechartsLegend,
-  AreaChart,
-  Area 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie 
 } from 'recharts';
-import axios from 'axios';
+
+import api from '../api/axiosConfig';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
-// Stillendirilmiş bileşenler
-const StyledCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  borderRadius: 16,
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-  transition: 'transform 0.3s, box-shadow 0.3s',
-  overflow: 'hidden',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 12px 24px rgba(0, 0, 0, 0.12)',
-  },
-}));
+const StatsContainer = styled(Box)({
+  minHeight: '100vh',
+  padding: '2rem 0',
+  backgroundColor: '#f8fafc',
+});
 
-const GradientBackground = styled(Box)(({ startColor, endColor }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  background: `linear-gradient(135deg, ${startColor} 0%, ${endColor} 100%)`,
-  opacity: 0.92,
-  borderRadius: 20,
+const StatItem = styled(Box)(({ theme, gradient }) => ({
+  padding: '1.5rem',
+  borderRadius: '20px',
+  background: gradient || 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+  border: '1px solid rgba(255, 255, 255, 0.8)',
+  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.06)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  position: 'relative',
+  overflow: 'hidden',
+  minHeight: '140px',
   '&::before': {
     content: '""',
     position: 'absolute',
     top: 0,
     left: 0,
-    width: '100%',
-    height: '100%',
-    background: 'radial-gradient(circle at 10% 10%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)',
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+    pointerEvents: 'none',
+  },
+  '&:hover': {
+    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-4px) scale(1.01)',
+    '& .icon-box': {
+      transform: 'rotate(3deg) scale(1.05)',
+      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)',
+    }
   }
 }));
 
-const StatCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  borderRadius: 20,
-  position: 'relative',
-  overflow: 'hidden',
-  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)',
-  transition: 'transform 0.3s, box-shadow 0.3s',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)',
-  },
-}));
-
-const IconAvatar = styled(Avatar)(({ theme, bgcolor }) => ({
-  width: 60,
-  height: 60,
-  borderRadius: 16,
-  backgroundColor: bgcolor || alpha('#fff', 0.2),
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+const IconBox = styled(Box)(({ bgcolor }) => ({
+  width: '48px',
+  height: '48px',
+  borderRadius: '16px',
+  background: `linear-gradient(135deg, ${bgcolor}, ${bgcolor}dd)`,
   display: 'flex',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
+  position: 'absolute',
+  top: '20px',
+  right: '20px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%)',
+    borderRadius: '16px',
+    pointerEvents: 'none',
+  }
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderRadius: 16,
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-}));
-
-const ProgressBar = styled(LinearProgress)(({ theme, color }) => ({
-  height: 8,
-  borderRadius: 4,
-  backgroundColor: alpha(color || theme.palette.primary.main, 0.1),
-  '& .MuiLinearProgress-bar': {
-    backgroundColor: color || theme.palette.primary.main,
-    borderRadius: 4,
-  },
-}));
-
-const StatusChip = styled(Chip)(({ theme, statuscolor }) => ({
-  fontSize: 12,
-  fontWeight: 600,
-  color: statuscolor,
-  backgroundColor: alpha(statuscolor, 0.1),
-  border: `1px solid ${alpha(statuscolor, 0.3)}`,
+const ModernPaper = styled(Paper)({
   borderRadius: 20,
-  padding: '2px 8px',
-}));
-
-// Pasta grafiği renkleri
-const COLORS = ['#2196F3', '#00C49F', '#FFBB28', '#FF8042', '#A569BD', '#45B39D', '#F39C12'];
+  background: '#ffffff',
+  border: '1px solid #e2e8f0',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+  overflow: 'hidden',
+});
 
 const Dashboard = () => {
   useDocumentTitle('Genel Bakış');
   
   const [loading, setLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [orderStatusData, setOrderStatusData] = useState([]);
   const [stats, setStats] = useState({
     totalCustomers: 0,
     totalOrders: 0,
     totalRevenue: 0,
     completedOrders: 0,
+    fittingOrders: 0,
+    deliveriesThisWeek: 0,
     growth: {
       customers: 12.5,
       orders: 8.3,
       revenue: 15.2,
-      completedOrders: 9.7
+      completed: 9.7,
+      fitting: -5.2,
+      deliveries: 15.7
     }
   });
-  const [orderStatus, setOrderStatus] = useState([]);
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [productData, setProductData] = useState([]);
-
-  // Browser uyumluluğu için CSS polyfill
-  useEffect(() => {
-    // Chart elemanlarının tüm tarayıcılarda görünürlüğünü sağlayacak CSS ayarları
-    const styleEl = document.createElement('style');
-    styleEl.innerHTML = `
-      .recharts-wrapper {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        overflow: visible !important;
-      }
-      .recharts-surface {
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-        overflow: visible !important;
-      }
-      .recharts-legend-wrapper {
-        position: absolute !important;
-      }
-      .recharts-default-tooltip {
-        border-radius: 5px !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
-      }
-      .recharts-cartesian-grid-horizontal line,
-      .recharts-cartesian-grid-vertical line {
-        stroke: rgba(0,0,0,0.1) !important;
-      }
-      
-      /* Tarayıcı-spesifik çözümler */
-      @supports (-webkit-appearance:none) {
-        .recharts-surface {
-          overflow: visible !important;
-          position: absolute !important;
-        }
-        .recharts-wrapper {
-          overflow: hidden !important;
-        }
-      }
-      
-      /* Chrome için özel düzeltmeler */
-      @media screen and (-webkit-min-device-pixel-ratio:0) {
-        .recharts-wrapper {
-          contain: none !important;
-        }
-        .recharts-surface {
-          contain: none !important;
-        }
-      }
-    `;
-    document.head.appendChild(styleEl);
-    
-    return () => {
-      document.head.removeChild(styleEl);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Gerçek API çağrınızı yapın, şu anda örnek veri kullanıyoruz
-        // const response = await axios.get('http://localhost:8080/api/dashboard/stats');
-        // setStats(response.data);
+        setLoading(true);
         
-        // Örnek istatistikler
+        const [statsResponse, recentOrdersResponse, statusDistributionResponse] = await Promise.all([
+          api.get('/api/dashboard/stats'),
+          api.get('/api/dashboard/recent-orders'),
+          api.get('/api/dashboard/order-status-distribution')
+        ]);
+        
+        const statsData = statsResponse.data;
+        
         setStats({
-          totalCustomers: 328,
-          totalOrders: 517,
-          totalRevenue: 1785500,
-          completedOrders: 423,
+          totalCustomers: statsData.totalCustomers,
+          totalOrders: statsData.ordersLast30Days,
+          totalRevenue: statsData.revenueLastMonth,
+          completedOrders: statsData.completedLastMonth,
+          fittingOrders: statsData.fittingOrders,
+          deliveriesThisWeek: statsData.deliveriesThisWeek,
           growth: {
-            customers: 12.5,
-            orders: 8.3,
-            revenue: 15.2,
-            completedOrders: 9.7
+            customers: statsData.customersGrowth,
+            orders: statsData.ordersGrowth,
+            revenue: statsData.revenueGrowth,
+            completed: 12.3,
+            fitting: -5.2,
+            deliveries: 15.7
           }
         });
 
-        // Sipariş durumu dağılımı için örnek veri
-        setOrderStatus([
-          { name: 'Hazırlanıyor', value: 32 },
-          { name: 'Kesim', value: 18 },
-          { name: 'Dikim', value: 24 },
-          { name: 'Prova', value: 16 },
-          { name: 'Hazır', value: 28 },
-          { name: 'Teslim Edildi', value: 10 },
-        ]);
-
-        // Son siparişler için örnek veri
-        setRecentOrders([
-          { id: 1245, productType: 'CEKET', customer: { firstName: 'Ahmet', lastName: 'Yılmaz' }, orderDate: '2025-05-12', status: 'PREPARING', totalPrice: 3200 },
-          { id: 1244, productType: 'GÖMLEK', customer: { firstName: 'Mehmet', lastName: 'Demir' }, orderDate: '2025-05-10', status: 'CUTTING', totalPrice: 1500 },
-          { id: 1243, productType: 'PANTOLON', customer: { firstName: 'Buğra', lastName: 'Kılıç' }, orderDate: '2025-05-08', status: 'SEWING', totalPrice: 1800 },
-          { id: 1242, productType: 'TAKIM', customer: { firstName: 'Oğuz', lastName: 'Aktürk' }, orderDate: '2025-05-05', status: 'READY', totalPrice: 5500 },
-          { id: 1241, productType: 'PANTOLON', customer: { firstName: 'Serkan', lastName: 'Öz' }, orderDate: '2025-05-03', status: 'DELIVERED', totalPrice: 2200 },
-        ]);
-
-        // Aylık veriler için örnek
-        setMonthlyData([
-          { name: 'Oca', siparişler: 45, ciro: 125000 },
-          { name: 'Şub', siparişler: 58, ciro: 168000 },
-          { name: 'Mar', siparişler: 62, ciro: 197000 },
-          { name: 'Nis', siparişler: 75, ciro: 238000 },
-          { name: 'May', siparişler: 72, ciro: 225000 },
-          { name: 'Haz', siparişler: 80, ciro: 267000 },
-          { name: 'Tem', siparişler: 82, ciro: 280000 },
-          { name: 'Ağu', siparişler: 78, ciro: 255000 },
-        ]);
-
-        // Ürün dağılımı için örnek veriler
-        setProductData([
-          { name: 'Takım Elbise', value: 28 },
-          { name: 'Ceket', value: 35 },
-          { name: 'Pantolon', value: 22 },
-          { name: 'Gömlek', value: 10 },
-          { name: 'Yelek', value: 5 },
-        ]);
-
+        setRecentOrders(recentOrdersResponse.data.slice(0, 10));
+        
+        // Sipariş durum verilerini işle
+        const statusData = statusDistributionResponse.data.map(item => ({
+          status: getStatusText(item.status),
+          siparisSayisi: item.count,
+          fill: getStatusColor(item.status)
+        }));
+        setOrderStatusData(statusData);
+        
         setLoading(false);
       } catch (error) {
         console.error('Dashboard verisi yüklenirken hata oluştu:', error);
+        
+        setStats({
+          totalCustomers: 0,
+          totalOrders: 0,
+          totalRevenue: 0,
+          completedOrders: 0,
+          fittingOrders: 0,
+          deliveriesThisWeek: 0,
+          growth: {
+            customers: 0,
+            orders: 0,
+            revenue: 0,
+            completed: 0,
+            fitting: 0,
+            deliveries: 0
+          }
+        });
+        setRecentOrders([]);
+        setOrderStatusData([]);
         setLoading(false);
       }
     };
 
     fetchDashboardData();
   }, []);
-
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -326,22 +232,30 @@ const Dashboard = () => {
     }
   };
 
-  // Büyüme göstergesini renk ve icon olarak döndürür
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return '₺0';
+    return new Intl.NumberFormat('tr-TR', { 
+      style: 'currency', 
+      currency: 'TRY',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
   const renderGrowth = (value) => {
     const isPositive = value >= 0;
-    const color = isPositive ? '#FFFFFF' : '#FFCDD2';
+    const color = isPositive ? '#10B981' : '#EF4444';
     const ArrowIcon = isPositive ? FaArrowUp : FaArrowDown;
     
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        <ArrowIcon size={12} color={color} style={{ marginRight: '2px' }} />
+        <ArrowIcon size={12} color={color} />
         <Typography 
           variant="caption" 
           sx={{ 
             color: color, 
             fontWeight: 600,
-            fontSize: '0.75rem',
-            letterSpacing: '0.3px'
+            fontSize: '0.75rem'
           }}
         >
           {Math.abs(value).toFixed(1)}%
@@ -350,521 +264,524 @@ const Dashboard = () => {
     );
   };
 
-  // İstatistik kartı
-  const StatCardItem = ({ title, value, icon, startColor, endColor, subtitle, growth }) => (
-    <StatCard>
-      <GradientBackground startColor={startColor} endColor={endColor} />
-      <CardContent sx={{ position: 'relative', zIndex: 10, p: 3.5 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-          <Box>
-            <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 500, mb: 1, opacity: 0.9, fontSize: '1rem' }}>
-              {title}
-            </Typography>
-            <Typography variant="h3" sx={{ color: 'white', fontWeight: 700, mb: 2, letterSpacing: '-0.5px' }}>
-              {value}
-            </Typography>
-            {subtitle && (
-              <Box display="flex" alignItems="center" spacing={1}>
-                <Typography variant="body2" sx={{ color: 'white', opacity: 0.9, fontWeight: 500 }}>
-                  {subtitle}
-                </Typography>
-                {growth !== undefined && (
-                  <Box 
-                    sx={{ 
-                      ml: 1, 
-                      bgcolor: alpha('#fff', 0.2), 
-                      borderRadius: 10, 
-                      px: 1.5, 
-                      py: 0.5, 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                    }}
-                  >
-                    {renderGrowth(growth)}
-                  </Box>
-                )}
-              </Box>
-            )}
-          </Box>
-          <IconAvatar bgcolor={alpha('#fff', 0.2)} sx={{ boxShadow: '0 8px 16px rgba(0,0,0,0.2)' }}>
-            {icon}
-          </IconAvatar>
-        </Box>
-      </CardContent>
-    </StatCard>
-  );
-
-  // Recharts Wrapper bileşeni - tüm tarayıcılarda tutarlı render için
-  const ChartWrapper = ({ children, height }) => {
-    return (
-      <Box 
-        sx={{ 
-          height: height || 360, 
-          width: '100%', 
-          position: 'relative',
-          '& .recharts-wrapper': {
-            position: 'absolute !important',
-            left: 0,
-            top: 0,
-            width: '100% !important', 
-            height: '100% !important'
-          }
-        }}
-      >
-        {children}
-      </Box>
-    );
-  };
-
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        <CircularProgress />
-      </Box>
+      <StatsContainer>
+        <Container maxWidth="xl">
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '60vh',
+            gap: 3
+          }}>
+            <CircularProgress size={60} thickness={4} sx={{ color: '#667eea' }} />
+            <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 500 }}>
+              Dashboard veriler yükleniyor...
+            </Typography>
+          </Box>
+        </Container>
+      </StatsContainer>
     );
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 800,
-          position: 'relative',
-          display: 'inline-block',
-          background: 'linear-gradient(90deg, #2196F3 0%, #4CAF50 100%)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            width: '60px',
-            height: '4px',
-            bottom: '-10px',
-            left: '0',
-            background: 'linear-gradient(90deg, #2196F3 0%, #4CAF50 100%)',
-            borderRadius: '10px'
-          }
-        }}>
-           Genel Bakış
-        </Typography>
-        
-        <Box>
-          <IconButton onClick={handleMenuClick}>
-            <BsThreeDotsVertical />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            PaperProps={{
-              sx: { 
-                borderRadius: 2,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-              }
-            }}
-          >
-            <MenuItem onClick={handleMenuClose}>Yenile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Rapor Oluştur</MenuItem>
-            <MenuItem onClick={handleMenuClose}>Ayarlar</MenuItem>
-          </Menu>
+    <StatsContainer>
+      <Container maxWidth="xl">
+        {/* Header */}
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h3" sx={{ 
+            fontWeight: 800,
+            color: '#1e293b',
+            mb: 1
+          }}>
+            Genel Bakış
+          </Typography>
+          <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 400 }}>
+            İşletmenizin genel performans özeti
+          </Typography>
         </Box>
-      </Box>
-      
-      {/* İstatistik Kartları */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCardItem 
-            title="Toplam Müşteri" 
-            value={stats.totalCustomers.toLocaleString('tr-TR')}
-            icon={<FaUsers size={30} color="white" />}
-            startColor="#4CAF50"
-            endColor="#2E7D32"
-            subtitle="Son 30 günde"
-            growth={stats.growth.customers}
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCardItem 
-            title="Toplam Sipariş" 
-            value={stats.totalOrders.toLocaleString('tr-TR')}
-            icon={<FaShoppingBag size={30} color="white" />}
-            startColor="#2196F3"
-            endColor="#0D47A1"
-            subtitle="Son 30 günde"
-            growth={stats.growth.orders}
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCardItem 
-            title="Toplam Ciro" 
-            value={new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(stats.totalRevenue)}
-            icon={<FaMoneyBillWave size={30} color="white" />}
-            startColor="#FF9800"
-            endColor="#E65100"
-            subtitle="Son 30 günde"
-            growth={stats.growth.revenue}
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCardItem 
-            title="Tamamlanan Siparişler" 
-            value={stats.completedOrders.toLocaleString('tr-TR')}
-            icon={<FaCheckCircle size={30} color="white" />}
-            startColor="#9C27B0"
-            endColor="#4A148C"
-            subtitle="Toplam siparişlerin %82'si"
-            growth={stats.growth.completedOrders}
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCardItem 
-            title="Bekleyen Siparişler" 
-            value={94}
-            icon={<FaClipboardCheck size={30} color="white" />}
-            startColor="#00BCD4"
-            endColor="#006064"
-            subtitle="Toplam siparişlerin %18'i"
-            growth={7.2}
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={4}>
-          <StatCardItem 
-            title="Ortalama Sipariş" 
-            value={new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(3450)}
-            icon={<FaCut size={30} color="white" />}
-            startColor="#3F51B5"
-            endColor="#1A237E"
-            subtitle="Son 30 günde"
-            growth={5.8}
-          />
-        </Grid>
-      </Grid>
-      
-      {/* Ana İçerik */}
-      <Grid container spacing={3}>
-                  <Grid item xs={12} lg={8}>
-            <StyledPaper sx={{ height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ 
-                fontWeight: 600, 
-                display: 'flex',
-                alignItems: 'center',
-                '&::before': {
-                  content: '""',
-                  display: 'inline-block',
-                  width: '4px',
-                  height: '24px',
-                  backgroundColor: '#2196F3',
-                  borderRadius: '4px',
-                  marginRight: '12px'
-                }
-              }}>
-                Aylık Sipariş ve Ciro Analizi
-              </Typography>
-              <Tooltip title="Bu yıla ait aylık sipariş ve ciro verilerini gösterir">
-                <IconButton>
-                  <BsThreeDotsVertical size={18} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Divider sx={{ mb: 3 }} />
-            
-            <ChartWrapper height={360}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={monthlyData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2196F3" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#2196F3" stopOpacity={0.1}/>
-                    </linearGradient>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4CAF50" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#4CAF50" stopOpacity={0.1}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                  <YAxis axisLine={false} tickLine={false} yAxisId="left" />
-                  <YAxis axisLine={false} tickLine={false} yAxisId="right" orientation="right" />
-                  <RechartsTooltip 
-                    formatter={(value, name) => {
-                      if (name === "siparişler") return [`${value} sipariş`, "Sipariş Sayısı"];
-                      return [`₺${value.toLocaleString('tr-TR')}`, "Toplam Ciro"];
-                    }}
-                  />
-                  <RechartsLegend />
-                  <Area
-                    type="monotone"
-                    dataKey="siparişler"
-                    name="siparişler"
-                    stroke="#2196F3"
-                    fillOpacity={1}
-                    fill="url(#colorOrders)"
-                    yAxisId="left"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="ciro"
-                    name="ciro"
-                    stroke="#4CAF50"
-                    fillOpacity={1}
-                    fill="url(#colorRevenue)"
-                    yAxisId="right"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartWrapper>
-          </StyledPaper>
-        </Grid>
 
-        {/* Sipariş Durumu Pasta Grafiği */}
-        <Grid item xs={12} lg={4}>
-          <StyledPaper sx={{ height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ 
-                fontWeight: 600, 
-                display: 'flex',
-                alignItems: 'center',
-                '&::before': {
-                  content: '""',
-                  display: 'inline-block',
-                  width: '4px',
-                  height: '24px',
-                  backgroundColor: '#FF9800',
-                  borderRadius: '4px',
-                  marginRight: '12px'
-                }
-              }}>
-                Sipariş Durumu Dağılımı
-              </Typography>
-              <Tooltip title="Aktif siparişlerin durum dağılımı">
-                <IconButton>
-                  <BsThreeDotsVertical size={18} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Divider sx={{ mb: 3 }} />
-            
-            <ChartWrapper height={360}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={orderStatus}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    innerRadius="55%"
-                    outerRadius="85%"
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {orderStatus.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip 
-                    formatter={(value, name, props) => {
-                      const percent = ((value / orderStatus.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(1);
-                      return [`${value} sipariş (${percent}%)`, name];
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartWrapper>
+        {/* İstatistik Özetleri */}
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b', mb: 3 }}>
+            Önemli Metriklerin Özeti
+          </Typography>
+          
+          <Grid container spacing={4}>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatItem gradient="linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)">
+                <IconBox bgcolor="#10B981" className="icon-box">
+                  <FaUsers size={22} color="white" />
+                </IconBox>
+                <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#065f46', mb: 0.5, lineHeight: 1 }}>
+                    {stats.totalCustomers.toLocaleString('tr-TR')}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#16a34a', fontWeight: 600, mb: 1.5 }}>
+                    Toplam Müşteri
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#4ade80', fontWeight: 500 }}>
+                      Son 30 günde
+                    </Typography>
+                    {renderGrowth(stats.growth.customers)}
+                  </Box>
+                </Box>
+              </StatItem>
+            </Grid>
 
-            <Box sx={{ mt: 2 }}>
-              <Grid container spacing={1}>
-                {orderStatus.map((status, index) => (
-                  <Grid item xs={6} key={index}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Box 
-                        sx={{ 
-                          width: 12, 
-                          height: 12, 
-                          borderRadius: '50%', 
-                          bgcolor: COLORS[index % COLORS.length],
-                          mr: 1 
-                        }}
-                      />
-                      <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                        {status.name}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </StyledPaper>
-        </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatItem gradient="linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)">
+                <IconBox bgcolor="#3B82F6" className="icon-box">
+                  <FaShoppingBag size={22} color="white" />
+                </IconBox>
+                <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#1e40af', mb: 0.5, lineHeight: 1 }}>
+                    {stats.totalOrders.toLocaleString('tr-TR')}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#2563eb', fontWeight: 600, mb: 1.5 }}>
+                    Toplam Sipariş (30 gün)
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#60a5fa', fontWeight: 500 }}>
+                      Önceki aya göre
+                    </Typography>
+                    {renderGrowth(stats.growth.orders)}
+                  </Box>
+                </Box>
+              </StatItem>
+            </Grid>
 
-        {/* Ürün Dağılımı */}
-        <Grid item xs={12} md={4}>
-          <StyledPaper sx={{ height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ 
-                fontWeight: 600, 
-                display: 'flex',
-                alignItems: 'center',
-                '&::before': {
-                  content: '""',
-                  display: 'inline-block',
-                  width: '4px',
-                  height: '24px',
-                  backgroundColor: '#9C27B0',
-                  borderRadius: '4px',
-                  marginRight: '12px'
-                }
-              }}>
-                Ürün Dağılımı
-              </Typography>
-              <Tooltip title="Ürünlerin satış dağılımı">
-                <IconButton>
-                  <BsThreeDotsVertical size={18} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Divider sx={{ mb: 3 }} />
-            
-            <ChartWrapper height={280}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={productData}
-                  margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
-                  layout="vertical"
-                >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                  <XAxis type="number" axisLine={false} tickLine={false} />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} />
-                  <RechartsTooltip formatter={(value) => [`${value} sipariş`, 'Miktar']} />
-                  <Bar 
-                    dataKey="value" 
-                    fill="#9C27B0" 
-                    radius={[0, 6, 6, 0]}
-                    barSize={30}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartWrapper>
-          </StyledPaper>
-        </Grid>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatItem gradient="linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)">
+                <IconBox bgcolor="#F59E0B" className="icon-box">
+                  <FaMoneyBillWave size={22} color="white" />
+                </IconBox>
+                <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#92400e', mb: 0.5, lineHeight: 1 }}>
+                    {formatCurrency(stats.totalRevenue)}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#d97706', fontWeight: 600, mb: 1.5 }}>
+                    Aylık Toplam Ciro
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#fbbf24', fontWeight: 500 }}>
+                      Önceki aya göre
+                    </Typography>
+                    {renderGrowth(stats.growth.revenue)}
+                  </Box>
+                </Box>
+              </StatItem>
+            </Grid>
 
-        {/* En Son Siparişler */}
-        <Grid item xs={12} md={8}>
-          <StyledPaper sx={{ height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ 
-                fontWeight: 600, 
-                display: 'flex',
-                alignItems: 'center',
-                '&::before': {
-                  content: '""',
-                  display: 'inline-block',
-                  width: '4px',
-                  height: '24px',
-                  backgroundColor: '#2196F3',
-                  borderRadius: '4px',
-                  marginRight: '12px'
-                }
-              }}>
-                Son Siparişler
-              </Typography>
-              <Tooltip title="En son alınan siparişler">
-                <IconButton>
-                  <BsThreeDotsVertical size={18} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Divider sx={{ mb: 3 }} />
-            
-            <Box sx={{ overflowX: 'auto' }}>
-              <Box component="table" sx={{ 
-                width: '100%', 
-                borderCollapse: 'separate', 
-                borderSpacing: '0 8px',
-                '& tr': {
-                  transition: 'all 0.2s'
-                },
-                '& tr:hover': {
-                  transform: 'translateX(5px)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
-                },
-                '& th': {
-                  padding: '12px 16px',
-                  borderBottom: '2px solid #f0f0f0',
-                  textAlign: 'left',
-                  fontWeight: 600,
-                  color: '#666'
-                },
-                '& td': {
-                  padding: '12px 16px',
-                  backgroundColor: '#fafafa',
-                  '&:first-of-type': { borderTopLeftRadius: 10, borderBottomLeftRadius: 10 },
-                  '&:last-of-type': { borderTopRightRadius: 10, borderBottomRightRadius: 10 }
-                }
-              }}>
-                <thead>
-                  <tr>
-                    <th>No</th>
-                    <th>Müşteri</th>
-                    <th>Ürün</th>
-                    <th>Tarih</th>
-                    <th>Tutar</th>
-                    <th>Durum</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentOrders.map((order) => (
-                    <tr key={order.id}>
-                      <td>{order.id}</td>
-                      <td>
+            <Grid item xs={12} sm={6} md={4}>
+              <StatItem gradient="linear-gradient(135deg, #fdf4ff 0%, #f3e8ff 100%)">
+                <IconBox bgcolor="#9C27B0" className="icon-box">
+                  <FaTshirt size={22} color="white" />
+                </IconBox>
+                <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#6b21a8', mb: 0.5, lineHeight: 1 }}>
+                    {stats.fittingOrders.toLocaleString('tr-TR')}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#a855f7', fontWeight: 600, mb: 1.5 }}>
+                    Prova Bekleyen Sipariş
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#c084fc', fontWeight: 500 }}>
+                      Aktif durumda
+                    </Typography>
+                    {renderGrowth(stats.growth.fitting)}
+                  </Box>
+                </Box>
+              </StatItem>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <StatItem gradient="linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%)">
+                <IconBox bgcolor="#00BCD4" className="icon-box">
+                  <FaCheckCircle size={22} color="white" />
+                </IconBox>
+                <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#115e59', mb: 0.5, lineHeight: 1 }}>
+                    {stats.completedOrders.toLocaleString('tr-TR')}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#0891b2', fontWeight: 600, mb: 1.5 }}>
+                    Tamamlanan Sipariş (30 gün)
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#22d3ee', fontWeight: 500 }}>
+                      Geçen aya göre
+                    </Typography>
+                    {renderGrowth(stats.growth.completed)}
+                  </Box>
+                </Box>
+              </StatItem>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <StatItem gradient="linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)">
+                <IconBox bgcolor="#3F51B5" className="icon-box">
+                  <FaClipboardCheck size={22} color="white" />
+                </IconBox>
+                <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: '#1e293b', mb: 0.5, lineHeight: 1 }}>
+                    {stats.deliveriesThisWeek.toLocaleString('tr-TR')}
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ color: '#475569', fontWeight: 600, mb: 1.5 }}>
+                    Bu Hafta Teslim Edilecek
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 500 }}>
+                      Haftalık trend
+                    </Typography>
+                    {renderGrowth(stats.growth.deliveries)}
+                  </Box>
+                </Box>
+              </StatItem>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Divider sx={{ my: 6 }} />
+
+        {/* Son Siparişler Tablosu */}
+        <ModernPaper sx={{ mb: 6 }}>
+          <Box sx={{ p: 4, borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
+            <Typography variant="h5" sx={{ 
+              fontWeight: 700,
+              color: '#1e293b',
+              mb: 1
+            }}>
+              Son Eklenen Siparişler
+            </Typography>
+            <Typography variant="body1" sx={{ color: '#64748b' }}>
+              En son alınan 10 sipariş
+            </Typography>
+          </Box>
+          
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Sipariş No</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Müşteri</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Ürün Tipi</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Tarih</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Tutar</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Durum</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {recentOrders.length > 0 ? (
+                  recentOrders.map((order) => (
+                    <TableRow key={order.id} sx={{ 
+                      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
+                      '&:last-child td': { border: 0 },
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <TableCell sx={{ fontWeight: 600, color: '#1e293b', borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>#{order.id}</TableCell>
+                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Avatar 
                             sx={{ 
-                              width: 32, 
-                              height: 32, 
-                              bgcolor: '#2196F3', 
-                              mr: 1,
-                              fontSize: '0.875rem'
+                              width: 36, 
+                              height: 36, 
+                              bgcolor: '#667eea', 
+                              mr: 2,
+                              fontSize: '0.875rem',
+                              fontWeight: 600
                             }}
                           >
-                            {order.customer.firstName.charAt(0)}{order.customer.lastName.charAt(0)}
+                            {order.customerName ? order.customerName.split(' ').map(n => n.charAt(0)).join('').slice(0, 2) : 'BM'}
                           </Avatar>
-                          {order.customer.firstName} {order.customer.lastName}
+                          <Typography variant="body2" sx={{ fontWeight: 500, color: '#1e293b' }}>
+                            {order.customerName || 'Bilinmeyen Müşteri'}
+                          </Typography>
                         </Box>
-                      </td>
-                      <td>{order.productType}</td>
-                      <td>{new Date(order.orderDate).toLocaleDateString('tr-TR')}</td>
-                      <td>
-                        <Typography fontWeight="600">
-                          {new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(order.totalPrice)}
+                      </TableCell>
+                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                        <Typography variant="body2" sx={{ color: '#64748b' }}>
+                          {order.productType || 'Belirtilmemiş'}
                         </Typography>
-                      </td>
-                      <td>
-                        <StatusChip 
+                      </TableCell>
+                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                        <Typography variant="body2" sx={{ color: '#64748b' }}>
+                          {order.orderDate ? new Date(order.orderDate).toLocaleDateString('tr-TR') : '-'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#059669' }}>
+                          {order.totalPrice ? formatCurrency(order.totalPrice) : '₺0'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                        <Chip 
                           label={getStatusText(order.status)}
-                          statuscolor={getStatusColor(order.status)}
                           size="small"
+                          sx={{
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: getStatusColor(order.status),
+                            backgroundColor: alpha(getStatusColor(order.status), 0.1),
+                            border: `1px solid ${alpha(getStatusColor(order.status), 0.3)}`,
+                            borderRadius: 2
+                          }}
                         />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6, border: 0 }}>
+                      <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 500 }}>
+                        Henüz sipariş bulunmuyor
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </ModernPaper>
+
+        {/* Sipariş Durumları Grafiği */}
+        <ModernPaper sx={{
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          overflow: 'hidden',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%)',
+            pointerEvents: 'none',
+          }
+        }}>
+          <Box sx={{ 
+            p: 4, 
+            borderBottom: '1px solid rgba(102, 126, 234, 0.08)',
+            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(255, 255, 255, 0.5) 100%)',
+            position: 'relative',
+            zIndex: 1
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+              <Box sx={{
+                width: 6,
+                height: 28,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '3px'
+              }} />
+              <Typography variant="h5" sx={{ 
+                fontWeight: 700,
+                color: '#1e293b',
+                background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
+                Sipariş Durumları 
+              </Typography>
             </Box>
-          </StyledPaper>
-        </Grid>
-      </Grid>
-    </Container>
+            <Typography variant="body1" sx={{ 
+              color: '#64748b',
+              fontWeight: 500,
+              opacity: 0.9
+            }}>
+              Sipariş durumlarının oransal dağılımı ve detaylı analizi
+            </Typography>
+          </Box>
+          
+          <Box sx={{ 
+            p: 4, 
+            height: 450,
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 250, 252, 0.8) 100%)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.05) 0%, transparent 50%)',
+              pointerEvents: 'none',
+            }
+          }}>
+            {orderStatusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%" style={{ position: 'relative', zIndex: 1 }}>
+                <PieChart>
+                  <defs>
+                    <linearGradient id="pieGradient1" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#667eea" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#764ba2" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="pieGradient2" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#f093fb" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#f5576c" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="pieGradient3" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#4facfe" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#00f2fe" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="pieGradient4" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#43e97b" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#38f9d7" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="pieGradient5" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#fa709a" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#fee140" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <linearGradient id="pieGradient6" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#a78bfa" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#ec4899" stopOpacity={0.9}/>
+                    </linearGradient>
+                    <filter id="dropshadow" height="130%">
+                      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                      <feOffset dx="2" dy="2" result="offset"/>
+                      <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.2"/>
+                      </feComponentTransfer>
+                      <feMerge> 
+                        <feMergeNode/>
+                        <feMergeNode in="SourceGraphic"/> 
+                      </feMerge>
+                    </filter>
+                  </defs>
+                                     <Pie
+                     data={orderStatusData}
+                     cx="50%"
+                     cy="50%"
+                     innerRadius={70}
+                     outerRadius={160}
+                     paddingAngle={4}
+                     dataKey="siparisSayisi"
+                     stroke="rgba(255, 255, 255, 0.8)"
+                     strokeWidth={3}
+                     filter="url(#dropshadow)"
+                     label={({ percent }) => `%${(percent * 100).toFixed(1)}`}
+                     labelLine={false}
+                  >
+                    {orderStatusData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={`url(#pieGradient${(index % 6) + 1})`}
+                      />
+                    ))}
+                  </Pie>
+                                     <Tooltip
+                     contentStyle={{
+                       backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                       border: 'none',
+                       borderRadius: '20px',
+                       boxShadow: '0 25px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.9)',
+                       fontSize: '15px',
+                       fontWeight: 500,
+                       backdropFilter: 'blur(25px)',
+                       padding: '20px 24px',
+                       minWidth: '220px',
+                       textAlign: 'center'
+                     }}
+                     formatter={(value, name, props) => {
+                       const total = orderStatusData.reduce((sum, item) => sum + item.siparisSayisi, 0);
+                       const percentage = ((value / total) * 100).toFixed(1);
+                       return [
+                         <div style={{textAlign: 'center'}}>
+                           <div style={{ 
+                             fontSize: '18px', 
+                             fontWeight: 700, 
+                             color: '#1e293b',
+                             marginBottom: '12px',
+                             textTransform: 'uppercase',
+                             letterSpacing: '0.5px'
+                           }}>
+                             📊 {props.payload.status}
+                           </div>
+                           <div style={{ 
+                             fontSize: '20px', 
+                             fontWeight: 800, 
+                             color: '#667eea',
+                             marginBottom: '8px'
+                           }}>
+                             {value} Sipariş
+                           </div>
+                           <div style={{ 
+                             fontSize: '16px', 
+                             fontWeight: 600, 
+                             color: '#10b981',
+                             background: 'rgba(16, 185, 129, 0.15)',
+                             padding: '8px 16px',
+                             borderRadius: '12px',
+                             display: 'inline-block'
+                           }}>
+                             🎯 %{percentage}
+                           </div>
+                         </div>
+                       ];
+                     }}
+                     labelStyle={{ display: 'none' }}
+                   />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100%',
+                flexDirection: 'column',
+                gap: 3,
+                position: 'relative',
+                zIndex: 1
+              }}>
+                <Box sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 2
+                }}>
+                  <Box sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    opacity: 0.3
+                  }} />
+                </Box>
+                <Typography variant="h6" sx={{ 
+                  color: '#64748b', 
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #64748b 0%, #94a3b8 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>
+                  Henüz veri bulunmuyor
+                </Typography>
+                <Typography variant="body2" sx={{ 
+                  color: '#94a3b8',
+                  textAlign: 'center',
+                  maxWidth: 280,
+                  lineHeight: 1.6,
+                  fontWeight: 500
+                }}>
+                  Sipariş durumu verileri yüklendiğinde bu grafik otomatik olarak güncellecek
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </ModernPaper>
+      </Container>
+    </StatsContainer>
   );
 };
 
