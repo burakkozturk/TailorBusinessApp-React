@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-// Axios instance oluşturma
+// Axios instance oluşturma - LOCAL DEVELOPMENT İÇİN
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 
-           (process.env.NODE_ENV === 'development' ? 'http://localhost:6767' : 'https://erdalguda.online'),
+  baseURL: 'http://localhost:6767', // Sadece localhost kullan
   timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -44,9 +43,9 @@ const parseToken = (token) => {
 
 // API isteklerinin durumunu kontrol etme
 const logApiCall = (config) => {
-  console.log(`API İsteği: ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
+  console.log(`🌐 API İsteği: ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
   if (config.data) {
-    console.log('Gönderilen veri:', config.data);
+    console.log('📤 Gönderilen veri:', config.data);
   }
   return config;
 };
@@ -61,14 +60,14 @@ api.interceptors.request.use(
       // Token geçerliliğini kontrol et
       if (parseToken(token)) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log(`Token eklendi: ${token.substring(0, 20)}...`);
+        console.log(`🔐 Token eklendi: ${token.substring(0, 20)}...`);
         
         // Kullanıcı bilgisini ve rolü logla
         const role = localStorage.getItem('role');
         const username = localStorage.getItem('username');
-        console.log(`İstek gönderen kullanıcı: ${username}, Rol: ${role}`);
+        console.log(`👤 İstek gönderen kullanıcı: ${username}, Rol: ${role}`);
       } else {
-        console.warn('Token geçersiz veya süresi dolmuş, oturum sonlandırılıyor...');
+        console.warn('⚠️ Token geçersiz veya süresi dolmuş, oturum sonlandırılıyor...');
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('username');
@@ -79,13 +78,13 @@ api.interceptors.request.use(
         }
       }
     } else {
-      console.warn('İstek için token bulunamadı! API çağrısı yetkilendirme hatası alabilir.');
+      console.warn('⚠️ İstek için token bulunamadı! API çağrısı yetkilendirme hatası alabilir.');
     }
     
     return logApiCall(config);
   }, 
   error => {
-    console.error('API istek hazırlama hatası:', error);
+    console.error('❌ API istek hazırlama hatası:', error);
     return Promise.reject(error);
   }
 );
@@ -93,22 +92,22 @@ api.interceptors.request.use(
 // Cevap interceptor'ü
 api.interceptors.response.use(
   response => {
-    console.log(`API Yanıtı (${response.status}): ${response.config.method.toUpperCase()} ${response.config.url}`);
+    console.log(`✅ API Yanıtı (${response.status}): ${response.config.method.toUpperCase()} ${response.config.url}`);
     return response;
   },
   error => {
     // Hata detaylarını logla
     if (error.response) {
       // Sunucu yanıtı ile dönen hata (400-500 arası)
-      console.error(`API Hata (${error.response.status}): ${error.config.method.toUpperCase()} ${error.config.url}`);
+      console.error(`❌ API Hata (${error.response.status}): ${error.config.method.toUpperCase()} ${error.config.url}`);
       
       if (error.response.data) {
-        console.error('Hata detayı:', error.response.data);
+        console.error('🔍 Hata detayı:', error.response.data);
       }
       
       // 401 Unauthorized hatası alındığında (token geçersiz veya expired)
       if (error.response.status === 401) {
-        console.warn('Kimlik doğrulama hatası, kullanıcı çıkış yapıyor...');
+        console.warn('🔐 Kimlik doğrulama hatası, kullanıcı çıkış yapıyor...');
         // Token'ı temizle ve giriş sayfasına yönlendir
         localStorage.removeItem('token');
         localStorage.removeItem('role');
@@ -122,27 +121,27 @@ api.interceptors.response.use(
       
       // 403 Forbidden hatası (yetki sorunu)
       if (error.response.status === 403) {
-        console.error('Yetki hatası: Bu işlemi yapmak için yetkiniz yok.');
+        console.error('🚫 Yetki hatası: Bu işlemi yapmak için yetkiniz yok.');
         
         // Hangi API'ye erişim reddedildi ve hangi metod kullanıldı?
-        console.error(`Erişim reddedilen endpoint: ${error.config.method.toUpperCase()} ${error.config.url}`);
+        console.error(`🚫 Erişim reddedilen endpoint: ${error.config.method.toUpperCase()} ${error.config.url}`);
         
         // Mevcut kullanıcı rolünü logla
         const role = localStorage.getItem('role');
         const username = localStorage.getItem('username');
         if (role) {
-          console.error(`Mevcut kullanıcı: ${username}, Rol: ${role}`);
+          console.error(`👤 Mevcut kullanıcı: ${username}, Rol: ${role}`);
         }
         
         // İstek headerlarını kontrol et
-        console.log('Gönderilen istek headerları:', error.config.headers);
+        console.log('📋 Gönderilen istek headerları:', error.config.headers);
       }
     } else if (error.request) {
       // İstek yapıldı ancak yanıt alınamadı (bağlantı sorunu)
-      console.error('Sunucudan yanıt alınamadı. Sunucu çalışıyor mu?', error.request);
+      console.error('🔌 Sunucudan yanıt alınamadı. Sunucu çalışıyor mu?', error.request);
     } else {
       // İstek oluşturulurken bir şeyler yanlış gitti
-      console.error('API istek oluşturma hatası:', error.message);
+      console.error('⚠️ API istek oluşturma hatası:', error.message);
     }
     
     return Promise.reject(error);

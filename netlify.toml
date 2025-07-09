@@ -4,7 +4,7 @@
 
 [context.production.environment]
   TOML_ENV_VAR = "From netlify.toml"
-  REACT_APP_API_BASE_URL = "https://erdalguda.online"
+  REACT_APP_API_BASE_URL = "http://localhost:6767"
 
 [[redirects]]
   from = "/*"

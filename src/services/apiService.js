@@ -35,14 +35,31 @@ const apiService = {
     getAll: () => api.get('/api/orders'),
     getById: (id) => api.get(`/api/orders/${id}`),
     create: (orderData) => api.post('/api/orders', orderData),
+    createNew: (orderData) => api.post('/api/orders/new', orderData), // Yeni özelleştirmeler için
     update: (id, orderData) => api.put(`/api/orders/${id}`, orderData),
+    updateAdvanced: (id, orderData) => api.put(`/api/orders/${id}/advanced`, orderData), // Özelleştirmeler için
     delete: (id) => api.delete(`/api/orders/${id}`),
     getByCustomer: (customerId) => api.get(`/api/orders/by-customer/${customerId}`),
     getActiveByCustomer: (customerId) => api.get(`/api/orders/active/by-customer/${customerId}`),
     getByStatus: (status) => api.get(`/api/orders/by-status/${status}`),
     getByDateRange: (startDate, endDate) => api.get(`/api/orders/by-date-range?startDate=${startDate}&endDate=${endDate}`),
     updateStatus: (id, status) => api.patch(`/api/orders/${id}/status`, { status }),
-    getProductTypeStats: (startDate, endDate) => api.get(`/api/orders/statistics/by-product-type?startDate=${startDate}&endDate=${endDate}`)
+    getProductTypeStats: (startDate, endDate) => api.get(`/api/orders/statistics/by-product-type?startDate=${startDate}&endDate=${endDate}`),
+    // ÜRÜN ÖZELLEŞTİRME SEÇENEKLERİ
+    getOptions: () => api.get('/api/orders/options/all'),
+    getProductTypeOptions: () => api.get('/api/orders/options/product-types'),
+    getCollarTypeOptions: () => api.get('/api/orders/options/collar-types'),
+    getSleeveTypeOptions: () => api.get('/api/orders/options/sleeve-types'),
+    getWaistTypeOptions: () => api.get('/api/orders/options/waist-types'),
+    getPleatTypeOptions: () => api.get('/api/orders/options/pleat-types'),
+    getLegTypeOptions: () => api.get('/api/orders/options/leg-types'),
+    getButtonTypeOptions: () => api.get('/api/orders/options/button-types'),
+    getPocketTypeOptions: () => api.get('/api/orders/options/pocket-types'),
+    getVentTypeOptions: () => api.get('/api/orders/options/vent-types'),
+    getBackTypeOptions: () => api.get('/api/orders/options/back-types'),
+    // İSTATİSTİKLER VE ANALİTİKLER
+    getRevenueAnalytics: (startDate, endDate) => api.get(`/api/orders/analytics/revenue?startDate=${startDate}&endDate=${endDate}`),
+    getTopCustomers: (minOrders = 1) => api.get(`/api/orders/statistics/top-customers?minOrders=${minOrders}`)
   },
 
   // ÖLÇÜ İŞLEMLERİ

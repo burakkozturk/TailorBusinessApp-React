@@ -3,9 +3,9 @@ import { Box, Button, Typography, Paper, Grid, Divider } from '@mui/material';
 import axios from 'axios';
 import apiService from '../services/apiService';
 
-// Axios instance
+// Axios instance - LOCAL DEVELOPMENT İÇİN
 const api = axios.create({
-  baseURL: 'https://erdalguda.online',
+  baseURL: 'http://localhost:6767', // Localhost kullan
   timeout: 10000
 });
 
@@ -23,9 +23,9 @@ const TestPage = () => {
     const savedRole = localStorage.getItem('role');
     const savedUsername = localStorage.getItem('username');
     
-    console.log('LocalStorage token:', savedToken);
-    console.log('LocalStorage role:', savedRole);
-    console.log('LocalStorage username:', savedUsername);
+    console.log('🔐 LocalStorage token:', savedToken);
+    console.log('👤 LocalStorage role:', savedRole);
+    console.log('👤 LocalStorage username:', savedUsername);
     
     setToken(savedToken || '');
   }, []);
@@ -35,7 +35,7 @@ const TestPage = () => {
     localStorage.removeItem('role');
     localStorage.removeItem('username');
     setToken('');
-    alert('LocalStorage temizlendi! Sayfayı yenileyiniz.');
+    alert('🧹 LocalStorage temizlendi! Sayfayı yenileyiniz.');
   };
 
   const testPublicEndpoint = async () => {
@@ -44,7 +44,7 @@ const TestPage = () => {
       setPublicResult(response.data);
       setErrorMsg('');
     } catch (error) {
-      console.error('Public endpoint hatası:', error);
+      console.error('❌ Public endpoint hatası:', error);
       setErrorMsg(`Public endpoint hatası: ${error.message}`);
       setPublicResult(null);
     }
@@ -56,7 +56,7 @@ const TestPage = () => {
       setCustomersResult(response.data);
       setErrorMsg('');
     } catch (error) {
-      console.error('Customers endpoint hatası:', error);
+      console.error('❌ Customers endpoint hatası:', error);
       setErrorMsg(`Customers endpoint hatası: ${error.message}`);
       setCustomersResult(null);
     }
@@ -68,7 +68,7 @@ const TestPage = () => {
       setOrdersResult(response.data);
       setErrorMsg('');
     } catch (error) {
-      console.error('Orders endpoint hatası:', error);
+      console.error('❌ Orders endpoint hatası:', error);
       setErrorMsg(`Orders endpoint hatası: ${error.message}`);
       setOrdersResult(null);
     }
@@ -80,7 +80,7 @@ const TestPage = () => {
       setFabricsResult(response.data);
       setErrorMsg('');
     } catch (error) {
-      console.error('Fabrics endpoint hatası:', error);
+      console.error('❌ Fabrics endpoint hatası:', error);
       setErrorMsg(`Fabrics endpoint hatası: ${error.message}`);
       setFabricsResult(null);
     }
@@ -94,30 +94,30 @@ const TestPage = () => {
       // Müşteriler
       try {
         const customersResponse = await apiService.customers.getAll();
-        console.log('Gerçek müşteriler endpoint yanıtı:', customersResponse.data);
+        console.log('✅ Gerçek müşteriler endpoint yanıtı:', customersResponse.data);
       } catch (error) {
-        console.error('Gerçek müşteriler endpoint hatası:', error);
+        console.error('❌ Gerçek müşteriler endpoint hatası:', error);
       }
       
       // Siparişler
       try {
         const ordersResponse = await apiService.orders.getAll();
-        console.log('Gerçek siparişler endpoint yanıtı:', ordersResponse.data);
+        console.log('✅ Gerçek siparişler endpoint yanıtı:', ordersResponse.data);
       } catch (error) {
-        console.error('Gerçek siparişler endpoint hatası:', error);
+        console.error('❌ Gerçek siparişler endpoint hatası:', error);
       }
       
-      // Kumaşlar (keeping original axios call since fabrics endpoint doesn't exist in our service)
+      // Kumaşlar - localhost kullan
       try {
-        const fabricsResponse = await axios.get('https://erdalguda.online/api/fabrics', { headers });
-        console.log('Gerçek kumaşlar endpoint yanıtı:', fabricsResponse.data);
+        const fabricsResponse = await axios.get('http://localhost:6767/api/fabrics', { headers });
+        console.log('✅ Gerçek kumaşlar endpoint yanıtı:', fabricsResponse.data);
       } catch (error) {
-        console.error('Gerçek kumaşlar endpoint hatası:', error);
+        console.error('❌ Gerçek kumaşlar endpoint hatası:', error);
       }
       
-      setErrorMsg('Gerçek endpointler test edildi, konsolu kontrol edin!');
+      setErrorMsg('✅ Gerçek endpointler test edildi, konsolu kontrol edin!');
     } catch (error) {
-      console.error('Genel hata:', error);
+      console.error('❌ Genel hata:', error);
       setErrorMsg(`Genel hata: ${error.message}`);
     }
   };

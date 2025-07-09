@@ -39,7 +39,7 @@ import {
   CardContent,
   Badge
 } from '@mui/material';
-import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person, Refresh, Groups } from '@mui/icons-material';
+import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person, Refresh, Groups, PhotoCamera, DeleteOutline, CloudUpload } from '@mui/icons-material';
 import { styled, alpha } from '@mui/material/styles';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Customers.css';
@@ -593,13 +593,27 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
 export const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) => {
   const [formData, setFormData] = useState({
     productType: order?.productType || 'CEKET',
-    fitType: order?.fitType || 'REGULAR',
     status: order?.status || 'PREPARING',
     estimatedDeliveryDate: order?.estimatedDeliveryDate || '',
     notes: order?.notes || '',
     totalPrice: order?.totalPrice || '',
     customer: customer || null,
-    deliveryDate: order?.deliveryDate || ''
+    deliveryDate: order?.deliveryDate || '',
+    
+    // === GÖMLEK ÖZELLEŞTİRMELERİ ===
+    collarType: order?.collarType || '',
+    sleeveType: order?.sleeveType || '',
+    
+    // === PANTOLON ÖZELLEŞTİRMELERİ ===
+    waistType: order?.waistType || '',
+    pleatType: order?.pleatType || '',
+    legType: order?.legType || '',
+    
+    // === CEKET ÖZELLEŞTİRMELERİ ===
+    buttonType: order?.buttonType || '',
+    pocketType: order?.pocketType || '',
+    ventType: order?.ventType || '',
+    backType: order?.backType || ''
   });
 
   const [customers, setCustomers] = useState([]);
@@ -607,6 +621,12 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const [searchTerm, setSearchTerm] = useState('');
   const [customerInputValue, setCustomerInputValue] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
+  
+  // Fotoğraf yükleme state'leri
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
 
   useEffect(() => {
     fetchCustomers();
@@ -617,27 +637,66 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
     if (order) {
       setFormData({
         productType: order.productType || 'CEKET',
-        fitType: order.fitType || 'REGULAR',
         status: order.status || 'PREPARING',
         estimatedDeliveryDate: order.estimatedDeliveryDate || '',
         notes: order.notes || '',
         totalPrice: order.totalPrice || '',
         customer: order.customer || null,
-        deliveryDate: order.deliveryDate || ''
+        deliveryDate: order.deliveryDate || '',
+        
+        // Ürün özelleştirmeleri - backend'den gelen değerler
+        collarType: order.collarType || '',
+        sleeveType: order.sleeveType || '',
+        waistType: order.waistType || '',
+        pleatType: order.pleatType || '',
+        legType: order.legType || '',
+        buttonType: order.buttonType || '',
+        pocketType: order.pocketType || '',
+        ventType: order.ventType || '',
+        backType: order.backType || ''
       });
+      
+      // Mevcut notlardaki resimleri extract et
+      if (order.notes) {
+        const imageRegex = /!\[.*?\]\((https?:\/\/[^\)]+)\)/g;
+        const foundImages = [];
+        let match;
+        while ((match = imageRegex.exec(order.notes)) !== null) {
+          foundImages.push(match[1]);
+        }
+        setUploadedImageUrls(foundImages);
+      }
     } else {
       // Yeni sipariş durumunda varsayılan değerler
       setFormData({
         productType: 'CEKET',
-        fitType: 'REGULAR',
         status: 'PREPARING',
         estimatedDeliveryDate: '',
         notes: '',
         totalPrice: '',
         customer: customer || null,
-        deliveryDate: ''
+        deliveryDate: '',
+        
+        // Yeni sipariş için boş özelleştirme değerleri
+        collarType: '',
+        sleeveType: '',
+        waistType: '',
+        pleatType: '',
+        legType: '',
+        buttonType: '',
+        pocketType: '',
+        ventType: '',
+        backType: ''
       });
+      
+      // Yeni sipariş için resimleri temizle
+      setUploadedImageUrls([]);
     }
+    
+    // Dialog her açıldığında fotoğraf state'lerini temizle
+    setImageFile(null);
+    setImagePreview(null);
+    setImageUploading(false);
   }, [order, customer]);
 
   const fetchCustomers = async () => {
@@ -653,8 +712,6 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
     }
   };
 
-
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -663,19 +720,140 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
     }));
   };
 
+  // Ürün tipine göre özelleştirme seçeneklerini al
+  const getCustomizationOptions = () => {
+    return Order.getCustomizationOptions(formData.productType);
+  };
+
+  // Fotoğraf yükleme fonksiyonları
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Dosya türü kontrolü
+      if (!file.type.match('image.*')) {
+        alert('Lütfen bir resim dosyası seçin');
+        return;
+      }
+      
+      // Dosya boyutu kontrolü (5MB)
+      if (file.size > 5242880) {
+        alert('Dosya boyutu 5MB\'dan küçük olmalıdır');
+        return;
+      }
+      
+      setImageFile(file);
+      
+      // Önizleme için FileReader kullan
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    console.log('🔥 handleImageUpload çağrıldı', { imageFile, hasFile: !!imageFile });
+    
+    if (!imageFile) {
+      console.warn('❌ imageFile bulunamadı!');
+      return;
+    }
+    
+    try {
+      setImageUploading(true);
+      console.log('📤 Upload başlatılıyor...', imageFile.name, imageFile.size);
+      
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', imageFile);
+      
+      console.log('🌐 API çağrısı yapılıyor...');
+      const response = await apiService.upload.uploadFile(uploadFormData);
+      console.log('✅ API Response:', response);
+      
+      if (response.data && response.data.url) {
+        const newImageUrl = response.data.url;
+        console.log('🖼️ Yeni image URL:', newImageUrl);
+        
+        setUploadedImageUrls(prev => {
+          const newUrls = [...prev, newImageUrl];
+          console.log('📋 uploadedImageUrls güncellendi:', newUrls);
+          return newUrls;
+        });
+        
+        // Notlara resim URL'ini ekle
+        const currentNotes = formData.notes || '';
+        const imageMarkdown = `\n![Sipariş Resmi](${newImageUrl})\n`;
+        console.log('📝 Notes güncelleniyor:', { currentNotes, imageMarkdown });
+        
+        setFormData(prev => {
+          const updated = {
+            ...prev,
+            notes: currentNotes + imageMarkdown
+          };
+          console.log('💾 formData.notes güncellendi:', updated.notes);
+          return updated;
+        });
+        
+        // Temizle
+        setImageFile(null);
+        setImagePreview(null);
+        
+        alert('Fotoğraf başarıyla yüklendi!');
+        console.log('🎉 Upload tamamlandı!');
+      } else {
+        console.error('❌ Response data veya url eksik:', response);
+      }
+    } catch (error) {
+      console.error('💥 Fotoğraf yüklenirken hata:', error);
+      alert('Fotoğraf yüklenirken bir hata oluştu: ' + error.message);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (imageUrl) => {
+    // Yüklenen resimler listesinden çıkar
+    setUploadedImageUrls(prev => prev.filter(url => url !== imageUrl));
+    
+    // Notlardan resim URL'ini çıkar
+    const imageMarkdown = `![Sipariş Resmi](${imageUrl})`;
+    const updatedNotes = formData.notes.replace(imageMarkdown, '').replace(/\n\n+/g, '\n\n').trim();
+    setFormData(prev => ({
+      ...prev,
+      notes: updatedNotes
+    }));
+  };
+
   const handleSubmit = async () => {
+    console.log('🚀 handleSubmit başladı');
+    console.log('📝 formData:', formData);
+    console.log('📋 uploadedImageUrls:', uploadedImageUrls);
+    
     try {
       setLoading(true);
       
-      // Müşteri verisi düzeltme
+      // Form verilerini temizle - boş alanları çıkar
       let orderData = { ...formData };
+      console.log('💾 orderData (kopyalandı):', orderData);
       
-      // Eğer formData.customer bir nesne değilse, sadece ID varsa doğru formatta gönderelim
+      // Boş özelleştirme alanlarını temizle
+      Object.keys(orderData).forEach(key => {
+        if (['collarType', 'sleeveType', 'waistType', 'pleatType', 'legType', 
+             'buttonType', 'pocketType', 'ventType', 'backType'].includes(key)) {
+          if (!orderData[key] || orderData[key] === '') {
+            delete orderData[key];
+          }
+        }
+      });
+      
+      console.log('🧹 orderData (temizlendi):', orderData);
+      
+      // Müşteri verisi düzeltme
       if (formData.customer && typeof formData.customer !== 'object') {
         const selectedCustomer = customers.find(c => c.id === formData.customer);
         orderData.customer = { id: formData.customer };
       } else if (formData.customer && typeof formData.customer === 'object') {
-        // Zaten nesne formatındaysa sadece ID'yi alalım
         orderData.customer = { id: formData.customer.id };
       }
 
@@ -686,20 +864,27 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
         const today = new Date().toISOString().split('T')[0];
         orderData.deliveryDate = today;
       }
+
+      // Yeni sipariş için customerId alanını ekle
+      if (!order && orderData.customer && orderData.customer.id) {
+        orderData.customerId = orderData.customer.id;
+        delete orderData.customer; // customer nesnesini kaldır, sadece customerId kullan
+      }
       
       if (order) {
-        // Güncelleme işlemi - Tüm sipariş verilerini tek seferde güncelle
+        // Güncelleme işlemi - gelişmiş endpoint kullan
+        console.log('🔄 Sipariş güncelleme işlemi başlatılıyor...');
+        console.log('📤 Gönderilen orderData:', orderData);
+        
         try {
-          response = await apiService.orders.update(order.id, orderData);
-          console.log("Sipariş başarıyla güncellendi:", response.data);
+          response = await apiService.orders.updateAdvanced(order.id, orderData);
+          console.log("✅ Sipariş başarıyla güncellendi:", response.data);
           
-          // Başarılı güncelleme durumunda state'i güncelle
           onSave(response.data);
           onClose();
         } catch (updateError) {
-          console.error("Sipariş güncellenirken hata:", updateError);
+          console.error("💥 Sipariş güncellenirken hata:", updateError);
           
-          // Hata mesajını göster
           let errorMessage = 'Sipariş güncellenirken bir hata oluştu';
           if (updateError.response) {
             if (updateError.response.data) {
@@ -711,18 +896,21 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
           throw new Error(errorMessage);
         }
       } else {
-        // Yeni oluşturma işlemi
+        // Yeni oluşturma işlemi - yeni endpoint kullan
+        console.log('🆕 Yeni sipariş oluşturma işlemi başlatılıyor...');
+        console.log('📤 Gönderilen orderData:', orderData);
+        
         try {
-          response = await apiService.orders.create(orderData);
-          console.log("Yeni sipariş başarıyla oluşturuldu:", response.data);
+          response = await apiService.orders.createNew(orderData);
+          console.log("✅ Yeni sipariş başarıyla oluşturuldu:", response.data);
+          console.log("📥 Backend'ten dönen data:", response.data);
           
-          // Başarılı oluşturma durumunda state'i güncelle
           onSave(response.data);
           onClose();
         } catch (createError) {
-          console.error("Sipariş oluşturulurken hata:", createError);
+          console.error("💥 Sipariş oluşturulurken hata:", createError);
+          console.error("❌ Error details:", createError.response?.data);
           
-          // Hata mesajını göster
           let errorMessage = 'Sipariş oluşturulurken bir hata oluştu';
           if (createError.response) {
             if (createError.response.data) {
@@ -749,18 +937,17 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
            (c.phone && c.phone.includes(customerInputValue));
   });
 
-
-
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       PaperProps={{
         sx: {
           borderRadius: 2,
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          maxHeight: '90vh'
         }
       }}
     >
@@ -869,6 +1056,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
             </Box>
           )}
 
+          {/* Temel sipariş bilgileri */}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
@@ -878,7 +1066,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                   value={formData.productType}
                   onChange={handleChange}
                   label="Ürün Tipi"
-                  disabled={order !== null} // Düzenleme modunda değiştirilemez
+                  disabled={order !== null}
                 >
                   {Object.entries(Order.ProductType).map(([key, value]) => (
                     <MenuItem key={key} value={key}>
@@ -888,27 +1076,6 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth required>
-                <InputLabel>Kalıp Tipi</InputLabel>
-                <Select
-                  name="fitType"
-                  value={formData.fitType}
-                  onChange={handleChange}
-                  label="Kalıp Tipi"
-                  disabled={order !== null} // Düzenleme modunda değiştirilemez
-                >
-                  {Object.entries(Order.FitType).map(([key, value]) => (
-                    <MenuItem key={key} value={key}>
-                      {value.displayName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-
-          <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth required>
                 <InputLabel>Durum</InputLabel>
@@ -926,6 +1093,83 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                 </Select>
               </FormControl>
             </Grid>
+          </Grid>
+
+          {/* ÜRÜN ÖZELLEŞTİRMELERİ - Dinamik olarak göster */}
+          {(() => {
+            const customizationOptions = getCustomizationOptions();
+            
+            if (Object.keys(customizationOptions).length === 0) {
+              return null;
+            }
+
+            return (
+              <>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    mt: 3, 
+                    mb: 2, 
+                    color: 'primary.main',
+                    borderBottom: '2px solid',
+                    borderColor: 'primary.main',
+                    paddingBottom: 1
+                  }}
+                >
+                  {formData.productType === 'GÖMLEK' ? 'Gömlek' : 
+                   formData.productType === 'PANTOLON' ? 'Pantolon' : 
+                   formData.productType === 'CEKET' ? 'Ceket' : 
+                   formData.productType === 'TAKIM' ? 'Takım Elbise' : 
+                   'Diğer'} Özelleştirmeleri
+                </Typography>
+                <Grid container spacing={2}>
+                  {Object.entries(customizationOptions).map(([optionKey, optionValues]) => (
+                    <Grid item xs={12} sm={6} md={4} key={optionKey}>
+                      <FormControl fullWidth>
+                        <InputLabel>
+                          {optionKey === 'collarType' ? 'Yaka Türü' :
+                           optionKey === 'sleeveType' ? 'Kol Türü' :
+                           optionKey === 'waistType' ? 'Bel Türü' :
+                           optionKey === 'pleatType' ? 'Pile Türü' :
+                           optionKey === 'legType' ? 'Paça Türü' :
+                           optionKey === 'buttonType' ? 'Düğme Türü' :
+                           optionKey === 'pocketType' ? 'Cep Türü' :
+                           optionKey === 'ventType' ? 'Yırtmaç Türü' :
+                           optionKey === 'backType' ? 'Sırt Türü' : optionKey}
+                        </InputLabel>
+                        <Select
+                          name={optionKey}
+                          value={formData[optionKey] || ''}
+                          onChange={handleChange}
+                          label={optionKey === 'collarType' ? 'Yaka Türü' :
+                                 optionKey === 'sleeveType' ? 'Kol Türü' :
+                                 optionKey === 'waistType' ? 'Bel Türü' :
+                                 optionKey === 'pleatType' ? 'Pile Türü' :
+                                 optionKey === 'legType' ? 'Paça Türü' :
+                                 optionKey === 'buttonType' ? 'Düğme Türü' :
+                                 optionKey === 'pocketType' ? 'Cep Türü' :
+                                 optionKey === 'ventType' ? 'Yırtmaç Türü' :
+                                 optionKey === 'backType' ? 'Sırt Türü' : optionKey}
+                        >
+                          <MenuItem value="">
+                            <em>Seçiniz</em>
+                          </MenuItem>
+                          {Object.entries(optionValues).map(([key, value]) => (
+                            <MenuItem key={key} value={key}>
+                              {value.displayName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  ))}
+                </Grid>
+              </>
+            );
+          })()}
+
+          {/* Durum ve tarih bilgileri */}
+          <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
                 name="estimatedDeliveryDate"
@@ -958,8 +1202,6 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
             />
           )}
 
-
-
           <TextField
             name="totalPrice"
             label="Toplam Fiyat"
@@ -982,6 +1224,122 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
             multiline
             rows={4}
           />
+
+          {/* Fotoğraf yükleme bölümü */}
+          <Box sx={{ mt: 3, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <PhotoCamera sx={{ mr: 1 }} />
+              Sipariş Fotoğrafları
+            </Typography>
+            
+            {/* Yüklenen fotoğrafları göster */}
+            {uploadedImageUrls.length > 0 && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 2 }}>
+                  Yüklenen Fotoğraflar:
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                  {uploadedImageUrls.map((imageUrl, index) => (
+                    <Box 
+                      key={index} 
+                      sx={{ 
+                        position: 'relative',
+                        width: 120,
+                        height: 120,
+                        borderRadius: 2,
+                        overflow: 'hidden',
+                        border: '2px solid',
+                        borderColor: 'grey.300'
+                      }}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Sipariş resmi ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      <IconButton
+                        onClick={() => handleRemoveImage(imageUrl)}
+                        sx={{
+                          position: 'absolute',
+                          top: 4,
+                          right: 4,
+                          bgcolor: 'error.main',
+                          color: 'white',
+                          width: 24,
+                          height: 24,
+                          '&:hover': {
+                            bgcolor: 'error.dark'
+                          }
+                        }}
+                        size="small"
+                      >
+                        <DeleteOutline fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
+
+            {/* Fotoğraf seçimi ve önizleme */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  startIcon={<CloudUpload />}
+                  disabled={imageUploading}
+                >
+                  Fotoğraf Seç
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </Button>
+                
+                {imageFile && (
+                  <Button
+                    variant="contained"
+                    onClick={handleImageUpload}
+                    disabled={imageUploading}
+                    startIcon={imageUploading ? <CircularProgress size={16} /> : <PhotoCamera />}
+                  >
+                    {imageUploading ? 'Yükleniyor...' : 'Yükle'}
+                  </Button>
+                )}
+              </Box>
+
+              {/* Önizleme */}
+              {imagePreview && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    Önizleme:
+                  </Typography>
+                  <img
+                    src={imagePreview}
+                    alt="Önizleme"
+                    style={{
+                      maxWidth: 200,
+                      maxHeight: 200,
+                      objectFit: 'cover',
+                      borderRadius: 8,
+                      border: '1px solid #ddd'
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+              * Maksimum dosya boyutu: 5MB. Desteklenen formatlar: JPG, PNG, GIF
+            </Typography>
+          </Box>
         </Stack>
       </DialogContent>
       <DialogActions
@@ -1012,7 +1370,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={loading || (!order && !formData.customer) || !formData.productType || !formData.fitType || !formData.status || !formData.estimatedDeliveryDate || !formData.totalPrice}
+          disabled={loading || (!order && !formData.customer) || !formData.productType || !formData.status || !formData.estimatedDeliveryDate || !formData.totalPrice}
           sx={{
             borderRadius: 2,
             px: 4,
