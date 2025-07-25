@@ -4,6 +4,7 @@ import apiService from '../services/apiService';
 import { Box, Typography, Container, Chip, CircularProgress, Grid, Paper, Divider } from '@mui/material';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import YouTubePlayer from '../components/YouTubePlayer';
 import '../styles/BlogPostPage.css';
 
 const BlogPostPage = () => {
@@ -67,11 +68,9 @@ const BlogPostPage = () => {
     <>
       <Navbar />
       <div className="blog-post-banner">
-        <Container>
-          <Typography variant="h4" className="banner-title">
-            Blog Yazımız
-          </Typography>
-        </Container>
+        <div className="banner-heading">
+          <p className="banner-title">Blog Yazımız</p>
+        </div>
       </div>
 
       <Container maxWidth="lg" sx={{ py: 5 }}>
@@ -108,7 +107,18 @@ const BlogPostPage = () => {
                     {formatDate(post.createdAt)}
                   </Typography>
                 </Box>
+
+                {/* YouTube Video Player */}
+                {post.youtubeUrl && (
+                  <Box sx={{ mb: 4 }}>
+                    <YouTubePlayer 
+                      youtubeUrl={post.youtubeUrl} 
+                      title={post.title}
+                    />
+                  </Box>
+                )}
                 
+                {/* Öne Çıkan Resim */}
                 {post.imageUrl && (
                   <div className="blog-image-container">
                     <img 
@@ -124,6 +134,77 @@ const BlogPostPage = () => {
                     <p key={index}>{paragraph}</p>
                   ))}
                 </div>
+
+                {/* Meta Bilgiler - Content'in altında */}
+                {(post.metaDescription || post.metaKeywords) && (
+                  <Paper elevation={2} sx={{ 
+                    p: 3, 
+                    mt: 4,
+                    background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+                    borderLeft: '4px solid #1976d2',
+                    borderRadius: '12px'
+                  }}>
+                    <Typography variant="h6" sx={{ 
+                      color: '#1976d2', 
+                      fontWeight: 'bold', 
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      📄 Blog Hakkında
+                    </Typography>
+                    
+                    {post.metaDescription && (
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#2d3748',
+                          mb: 1 
+                        }}>
+                          Açıklama:
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          color: '#4a5568',
+                          lineHeight: 1.6,
+                          fontStyle: 'italic'
+                        }}>
+                          {post.metaDescription}
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    {post.metaKeywords && (
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#2d3748',
+                          mb: 1 
+                        }}>
+                          Anahtar Kelimeler:
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {post.metaKeywords.split(',').map((keyword, index) => (
+                            <Chip
+                              key={index}
+                              label={keyword.trim()}
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                borderColor: '#1976d2',
+                                color: '#1976d2',
+                                fontWeight: 'medium',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(25, 118, 210, 0.1)'
+                                }
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+                  </Paper>
+                )}
               </Paper>
             </Grid>
             

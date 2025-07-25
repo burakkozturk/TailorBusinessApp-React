@@ -34,7 +34,11 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  useTheme,
+  useMediaQuery,
+
+  Divider
 } from '@mui/material';
 import {
   Edit,
@@ -49,7 +53,8 @@ import {
   Update,
   Refresh,
   Assignment,
-  Sort
+  Sort,
+  PhotoCamera
 } from '@mui/icons-material';
 import { styled, alpha } from '@mui/material/styles';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -109,8 +114,9 @@ const getStatusChip = (status) => {
   // Status için renk ve isim mapping
   const statusConfig = {
     'PREPARING': { displayName: 'Hazırlanıyor', color: '#FF9800' },
+    'CUTTING': { displayName: 'Kesim', color: '#E91E63' },
+    'SEWING': { displayName: 'Dikim', color: '#9C27B0' },
     'FITTING': { displayName: 'Prova', color: '#2196F3' },
-    'PRODUCTION': { displayName: 'Üretim', color: '#9C27B0' },
     'READY': { displayName: 'Hazır', color: '#4CAF50' },
     'DELIVERED': { displayName: 'Teslim Edildi', color: '#8BC34A' },
     'CANCELLED': { displayName: 'İptal', color: '#F44336' }
@@ -569,6 +575,10 @@ const sortOrders = (orders, sortBy) => {
 const Orders = () => {
   useDocumentTitle('Sipariş Yönetimi');
   
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -728,7 +738,7 @@ const Orders = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
       {/* Header Card */}
       <Card sx={{ 
         mb: 4, 
@@ -738,24 +748,39 @@ const Orders = () => {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        <CardContent sx={{ py: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center' }}>
-                <Assignment sx={{ mr: 2, fontSize: '2.5rem' }} />
+        <CardContent sx={{ py: { xs: 3, md: 4 } }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2, md: 0 }
+          }}>
+            <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+              <Typography variant={isMobile ? "h5" : "h4"} sx={{ 
+                fontWeight: 700, 
+                mb: 1, 
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: { xs: 'center', md: 'flex-start' }
+              }}>
+                <Assignment sx={{ mr: 2, fontSize: { xs: '2rem', md: '2.5rem' } }} />
                 Sipariş Yönetimi
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
+              <Typography variant="body1" sx={{ 
+                opacity: 0.9, 
+                fontSize: { xs: '1rem', md: '1.1rem' }
+              }}>
                 Siparişleri görüntüleyin, düzenleyin ve yeni siparişler oluşturun
               </Typography>
             </Box>
             <Avatar sx={{ 
-              width: 80, 
-              height: 80, 
+              width: { xs: 60, md: 80 }, 
+              height: { xs: 60, md: 80 }, 
               backgroundColor: 'rgba(255,255,255,0.2)',
               backdropFilter: 'blur(10px)'
             }}>
-              <Assignment sx={{ fontSize: '2.5rem' }} />
+              <Assignment sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }} />
             </Avatar>
           </Box>
         </CardContent>
@@ -763,8 +788,20 @@ const Orders = () => {
 
       {/* Stats and Actions Bar */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: { xs: 3, md: 0 }
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            flexDirection: { xs: 'column', sm: 'row' }
+          }}>
             <Badge badgeContent={orders.length} color="primary" max={999}>
               <Chip 
                 icon={<Assignment />} 
@@ -789,7 +826,12 @@ const Orders = () => {
             )}
           </Box>
           
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            flexDirection: { xs: 'column', sm: 'row' },
+            width: { xs: '100%', md: 'auto' }
+          }}>
             <StyledTextField
               placeholder="Müşteri adı veya telefon ile ara..."
               size="small"
@@ -802,10 +844,16 @@ const Orders = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ minWidth: 280 }}
+              sx={{ 
+                minWidth: { xs: '100%', sm: '240px', md: '280px' },
+                maxWidth: { xs: '100%', md: '280px' }
+              }}
             />
             
-            <FormControl size="small" sx={{ minWidth: 220 }}>
+            <FormControl size="small" sx={{ 
+              minWidth: { xs: '100%', sm: '180px', md: '220px' },
+              maxWidth: { xs: '100%', md: '220px' }
+            }}>
               <InputLabel>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Sort fontSize="small" />
@@ -837,65 +885,205 @@ const Orders = () => {
               </Select>
             </FormControl>
             
-            <StyledButton
-              variant="outlined"
-              startIcon={<Refresh />}
-              onClick={fetchOrders}
-              disabled={loading}
-            >
-              Yenile
-            </StyledButton>
-            
-            <StyledButton
-              variant="contained"
-              color="primary"
-              startIcon={<Add />}
-              onClick={() => setOrderDialogOpen(true)}
-            >
-              Yeni Sipariş
-            </StyledButton>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 2,
+              width: { xs: '100%', sm: 'auto' }
+            }}>
+              <StyledButton
+                variant="outlined"
+                startIcon={isMobile ? null : <Refresh />}
+                onClick={fetchOrders}
+                disabled={loading}
+                sx={{ 
+                  flex: { xs: 1, sm: 'none' },
+                  minWidth: { xs: 'auto', sm: '120px' }
+                }}
+              >
+                {isMobile ? <Refresh /> : 'Yenile'}
+              </StyledButton>
+              
+              <StyledButton
+                variant="contained"
+                color="primary"
+                startIcon={isMobile ? null : <Add />}
+                onClick={() => setOrderDialogOpen(true)}
+                sx={{ 
+                  flex: { xs: 1, sm: 'none' },
+                  minWidth: { xs: 'auto', sm: '140px' }
+                }}
+              >
+                {isMobile ? <Add /> : 'Yeni Sipariş'}
+              </StyledButton>
+            </Box>
           </Box>
         </Box>
       </Box>
 
-      <StyledCard elevation={3}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <StyledTableCell width="60px"></StyledTableCell>
-                <StyledTableCell>Müşteri</StyledTableCell>
-                <StyledTableCell>Telefon</StyledTableCell>
-                <StyledTableCell>Sipariş Tarihi</StyledTableCell>
-                <StyledTableCell>Teslim Tarihi</StyledTableCell>
-                <StyledTableCell>Toplam</StyledTableCell>
-                <StyledTableCell>Durum</StyledTableCell>
-                <StyledTableCell width="60px">İşlem</StyledTableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedOrders.length > 0 ? (
-                paginatedOrders.map((order) => (
-                  <Row 
-                    key={order.id} 
-                    order={order} 
-                    onDelete={handleDelete}
-                    onEdit={handleEdit}
-                  />
-                ))
-              ) : (
+      {/* Desktop Table View */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <StyledCard elevation={3}>
+          <TableContainer>
+            <Table>
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      {searchTerm ? 'Arama sonucunda sipariş bulunamadı.' : 'Henüz kayıtlı sipariş bulunmuyor.'}
-                    </Typography>
-                  </TableCell>
+                  <StyledTableCell width="60px"></StyledTableCell>
+                  <StyledTableCell>Müşteri</StyledTableCell>
+                  <StyledTableCell>Telefon</StyledTableCell>
+                  <StyledTableCell>Sipariş Tarihi</StyledTableCell>
+                  <StyledTableCell>Teslim Tarihi</StyledTableCell>
+                  <StyledTableCell>Toplam</StyledTableCell>
+                  <StyledTableCell>Durum</StyledTableCell>
+                  <StyledTableCell width="60px">İşlem</StyledTableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </StyledCard>
+              </TableHead>
+              <TableBody>
+                {paginatedOrders.length > 0 ? (
+                  paginatedOrders.map((order) => (
+                    <Row 
+                      key={order.id} 
+                      order={order} 
+                      onDelete={handleDelete}
+                      onEdit={handleEdit}
+                    />
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                      <Typography variant="body1" color="textSecondary">
+                        {searchTerm ? 'Arama sonucunda sipariş bulunamadı.' : 'Henüz kayıtlı sipariş bulunmuyor.'}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </StyledCard>
+      </Box>
+
+      {/* Mobile Card View */}
+      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+        <Box sx={{ mb: 4 }}>
+          {paginatedOrders.length > 0 ? (
+            <Stack spacing={2}>
+              {paginatedOrders.map((order) => (
+                <Card key={order.id} sx={{ 
+                  borderRadius: 3, 
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Avatar
+                          sx={{ 
+                            bgcolor: 'primary.main',
+                            width: 40, 
+                            height: 40,
+                            fontSize: '1rem',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {order.customer.firstName?.charAt(0)}{order.customer.lastName?.charAt(0)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                            {order.customer.firstName} {order.customer.lastName}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {order.customer.phone}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(order)}
+                          sx={{ 
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                            '&:hover': { backgroundColor: 'primary.dark' }
+                          }}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(order.id)}
+                          sx={{ 
+                            backgroundColor: 'error.main',
+                            color: 'white',
+                            '&:hover': { backgroundColor: 'error.dark' }
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ mb: 2 }}>
+                      {getStatusChip(order.status)}
+                    </Box>
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Ürün:</strong> {order.productType || 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Toplam:</strong> {order.totalPrice ? `${order.totalPrice.toLocaleString()} TL` : 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Sipariş Tarihi:</strong> {order.orderDate ? new Date(order.orderDate).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Teslim Tarihi:</strong> {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      {order.notes && (
+                        <Grid item xs={12}>
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Notlar:</strong> {order.notes.length > 100 ? `${order.notes.substring(0, 100)}...` : order.notes}
+                          </Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          ) : (
+            <Card sx={{ borderRadius: 3, textAlign: 'center', py: 8 }}>
+              <CardContent>
+                <Assignment sx={{ fontSize: '4rem', color: 'text.secondary', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary">
+                  {searchTerm ? 'Arama sonucunda sipariş bulunamadı.' : 'Henüz kayıtlı sipariş bulunmuyor.'}
+                </Typography>
+                {!searchTerm && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Yeni sipariş eklemek için yukarıdaki butonu kullanabilirsiniz.
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      </Box>
 
       {filteredOrders.length > 0 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>

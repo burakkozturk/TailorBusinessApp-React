@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/apiService';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Switch, FormControlLabel, Typography, Box, Stack, Chip, Select, MenuItem, InputLabel, FormControl, OutlinedInput, Autocomplete, IconButton, Tabs, Tab, Divider, Container, Card, CardContent, Avatar, Grid, Badge, CircularProgress
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Switch, FormControlLabel, Typography, Box, Stack, Chip, Select, MenuItem, InputLabel, FormControl, OutlinedInput, Autocomplete, IconButton, Tabs, Tab, Divider, Container, Card, CardContent, Avatar, Grid, Badge, CircularProgress, useTheme, useMediaQuery
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { PhotoCamera, Article, Category, Create } from '@mui/icons-material';
+import { PhotoCamera, Article, Category, Create, YouTube, VideoLibrary } from '@mui/icons-material';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Customers.css';
 
@@ -45,8 +45,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 function AdminBlog() {
   useDocumentTitle('Blog Yönetimi');
   
-  // Tab state
-  const [tabValue, setTabValue] = useState(0);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   
   // Blog states
   const [blogs, setBlogs] = useState([]);
@@ -57,30 +58,22 @@ function AdminBlog() {
     title: '', 
     content: '', 
     imageUrl: '', 
+    youtubeUrl: '',
+    metaDescription: '',
+    metaKeywords: '',
     published: false,
-    categoryIds: [],
     slug: ''
   });
   const [editingBlog, setEditingBlog] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-
-  // Category states
-  const [categories, setCategories] = useState([]);
-  const [categoryLoading, setCategoryLoading] = useState(false);
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [newCategory, setNewCategory] = useState({ name: '', description: '', slug: '' });
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [categorySubmitting, setCategorySubmitting] = useState(false);
 
   const fetchBlogs = async () => {
     try {
       setLoading(true);
       const res = await apiService.blogs.getAll();
       setBlogs(res.data);
-      setSelectedCategories(res.data.map(blog => blog.categories || []));
     } catch (error) {
       console.error('Blog verileri çekilirken hata:', error);
       setError('Blog verileri yüklenirken bir hata oluştu');
@@ -89,22 +82,8 @@ function AdminBlog() {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      setCategoryLoading(true);
-      const res = await apiService.categories.getAll();
-      setCategories(res.data);
-    } catch (error) {
-      console.error('Kategoriler çekilirken hata:', error);
-      setError('Kategoriler yüklenirken bir hata oluştu');
-    } finally {
-      setCategoryLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchBlogs();
-    fetchCategories();
   }, []);
 
   // Blog Operations
@@ -132,10 +111,6 @@ function AdminBlog() {
     }
   };
 
-  const handleCategoryChange = (event, value) => {
-    setSelectedCategories(value);
-  };
-
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -152,7 +127,6 @@ function AdminBlog() {
     if (blog) {
       setEditingBlog(blog);
       setNewBlog(blog);
-      setSelectedCategories(blog.categories || []);
       setImagePreview(blog.imageUrl);
     } else {
       setEditingBlog(null);
@@ -160,11 +134,12 @@ function AdminBlog() {
         title: '', 
         content: '', 
         imageUrl: '', 
+        youtubeUrl: '',
+        metaDescription: '',
+        metaKeywords: '',
         published: false,
-        categoryIds: [],
         slug: ''
       });
-      setSelectedCategories([]);
       setImagePreview(null);
     }
     setDialogOpen(true);
@@ -219,20 +194,12 @@ function AdminBlog() {
     try {
       setLoading(true);
       
-      // Kategori ID'lerini düzenle
-      const payload = {
-        ...newBlog,
-        categories: Array.isArray(selectedCategories) 
-          ? selectedCategories.map(cat => typeof cat === 'object' ? cat : { id: cat })
-          : []
-      };
-      
       let response;
       if (editingBlog) {
-        response = await apiService.blogs.update(editingBlog.id, payload);
+        response = await apiService.blogs.update(editingBlog.id, newBlog);
         setSuccess('Blog başarıyla güncellendi');
       } else {
-        response = await apiService.blogs.create(payload);
+        response = await apiService.blogs.create(newBlog);
         setSuccess('Blog başarıyla oluşturuldu');
       }
       
@@ -264,97 +231,6 @@ function AdminBlog() {
     }
   };
 
-  // Category Operations
-  const handleCategoryInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewCategory({ ...newCategory, [name]: value });
-    
-    // URL slug'ını otomatik oluşturalım
-    if (name === 'name' && !editingCategory) {
-      const slug = value.toLowerCase()
-        .replace(/ı/g, 'i')
-        .replace(/ğ/g, 'g')
-        .replace(/ü/g, 'u')
-        .replace(/ş/g, 's')
-        .replace(/ö/g, 'o')
-        .replace(/ç/g, 'c')
-        .replace(/[^a-z0-9]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
-      
-      setNewCategory(prev => ({ ...prev, slug: slug }));
-    }
-  };
-
-  const handleCategoryDialogClose = () => {
-    setCategoryDialogOpen(false);
-    setNewCategory({ name: '', description: '', slug: '' });
-    setEditingCategory(null);
-  };
-
-  const handleCategoryDialogOpen = (category = null) => {
-    if (category) {
-      setNewCategory(category);
-      setEditingCategory(category);
-    } else {
-      setNewCategory({ name: '', description: '', slug: '' });
-      setEditingCategory(null);
-    }
-    setCategoryDialogOpen(true);
-  };
-
-  const handleCategorySave = async () => {
-    if (!newCategory.name || newCategory.name.trim() === '') {
-      setError('Kategori adı boş olamaz');
-      return;
-    }
-    
-    if (!newCategory.slug || newCategory.slug.trim() === '') {
-      setError('Kategori URL değeri boş olamaz');
-      return;
-    }
-    
-    setCategorySubmitting(true);
-    
-    try {
-      setError('');
-      
-      if (editingCategory) {
-        await apiService.categories.update(newCategory.id, newCategory);
-        setSuccess('Kategori başarıyla güncellendi');
-      } else {
-        await apiService.categories.create(newCategory);
-        setSuccess('Kategori başarıyla oluşturuldu');
-      }
-      
-      fetchCategories();
-      handleCategoryDialogClose();
-    } catch (error) {
-      console.error('Kategori kaydedilirken hata:', error);
-      setError('Kategori kaydedilirken bir hata oluştu');
-    } finally {
-      setCategorySubmitting(false);
-    }
-  };
-
-  const handleCategoryDelete = async (id) => {
-    if (!window.confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) {
-      return;
-    }
-    
-    try {
-      setCategoryLoading(true);
-      await apiService.categories.delete(id);
-      fetchCategories();
-      setSuccess('Kategori başarıyla silindi');
-    } catch (error) {
-      console.error('Kategori silinirken hata:', error);
-      setError('Kategori silinirken bir hata oluştu');
-    } finally {
-      setCategoryLoading(false);
-    }
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('tr-TR', {
       year: 'numeric',
@@ -365,15 +241,8 @@ function AdminBlog() {
     });
   };
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    if (newValue === 1) {
-      fetchCategories(); // Kategori tab'ı açıldığında refresh
-    }
-  };
-
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
       {/* Header Card */}
       <Card sx={{ 
         mb: 4, 
@@ -383,24 +252,39 @@ function AdminBlog() {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        <CardContent sx={{ py: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center' }}>
-                <Create sx={{ mr: 2, fontSize: '2.5rem' }} />
+        <CardContent sx={{ py: { xs: 3, md: 4 } }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2, md: 0 }
+          }}>
+            <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+              <Typography variant={isMobile ? "h5" : "h4"} sx={{ 
+                fontWeight: 700, 
+                mb: 1, 
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: { xs: 'center', md: 'flex-start' }
+              }}>
+                <Create sx={{ mr: 2, fontSize: { xs: '2rem', md: '2.5rem' } }} />
                 Blog Yönetimi
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
+              <Typography variant="body1" sx={{ 
+                opacity: 0.9, 
+                fontSize: { xs: '1rem', md: '1.1rem' }
+              }}>
                 Blog yazıları ve kategorileri oluşturun, düzenleyin ve yönetin
               </Typography>
             </Box>
             <Avatar sx={{ 
-              width: 80, 
-              height: 80, 
+              width: { xs: 60, md: 80 }, 
+              height: { xs: 60, md: 80 }, 
               backgroundColor: 'rgba(255,255,255,0.2)',
               backdropFilter: 'blur(10px)'
             }}>
-              <Create sx={{ fontSize: '2.5rem' }} />
+              <Create sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }} />
             </Avatar>
           </Box>
         </CardContent>
@@ -464,7 +348,7 @@ function AdminBlog() {
             <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
-                  {categories.length}
+                  {/* Removed categories count */}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Toplam Kategori
@@ -479,41 +363,50 @@ function AdminBlog() {
       </Grid>
 
       {/* Action Button */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: { xs: 'center', md: 'flex-end' }, 
+        mb: 3 
+      }}>
         <StyledButton 
           variant="contained" 
           color="primary" 
-          startIcon={<AddIcon />} 
-          onClick={tabValue === 0 ? () => openDialog() : () => handleCategoryDialogOpen()}
-          sx={{ fontWeight: 'bold' }}
+          startIcon={isMobile ? null : <AddIcon />} 
+          onClick={() => openDialog()}
+          sx={{ 
+            fontWeight: 'bold',
+            minWidth: { xs: '200px', md: 'auto' }
+          }}
         >
-          {tabValue === 0 ? 'Yeni Blog Ekle' : 'Yeni Kategori Ekle'}
+          {isMobile ? <AddIcon sx={{ mr: 1 }} /> : null}
+          Yeni Blog Ekle
         </StyledButton>
       </Box>
 
       {/* Tab Navigation */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tabs value={0} onChange={() => {}}>
           <Tab label={`Blog Yazıları (${blogs.length})`} />
-          <Tab label={`Kategoriler (${categories.length})`} />
+          {/* Removed Category Tab */}
         </Tabs>
       </Box>
 
       {/* Tab Content */}
-      {tabValue === 0 ? (
-        // Blog Management Tab
-        <>
-          <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-            Blog yazıları burada yönetilir. Yeni yazı ekleyebilir, mevcut yazıları düzenleyebilir ve silebilirsiniz.
-          </Typography>
+      <Box sx={{ mt: 3 }}>
+        {/* Blog Management Tab */}
+        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+          Blog yazıları burada yönetilir. Yeni yazı ekleyebilir, mevcut yazıları düzenleyebilir ve silebilirsiniz.
+        </Typography>
 
+        {/* Desktop Table View */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
           <TableContainer component={Paper} sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
             <Table>
               <TableHead>
                 <TableRow>
                   <StyledTableCell>Resim</StyledTableCell>
                   <StyledTableCell>Başlık</StyledTableCell>
-                  <StyledTableCell>Kategoriler</StyledTableCell>
+                  <StyledTableCell>Video</StyledTableCell>
                   <StyledTableCell>Durum</StyledTableCell>
                   <StyledTableCell>Tarih</StyledTableCell>
                   <StyledTableCell align="center">İşlemler</StyledTableCell>
@@ -566,17 +459,18 @@ function AdminBlog() {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                          {blog.categories?.map((cat) => (
-                            <Chip 
-                              key={cat.id} 
-                              label={cat.name} 
-                              size="small" 
-                              color="primary" 
-                              variant="outlined"
-                            />
-                          ))}
-                        </Stack>
+                        {blog.youtubeUrl ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <YouTube sx={{ color: '#ff0000', fontSize: 20 }} />
+                            <Typography variant="caption" color="text.secondary">
+                              Video Var
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            -
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Chip 
@@ -613,78 +507,137 @@ function AdminBlog() {
               </TableBody>
             </Table>
           </TableContainer>
-        </>
-      ) : (
-        // Category Management Tab
-        <>
-          <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-            Blog kategorileri burada yönetilir. Kategoriler blog yazılarını gruplandırmak için kullanılır.
-          </Typography>
+        </Box>
 
-          <TableContainer component={Paper} sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>ID</StyledTableCell>
-                  <StyledTableCell>Kategori Adı</StyledTableCell>
-                  <StyledTableCell>URL</StyledTableCell>
-                  <StyledTableCell>Açıklama</StyledTableCell>
-                  <StyledTableCell align="center">İşlemler</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {categoryLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">Yükleniyor...</TableCell>
-                  </TableRow>
-                ) : categories.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">Henüz kategori bulunmuyor</TableCell>
-                  </TableRow>
-                ) : (
-                  categories.map((category) => (
-                    <StyledTableRow key={category.id}>
-                      <TableCell>{category.id}</TableCell>
-                      <TableCell>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                          {category.name}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {category.slug}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {category.description || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => handleCategoryDialogOpen(category)}
-                          sx={{ mr: 1 }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleCategoryDelete(category.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </StyledTableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
-      )}
+        {/* Mobile Card View */}
+        <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          <Box>
+            {loading ? (
+              <Card sx={{ borderRadius: 2, textAlign: 'center', py: 4 }}>
+                <CardContent>
+                  <CircularProgress />
+                  <Typography variant="body1" sx={{ mt: 2 }}>
+                    Yükleniyor...
+                  </Typography>
+                </CardContent>
+              </Card>
+            ) : blogs.length === 0 ? (
+              <Card sx={{ borderRadius: 2, textAlign: 'center', py: 6 }}>
+                <CardContent>
+                  <Create sx={{ fontSize: '4rem', color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Henüz blog yazısı bulunmuyor
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Yeni blog yazısı eklemek için yukarıdaki butonu kullanabilirsiniz.
+                  </Typography>
+                </CardContent>
+              </Card>
+            ) : (
+              <Stack spacing={2}>
+                {blogs.map((blog) => (
+                  <Card key={blog.id} sx={{ 
+                    borderRadius: 2, 
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                      transform: 'translateY(-2px)'
+                    }
+                  }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                          {blog.imageUrl ? (
+                            <img 
+                              src={blog.imageUrl} 
+                              alt={blog.title}
+                              style={{
+                                width: 48,
+                                height: 48,
+                                objectFit: 'cover',
+                                borderRadius: 8
+                              }}
+                            />
+                          ) : (
+                            <Box sx={{ 
+                              width: 48, 
+                              height: 48, 
+                              backgroundColor: '#f0f0f0', 
+                              borderRadius: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <PhotoCamera sx={{ color: '#ccc', fontSize: '1.5rem' }} />
+                            </Box>
+                          )}
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                              {blog.title}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                              {blog.slug}
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 1 }}>
+                              <Chip 
+                                label={blog.published ? 'Yayında' : 'Taslak'} 
+                                color={blog.published ? 'success' : 'warning'}
+                                size="small"
+                              />
+                              {blog.youtubeUrl && (
+                                <Chip 
+                                  icon={<YouTube />}
+                                  label="Video" 
+                                  color="error"
+                                  size="small"
+                                  variant="outlined"
+                                />
+                              )}
+                            </Box>
+                          </Box>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => openDialog(blog)}
+                            sx={{ 
+                              backgroundColor: 'primary.main',
+                              color: 'white',
+                              '&:hover': { backgroundColor: 'primary.dark' }
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleDelete(blog.id)}
+                            sx={{ 
+                              backgroundColor: 'error.main',
+                              color: 'white',
+                              '&:hover': { backgroundColor: 'error.dark' }
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      
+                      <Divider sx={{ my: 1.5 }} />
+                      
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Oluşturulma Tarihi:</strong> {formatDate(blog.createdAt)}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+          </Box>
+        </Box>
+      </Box>
 
       {/* Blog Dialog */}
       <Dialog 
@@ -742,30 +695,39 @@ function AdminBlog() {
               required
             />
 
-            <Autocomplete
-              multiple
-              options={categories}
-              getOptionLabel={(option) => option.name}
-              value={selectedCategories}
-              onChange={handleCategoryChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Kategoriler"
-                  margin="normal"
-                  fullWidth
-                />
-              )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    variant="outlined"
-                    label={option.name}
-                    {...getTagProps({ index })}
-                    key={option.id}
-                  />
-                ))
-              }
+            <TextField
+              name="youtubeUrl"
+              label="YouTube Video URL (İsteğe Bağlı)"
+              value={newBlog.youtubeUrl}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+              placeholder="https://www.youtube.com/watch?v=..."
+              helperText="YouTube videosunun URL'ini girin. Video blog yazısında gömülü olarak gösterilecek."
+            />
+
+            <TextField
+              name="metaDescription"
+              label="Meta Açıklama (SEO)"
+              value={newBlog.metaDescription}
+              onChange={handleInputChange}
+              fullWidth
+              multiline
+              rows={2}
+              margin="normal"
+              placeholder="Bu blog yazısının kısa açıklaması..."
+              helperText="Arama motorları için açıklama (160 karakter önerilir)"
+            />
+
+            <TextField
+              name="metaKeywords"
+              label="Anahtar Kelimeler (SEO)"
+              value={newBlog.metaKeywords}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+              placeholder="moda, terzilik, stil"
+              helperText="Virgül ile ayrılmış anahtar kelimeler"
             />
 
             <Box sx={{ mt: 2, mb: 2 }}>
@@ -831,78 +793,6 @@ function AdminBlog() {
             sx={{ fontWeight: 'bold' }}
           >
             {editingBlog ? 'Güncelle' : 'Ekle'}
-          </StyledButton>
-        </DialogActions>
-      </Dialog>
-
-      {/* Category Dialog */}
-      <Dialog 
-        open={categoryDialogOpen} 
-        onClose={handleCategoryDialogClose}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: '12px',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)'
-          }
-        }}
-      >
-        <DialogTitle sx={{ borderBottom: '1px solid #eee', pb: 2 }}>
-          <Box display="flex" alignItems="center">
-            <Category color="primary" sx={{ mr: 1 }} />
-            <Typography variant="h6">
-              {editingCategory ? 'Kategori Düzenle' : 'Yeni Kategori Ekle'}
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          <TextField
-            name="name"
-            label="Kategori Adı"
-            value={newCategory.name}
-            onChange={handleCategoryInputChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-          
-          <TextField
-            name="slug"
-            label="URL (Slug)"
-            value={newCategory.slug}
-            onChange={handleCategoryInputChange}
-            fullWidth
-            margin="normal"
-            required
-            helperText="URL'de kullanılacak olan değer (otomatik oluşturulur)"
-          />
-
-          <TextField
-            name="description"
-            label="Açıklama"
-            value={newCategory.description}
-            onChange={handleCategoryInputChange}
-            fullWidth
-            multiline
-            rows={3}
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2, borderTop: '1px solid #eee' }}>
-          <Button 
-            onClick={handleCategoryDialogClose}
-            sx={{ borderRadius: '8px', fontWeight: 'bold' }}
-          >
-            İptal
-          </Button>
-          <StyledButton 
-            onClick={handleCategorySave}
-            variant="contained"
-            disabled={categorySubmitting || !newCategory.name.trim() || !newCategory.slug.trim()}
-            sx={{ fontWeight: 'bold' }}
-          >
-            {editingCategory ? 'Güncelle' : 'Ekle'}
           </StyledButton>
         </DialogActions>
       </Dialog>

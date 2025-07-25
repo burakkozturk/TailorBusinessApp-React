@@ -1,14 +1,29 @@
 import axios from 'axios';
 
-// Axios instance oluşturma - LOCAL DEVELOPMENT İÇİN
+// Environment-based API configuration
+const getBaseURL = () => {
+  // Production: Environment variable'dan al, yoksa production domain kullan
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.REACT_APP_API_BASE_URL || 'https://erdalguda.online';
+  }
+  
+  // Development: Local server kullan
+  return process.env.REACT_APP_API_BASE_URL || 'http://localhost:6767';
+};
+
+// Axios instance oluşturma
 const api = axios.create({
-  baseURL: 'http://localhost:6767', // Sadece localhost kullan
-  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 15000,
+  baseURL: getBaseURL(),
+  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 30000, // Production için daha uzun timeout
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
+
+// Production'da log seviyesini azalt
+const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Token bilgilerini dekode et ve kontrol et
 const parseToken = (token) => {
@@ -18,34 +33,44 @@ const parseToken = (token) => {
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(window.atob(base64));
     
-    // Token içeriğini logla
-    console.log('Token içeriği:', payload);
+    // Development'ta token içeriğini logla
+    if (isDevelopment) {
+      console.log('Token içeriği:', payload);
+    }
     
     // Token içerisinde rol ve kullanıcı adı doğrula
     if (!payload.sub || !payload.role) {
-      console.error('Token içinde gereken bilgiler yok:', payload);
+      if (isDevelopment) {
+        console.error('Token içinde gereken bilgiler yok:', payload);
+      }
       return false;
     }
     
     // Token süresini kontrol et
     const expirationTime = payload.exp * 1000; // ms cinsine çevir
     if (Date.now() >= expirationTime) {
-      console.error('Token süresi dolmuş:', new Date(expirationTime));
+      if (isDevelopment) {
+        console.error('Token süresi dolmuş:', new Date(expirationTime));
+      }
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error('Token çözümlemede hata:', error);
+    if (isDevelopment) {
+      console.error('Token çözümlemede hata:', error);
+    }
     return false;
   }
 };
 
-// API isteklerinin durumunu kontrol etme
+// API isteklerinin durumunu kontrol etme (sadece development'ta)
 const logApiCall = (config) => {
-  console.log(`🌐 API İsteği: ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
-  if (config.data) {
-    console.log('📤 Gönderilen veri:', config.data);
+  if (isDevelopment) {
+    console.log(`🌐 API İsteği: ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
+    if (config.data) {
+      console.log('📤 Gönderilen veri:', config.data);
+    }
   }
   return config;
 };
@@ -60,14 +85,19 @@ api.interceptors.request.use(
       // Token geçerliliğini kontrol et
       if (parseToken(token)) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log(`🔐 Token eklendi: ${token.substring(0, 20)}...`);
         
-        // Kullanıcı bilgisini ve rolü logla
-        const role = localStorage.getItem('role');
-        const username = localStorage.getItem('username');
-        console.log(`👤 İstek gönderen kullanıcı: ${username}, Rol: ${role}`);
+        if (isDevelopment) {
+          console.log(`🔐 Token eklendi: ${token.substring(0, 20)}...`);
+          
+          // Kullanıcı bilgisini ve rolü logla
+          const role = localStorage.getItem('role');
+          const username = localStorage.getItem('username');
+          console.log(`👤 İstek gönderen kullanıcı: ${username}, Rol: ${role}`);
+        }
       } else {
-        console.warn('⚠️ Token geçersiz veya süresi dolmuş, oturum sonlandırılıyor...');
+        if (isDevelopment) {
+          console.warn('⚠️ Token geçersiz veya süresi dolmuş, oturum sonlandırılıyor...');
+        }
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('username');
@@ -77,14 +107,16 @@ api.interceptors.request.use(
           return Promise.reject('Oturum sonlandırıldı: Token geçersiz');
         }
       }
-    } else {
+    } else if (isDevelopment) {
       console.warn('⚠️ İstek için token bulunamadı! API çağrısı yetkilendirme hatası alabilir.');
     }
     
     return logApiCall(config);
   }, 
   error => {
-    console.error('❌ API istek hazırlama hatası:', error);
+    if (isDevelopment) {
+      console.error('❌ API istek hazırlama hatası:', error);
+    }
     return Promise.reject(error);
   }
 );
@@ -92,22 +124,28 @@ api.interceptors.request.use(
 // Cevap interceptor'ü
 api.interceptors.response.use(
   response => {
-    console.log(`✅ API Yanıtı (${response.status}): ${response.config.method.toUpperCase()} ${response.config.url}`);
+    if (isDevelopment) {
+      console.log(`✅ API Yanıtı (${response.status}): ${response.config.method.toUpperCase()} ${response.config.url}`);
+    }
     return response;
   },
   error => {
-    // Hata detaylarını logla
+    // Hata detaylarını logla (production'da daha az detay)
     if (error.response) {
       // Sunucu yanıtı ile dönen hata (400-500 arası)
-      console.error(`❌ API Hata (${error.response.status}): ${error.config.method.toUpperCase()} ${error.config.url}`);
-      
-      if (error.response.data) {
-        console.error('🔍 Hata detayı:', error.response.data);
+      if (isDevelopment) {
+        console.error(`❌ API Hata (${error.response.status}): ${error.config.method.toUpperCase()} ${error.config.url}`);
+        
+        if (error.response.data) {
+          console.error('🔍 Hata detayı:', error.response.data);
+        }
       }
       
       // 401 Unauthorized hatası alındığında (token geçersiz veya expired)
       if (error.response.status === 401) {
-        console.warn('🔐 Kimlik doğrulama hatası, kullanıcı çıkış yapıyor...');
+        if (isDevelopment) {
+          console.warn('🔐 Kimlik doğrulama hatası, kullanıcı çıkış yapıyor...');
+        }
         // Token'ı temizle ve giriş sayfasına yönlendir
         localStorage.removeItem('token');
         localStorage.removeItem('role');
@@ -120,32 +158,36 @@ api.interceptors.response.use(
       }
       
       // 403 Forbidden hatası (yetki sorunu)
-      if (error.response.status === 403) {
+      if (error.response.status === 403 && isDevelopment) {
         console.error('🚫 Yetki hatası: Bu işlemi yapmak için yetkiniz yok.');
-        
-        // Hangi API'ye erişim reddedildi ve hangi metod kullanıldı?
         console.error(`🚫 Erişim reddedilen endpoint: ${error.config.method.toUpperCase()} ${error.config.url}`);
         
-        // Mevcut kullanıcı rolünü logla
         const role = localStorage.getItem('role');
         const username = localStorage.getItem('username');
         if (role) {
           console.error(`👤 Mevcut kullanıcı: ${username}, Rol: ${role}`);
         }
-        
-        // İstek headerlarını kontrol et
         console.log('📋 Gönderilen istek headerları:', error.config.headers);
       }
     } else if (error.request) {
       // İstek yapıldı ancak yanıt alınamadı (bağlantı sorunu)
-      console.error('🔌 Sunucudan yanıt alınamadı. Sunucu çalışıyor mu?', error.request);
+      if (isDevelopment) {
+        console.error('🔌 Sunucudan yanıt alınamadı. Sunucu çalışıyor mu?', error.request);
+      }
     } else {
       // İstek oluşturulurken bir şeyler yanlış gitti
-      console.error('⚠️ API istek oluşturma hatası:', error.message);
+      if (isDevelopment) {
+        console.error('⚠️ API istek oluşturma hatası:', error.message);
+      }
     }
     
     return Promise.reject(error);
   }
 );
+
+// Production'da console'da API base URL'ini göster
+if (isProduction) {
+  console.log(`🌐 API Base URL: ${getBaseURL()}`);
+}
 
 export default api; 

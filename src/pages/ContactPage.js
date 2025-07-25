@@ -111,10 +111,10 @@ function ContactPage() {
 
         <div className="contact-info">
           <h2>İletişim Bilgileri</h2>
-          <p><strong>Telefon:</strong> +90 555 555 55 55</p>
+          <p><strong>Telefon:</strong> 0 (312) 491 36 30</p>
           <p><strong>E-posta:</strong> info@erdalguda.com</p>
-          <p><strong>Adres:</strong> Nişantaşı, İstanbul</p>
-          <p><strong>Çalışma Saatleri:</strong><br />Pazartesi - Cumartesi: 09:00 - 19:00<br />Pazar: Kapalı</p>
+          <p><strong>Adres:</strong> Nezihe Hanım Apartmanı, Yukarı Dikmen, Ürdün Cd. 3/A, 06450 Çankaya/Ankara</p>
+          <p><strong>Çalışma Saatleri:</strong><br />Pazartesi - Cumartesi: 09:30 - 19:00<br />Pazar: Kapalı</p>
         </div>
       </div>
 

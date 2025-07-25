@@ -14,40 +14,70 @@ import {
   FaEnvelope,
   FaUsersCog
 } from 'react-icons/fa';
-import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Tooltip, Avatar, IconButton, Badge } from '@mui/material';
+import { 
+  Box, 
+  Typography, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Divider, 
+  Tooltip, 
+  Avatar, 
+  IconButton, 
+  Badge,
+  useTheme,
+  useMediaQuery
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 
+// Responsive constants
+const SIDEBAR_WIDTH = 280;
+const SIDEBAR_COLLAPSED_WIDTH = 80;
+
 // Stillendirilmiş bileşenler
-const SidebarContainer = styled(Box)(({ theme, iscollapsed }) => ({
-  width: iscollapsed === 'true' ? '80px' : '280px',
+const SidebarContainer = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
+  width: iscollapsed === 'true' && ismobile !== 'true' ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
   height: '100vh',
   background: 'linear-gradient(180deg, #1A2C42 0%, #0B1625 100%)',
   color: '#fff',
-  position: 'fixed',
+  position: ismobile === 'true' ? 'relative' : 'fixed',
   left: 0,
   top: 0,
   display: 'flex',
   flexDirection: 'column',
-  transition: 'width 0.3s ease',
+  transition: theme.transitions.create(['width'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
   boxShadow: '0 0 20px rgba(0, 0, 0, 0.2)',
   zIndex: 1000,
-  overflow: 'hidden'
+  overflow: 'hidden',
+  [theme.breakpoints.down('md')]: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+  },
 }));
 
-const Logo = styled(Box)(({ theme, iscollapsed }) => ({
+const Logo = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: iscollapsed === 'true' ? 'center' : 'flex-start',
-  padding: iscollapsed === 'true' ? '20px 0' : '24px 20px',
+  justifyContent: (iscollapsed === 'true' && ismobile !== 'true') ? 'center' : 'flex-start',
+  padding: (iscollapsed === 'true' && ismobile !== 'true') ? '20px 0' : '24px 20px',
   borderBottom: '1px solid rgba(255,255,255,0.1)',
   background: 'linear-gradient(90deg, rgba(40, 60, 80, 0.6) 0%, rgba(20, 30, 50, 0.3) 100%)',
   boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
   height: '80px',
+  [theme.breakpoints.down('md')]: {
+    padding: '24px 20px',
+    justifyContent: 'flex-start',
+  },
 }));
 
-const LogoText = styled(Typography)(({ theme }) => ({
+const LogoText = styled(Typography)(({ theme, iscollapsed, ismobile }) => ({
   fontWeight: 700,
   fontSize: '1.5rem',
   backgroundImage: 'linear-gradient(90deg, #64B5F6 0%, #81C784 100%)',
@@ -56,20 +86,28 @@ const LogoText = styled(Typography)(({ theme }) => ({
   WebkitTextFillColor: 'transparent',
   marginLeft: '16px',
   letterSpacing: '0.5px',
+  display: (iscollapsed === 'true' && ismobile !== 'true') ? 'none' : 'block',
+  [theme.breakpoints.down('md')]: {
+    display: 'block',
+  },
 }));
 
-const NavList = styled(List)({
+const NavList = styled(List)(({ theme }) => ({
   padding: '10px 0',
-  flexGrow: 1
-});
+  flexGrow: 1,
+  [theme.breakpoints.down('md')]: {
+    padding: '20px 0',
+  },
+}));
 
-const NavItem = styled(ListItem)(({ theme, isactive }) => ({
-  padding: '12px 20px',
+const NavItem = styled(ListItem)(({ theme, isactive, iscollapsed, ismobile }) => ({
+  padding: (iscollapsed === 'true' && ismobile !== 'true') ? '12px 12px' : '12px 20px',
   margin: '4px 10px',
   borderRadius: '10px',
   transition: 'all 0.2s ease',
   backgroundColor: isactive === 'true' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
   position: 'relative',
+  minHeight: 48,
   '&:hover': {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
@@ -85,22 +123,35 @@ const NavItem = styled(ListItem)(({ theme, isactive }) => ({
       backgroundColor: '#4CAF50',
       borderRadius: '0 4px 4px 0'
     }
-  })
+  }),
+  [theme.breakpoints.down('md')]: {
+    padding: '12px 20px',
+    margin: '4px 10px',
+  },
 }));
 
-const NavIcon = styled(ListItemIcon)({
-  minWidth: '36px',
-  color: '#4CAF50'
-});
+const NavIcon = styled(ListItemIcon)(({ theme, iscollapsed, ismobile }) => ({
+  minWidth: (iscollapsed === 'true' && ismobile !== 'true') ? 'auto' : '36px',
+  color: '#4CAF50',
+  justifyContent: 'center',
+  [theme.breakpoints.down('md')]: {
+    minWidth: '36px',
+  },
+}));
 
-const NavText = styled(ListItemText)({
+const NavText = styled(ListItemText)(({ theme, iscollapsed, ismobile }) => ({
   '& .MuiListItemText-primary': {
     color: 'white',
-    fontWeight: 500
-  }
-});
+    fontWeight: 500,
+    fontSize: '0.95rem',
+  },
+  display: (iscollapsed === 'true' && ismobile !== 'true') ? 'none' : 'block',
+  [theme.breakpoints.down('md')]: {
+    display: 'block',
+  },
+}));
 
-const ToggleButton = styled(IconButton)({
+const ToggleButton = styled(IconButton)(({ theme, ismobile }) => ({
   position: 'absolute',
   right: '6px',
   top: '20px',
@@ -113,15 +164,26 @@ const ToggleButton = styled(IconButton)({
   '&:hover': {
     backgroundColor: '#293E58',
     boxShadow: '0 4px 10px rgba(0,0,0,0.4)'
-  }
-});
+  },
+  [theme.breakpoints.down('md')]: {
+    display: 'none',
+  },
+}));
 
-const ProfileSection = styled(Box)(({ theme, iscollapsed }) => ({
-  padding: iscollapsed === 'true' ? '10px 0' : '15px 20px',
+const ProfileSection = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
+  padding: (iscollapsed === 'true' && ismobile !== 'true') ? '10px 0' : '15px 20px',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: iscollapsed === 'true' ? 'center' : 'flex-start',
+  justifyContent: (iscollapsed === 'true' && ismobile !== 'true') ? 'center' : 'flex-start',
+  flexDirection: (iscollapsed === 'true' && ismobile !== 'true') ? 'column' : 'row',
+  gap: (iscollapsed === 'true' && ismobile !== 'true') ? '8px' : '12px',
+  [theme.breakpoints.down('md')]: {
+    padding: '15px 20px',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: '12px',
+  },
 }));
 
 const ProfileAvatar = styled(Avatar)(({ theme }) => ({
@@ -133,6 +195,28 @@ const ProfileAvatar = styled(Avatar)(({ theme }) => ({
   fontSize: '1.2rem',
   fontWeight: 'bold',
   boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+}));
+
+const ProfileInfo = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
+  display: (iscollapsed === 'true' && ismobile !== 'true') ? 'none' : 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  [theme.breakpoints.down('md')]: {
+    display: 'flex',
+  },
+}));
+
+const ProfileName = styled(Typography)(({ theme }) => ({
+  color: 'white',
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  lineHeight: 1.2,
+}));
+
+const ProfileRole = styled(Typography)(({ theme }) => ({
+  color: 'rgba(255, 255, 255, 0.7)',
+  fontSize: '0.75rem',
+  lineHeight: 1.2,
 }));
 
 // Box bileşenine scrollbar'ı gizleyen CSS ekliyorum
@@ -150,19 +234,31 @@ const ScrollBox = styled(Box)(({ theme }) => ({
   msOverflowStyle: 'none',
 }));
 
-const SideBar = ({ onToggle }) => {
+const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) => {
+  const theme = useTheme();
   const location = useLocation();
   const currentPath = location.pathname.split('/')[2] || '';
   const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(isCollapsed);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
   const { user, logout, isAdmin } = useAuth();
+
+  // Collapse durumunu prop'tan al
+  useEffect(() => {
+    setCollapsed(isCollapsed);
+  }, [isCollapsed]);
 
   const handleLogout = (e) => {
     e.preventDefault();
     logout();
     navigate('/');
+  };
+
+  const handleNavClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
   };
 
   // Okunmamış mesaj sayısını almak için
@@ -197,138 +293,180 @@ const SideBar = ({ onToggle }) => {
         fetchPendingUsersCount();
       }
     }, 60000);
-    
+
     return () => clearInterval(interval);
-  }, [user?.role]);
-
-  // Rol bazlı menü öğeleri
-  const allMenuItems = [
-    { path: '', label: 'Genel Bakış', icon: <FaHome size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
-    { path: 'customers', label: 'Müşteriler', icon: <FaUser size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
-    { path: 'orders', label: 'Siparişler', icon: <FaTshirt size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
-    { 
-      path: 'messages', 
-      label: 'Mesajlar', 
-      icon: 
-        <Badge badgeContent={unreadCount} color="error" max={99} sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }}>
-          <FaEnvelope size={18} />
-        </Badge>,
-      roles: ['ADMIN']
-    },
-    { 
-      path: 'user-management', 
-      label: 'Kullanıcı Yönetimi', 
-      icon: 
-        <Badge badgeContent={pendingUsersCount} color="warning" max={99} sx={{ '& .MuiBadge-badge': { fontSize: '0.7rem' } }}>
-          <FaUsersCog size={18} />
-        </Badge>,
-      roles: ['ADMIN']
-    },
-    { path: 'blog', label: 'Blog Yönetimi', icon: <FaBlog size={18} />, roles: ['ADMIN'] },
-    { path: 'settings', label: 'Ayarlar', icon: <FaCogs size={18} />, roles: ['ADMIN', 'USTA', 'MUHASEBECI'] },
-  ];
-
-  // Kullanıcının rolüne göre menü öğelerini filtrele
-  const menuItems = allMenuItems.filter((item) => 
-    item.roles.includes(user?.role)
-  );
+  }, [user]);
 
   const toggleSidebar = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
-    if (onToggle) {
-      onToggle(newState ? '80px' : '280px');
+    if (!isMobile) {
+      const newCollapsed = !collapsed;
+      setCollapsed(newCollapsed);
+      onToggle(newCollapsed);
+    }
+  };
+
+  const menuItems = [
+    { path: '', icon: FaHome, label: 'Genel Bakış' },
+    { path: 'customers', icon: FaUser, label: 'Müşteriler' },
+    { path: 'orders', icon: FaTshirt, label: 'Siparişler' },
+    { path: 'messages', icon: FaEnvelope, label: 'Mesajlar', badge: unreadCount },
+    { path: 'blog', icon: FaBlog, label: 'Blog Yönetimi' },
+    ...(user?.role === 'ADMIN' ? [{ path: 'managers', icon: FaUsersCog, label: 'Kullanıcı Yönetimi', badge: pendingUsersCount }] : []),
+    { path: 'settings', icon: FaCogs, label: 'Ayarlar' },
+  ];
+
+  const getRoleText = (role) => {
+    switch (role) {
+      case 'ADMIN':
+        return 'Yönetici';
+      case 'USTA':
+        return 'Usta';
+      case 'MUHASEBECI':
+        return 'Muhasebeci';
+      default:
+        return 'Kullanıcı';
     }
   };
 
   return (
-    <SidebarContainer iscollapsed={isCollapsed ? 'true' : 'false'}>
-      <Logo iscollapsed={isCollapsed ? 'true' : 'false'}>
-        {isCollapsed ? (
-          <ProfileAvatar sx={{ width: 40, height: 40, fontSize: '1rem' }}>EG</ProfileAvatar>
-        ) : (
-          <>
-            <ProfileAvatar>EG</ProfileAvatar>
-            <LogoText variant="h6">Erdal Güda</LogoText>
-          </>
-        )}
+    <SidebarContainer 
+      iscollapsed={collapsed.toString()} 
+      ismobile={isMobile.toString()}
+    >
+      <Logo 
+        iscollapsed={collapsed.toString()} 
+        ismobile={isMobile.toString()}
+      >
+        <Avatar
+          src="/img/logo.png"
+          alt="Erdal Güda"
+          sx={{ 
+            width: 40, 
+            height: 40, 
+            bgcolor: '#4CAF50',
+            border: '2px solid rgba(255,255,255,0.3)'
+          }}
+        />
+        <LogoText 
+          variant="h6" 
+          iscollapsed={collapsed.toString()} 
+          ismobile={isMobile.toString()}
+        >
+          Erdal Güda
+        </LogoText>
       </Logo>
 
-      <ToggleButton size="small" onClick={toggleSidebar}>
-        {isCollapsed ? <FaChevronRight size={16} /> : <FaChevronLeft size={16} />}
-      </ToggleButton>
-      
+      {!isMobile && (
+        <ToggleButton 
+          onClick={toggleSidebar}
+          ismobile={isMobile.toString()}
+        >
+          {collapsed ? <FaChevronRight size={14} /> : <FaChevronLeft size={14} />}
+        </ToggleButton>
+      )}
+
       <ScrollBox>
         <NavList>
-          {menuItems.map((item) => (
+          {menuItems.map((item, index) => (
             <Tooltip 
-              key={item.path} 
-              title={isCollapsed ? item.label : ""}
+              key={index} 
+              title={collapsed && !isMobile ? item.label : ""} 
               placement="right"
-              arrow
-              disableHoverListener={!isCollapsed}
             >
-              <NavItem 
-                isactive={currentPath === item.path ? 'true' : 'false'}
-                component={Link} 
+              <NavItem
+                component={Link}
                 to={`/admin/${item.path}`}
-                button="true"
+                isactive={(currentPath === item.path).toString()}
+                iscollapsed={collapsed.toString()}
+                ismobile={isMobile.toString()}
+                onClick={handleNavClick}
               >
-                <NavIcon>{item.icon}</NavIcon>
-                {!isCollapsed && <NavText primary={item.label} />}
+                <NavIcon 
+                  iscollapsed={collapsed.toString()}
+                  ismobile={isMobile.toString()}
+                >
+                  {item.badge && item.badge > 0 ? (
+                    <Badge 
+                      badgeContent={item.badge} 
+                      color="error"
+                      max={99}
+                    >
+                      <item.icon size={20} />
+                    </Badge>
+                  ) : (
+                    <item.icon size={20} />
+                  )}
+                </NavIcon>
+                <NavText 
+                  primary={item.label}
+                  iscollapsed={collapsed.toString()}
+                  ismobile={isMobile.toString()}
+                />
               </NavItem>
             </Tooltip>
           ))}
         </NavList>
       </ScrollBox>
-      
-      <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
-      
-      <ProfileSection iscollapsed={isCollapsed ? 'true' : 'false'}>
-        {isCollapsed ? (
-          <Tooltip title="Çıkış Yap" placement="right">
-            <IconButton 
-              sx={{ 
-                color: 'white', 
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' } 
-              }}
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt size={18} />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <>
-            <Box sx={{ mr: 2 }}>
-              <ProfileAvatar>{user?.username?.charAt(0) || 'U'}</ProfileAvatar>
-            </Box>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'white' }}>
-                {user?.username || 'Kullanıcı'}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                {user?.userType === 'ADMIN' 
-                  ? (user?.role === 'ADMIN' ? 'Yönetici' : user?.role === 'USTA' ? 'Usta' : 'Muhasebeci')
-                  : 'Kullanıcı'
-                }
-              </Typography>
-            </Box>
-            <Tooltip title="Çıkış Yap">
-              <IconButton 
-                sx={{ 
-                  color: 'white', 
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' } 
-                }}
-                onClick={handleLogout}
-              >
-                <FaSignOutAlt size={18} />
-              </IconButton>
-            </Tooltip>
-          </>
-        )}
+
+      <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+
+      <ProfileSection 
+        iscollapsed={collapsed.toString()} 
+        ismobile={isMobile.toString()}
+      >
+        <ProfileAvatar>
+          {user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'EG'}
+        </ProfileAvatar>
+        <ProfileInfo 
+          iscollapsed={collapsed.toString()} 
+          ismobile={isMobile.toString()}
+        >
+          <ProfileName>
+            {user?.firstName || 'Erdal'} {user?.lastName || 'Güda'}
+          </ProfileName>
+          <ProfileRole>
+            {getRoleText(user?.role)}
+          </ProfileRole>
+        </ProfileInfo>
       </ProfileSection>
+
+      <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+
+      <Box sx={{ p: 1 }}>
+        <Tooltip 
+          title={collapsed && !isMobile ? "Çıkış Yap" : ""} 
+          placement="right"
+        >
+          <NavItem 
+            onClick={handleLogout}
+            iscollapsed={collapsed.toString()}
+            ismobile={isMobile.toString()}
+            sx={{ 
+              '&:hover': { 
+                backgroundColor: 'rgba(244, 67, 54, 0.1)' 
+              } 
+            }}
+          >
+            <NavIcon 
+              iscollapsed={collapsed.toString()}
+              ismobile={isMobile.toString()}
+              sx={{ color: '#f44336' }}
+            >
+              <FaSignOutAlt size={20} />
+            </NavIcon>
+            <NavText 
+              primary="Çıkış Yap"
+              iscollapsed={collapsed.toString()}
+              ismobile={isMobile.toString()}
+              sx={{ 
+                '& .MuiListItemText-primary': { 
+                  color: '#f44336' 
+                } 
+              }}
+            />
+          </NavItem>
+        </Tooltip>
+      </Box>
     </SidebarContainer>
   );
 };

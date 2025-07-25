@@ -14,7 +14,13 @@ import {
   TableRow,
   Paper,
   Chip,
-  Divider
+  Divider,
+  useTheme,
+  useMediaQuery,
+
+  Card,
+  CardContent,
+  Stack
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import { 
@@ -116,6 +122,10 @@ const ModernPaper = styled(Paper)({
 
 const Dashboard = () => {
   useDocumentTitle('Genel Bakış');
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   
   const [loading, setLoading] = useState(true);
   const [recentOrders, setRecentOrders] = useState([]);
@@ -288,28 +298,38 @@ const Dashboard = () => {
 
   return (
     <StatsContainer>
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{ px: { xs: 2, md: 3 } }}>
         {/* Header */}
-        <Box sx={{ mb: 6 }}>
-          <Typography variant="h3" sx={{ 
+        <Box sx={{ mb: { xs: 4, md: 6 } }}>
+          <Typography variant={isMobile ? "h4" : "h3"} sx={{ 
             fontWeight: 800,
             color: '#1e293b',
-            mb: 1
+            mb: 1,
+            textAlign: { xs: 'center', md: 'left' }
           }}>
             Genel Bakış
           </Typography>
-          <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 400 }}>
+          <Typography variant={isMobile ? "body1" : "h6"} sx={{ 
+            color: '#64748b', 
+            fontWeight: 400,
+            textAlign: { xs: 'center', md: 'left' }
+          }}>
             İşletmenizin genel performans özeti
           </Typography>
         </Box>
 
         {/* İstatistik Özetleri */}
-        <Box sx={{ mb: 6 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, color: '#1e293b', mb: 3 }}>
+        <Box sx={{ mb: { xs: 4, md: 6 } }}>
+          <Typography variant={isMobile ? "h6" : "h5"} sx={{ 
+            fontWeight: 700, 
+            color: '#1e293b', 
+            mb: 3,
+            textAlign: { xs: 'center', md: 'left' }
+          }}>
             Önemli Metriklerin Özeti
           </Typography>
           
-          <Grid container spacing={4}>
+          <Grid container spacing={{ xs: 2, md: 4 }}>
             <Grid item xs={12} sm={6} md={4}>
               <StatItem gradient="linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)">
                 <IconBox bgcolor="#10B981" className="icon-box">
@@ -444,69 +464,75 @@ const Dashboard = () => {
           </Grid>
         </Box>
 
-        <Divider sx={{ my: 6 }} />
+        <Divider sx={{ my: { xs: 4, md: 6 } }} />
 
         {/* Son Siparişler Tablosu */}
-        <ModernPaper sx={{ mb: 6 }}>
-          <Box sx={{ p: 4, borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
-            <Typography variant="h5" sx={{ 
+        <ModernPaper sx={{ mb: { xs: 4, md: 6 } }}>
+          <Box sx={{ p: { xs: 3, md: 4 }, borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
+            <Typography variant={isMobile ? "h6" : "h5"} sx={{ 
               fontWeight: 700,
               color: '#1e293b',
-              mb: 1
+              mb: 1,
+              textAlign: { xs: 'center', md: 'left' }
             }}>
               Son Eklenen Siparişler
             </Typography>
-            <Typography variant="body1" sx={{ color: '#64748b' }}>
+            <Typography variant="body1" sx={{ 
+              color: '#64748b',
+              textAlign: { xs: 'center', md: 'left' }
+            }}>
               En son alınan 10 sipariş
             </Typography>
           </Box>
           
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Sipariş No</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Müşteri</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Ürün Tipi</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Tarih</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Tutar</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Durum</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {recentOrders.length > 0 ? (
-                  recentOrders.map((order) => (
-                    <TableRow key={order.id} sx={{ 
-                      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
-                      '&:last-child td': { border: 0 },
-                      transition: 'all 0.2s ease'
-                    }}>
-                      <TableCell sx={{ fontWeight: 600, color: '#1e293b', borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>#{order.id}</TableCell>
-                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar 
-                            sx={{ 
-                              width: 36, 
-                              height: 36, 
-                              bgcolor: '#667eea', 
-                              mr: 2,
-                              fontSize: '0.875rem',
-                              fontWeight: 600
-                            }}
-                          >
-                            {order.customerName ? order.customerName.split(' ').map(n => n.charAt(0)).join('').slice(0, 2) : 'BM'}
-                          </Avatar>
-                          <Typography variant="body2" sx={{ fontWeight: 500, color: '#1e293b' }}>
-                            {order.customerName || 'Bilinmeyen Müşteri'}
+          {/* Desktop Table View */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Sipariş No</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Müşteri</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Ürün Tipi</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Tarih</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Tutar</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#374151', fontSize: '0.875rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>Durum</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {recentOrders.length > 0 ? (
+                    recentOrders.map((order) => (
+                      <TableRow key={order.id} sx={{ 
+                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.02)' },
+                        '&:last-child td': { border: 0 },
+                        transition: 'all 0.2s ease'
+                      }}>
+                        <TableCell sx={{ fontWeight: 600, color: '#1e293b', borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>#{order.id}</TableCell>
+                        <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar 
+                              sx={{ 
+                                width: 36, 
+                                height: 36, 
+                                bgcolor: '#667eea', 
+                                mr: 2,
+                                fontSize: '0.875rem',
+                                fontWeight: 600
+                              }}
+                            >
+                              {order.customerName ? order.customerName.split(' ').map(n => n.charAt(0)).join('').slice(0, 2) : 'BM'}
+                            </Avatar>
+                            <Typography variant="body2" sx={{ fontWeight: 500, color: '#1e293b' }}>
+                              {order.customerName || 'Bilinmeyen Müşteri'}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                          <Typography variant="body2" sx={{ color: '#64748b' }}>
+                            {order.productType || 'Belirtilmemiş'}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
-                        <Typography variant="body2" sx={{ color: '#64748b' }}>
-                          {order.productType || 'Belirtilmemiş'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
+                        </TableCell>
+                        <TableCell sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.04)' }}>
                         <Typography variant="body2" sx={{ color: '#64748b' }}>
                           {order.orderDate ? new Date(order.orderDate).toLocaleDateString('tr-TR') : '-'}
                         </Typography>
@@ -544,6 +570,93 @@ const Dashboard = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          </Box>
+
+          {/* Mobile Card View */}
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            <Box sx={{ p: { xs: 2, md: 3 } }}>
+              {recentOrders.length > 0 ? (
+                <Stack spacing={2}>
+                  {recentOrders.map((order) => (
+                    <Card key={order.id} sx={{ 
+                      borderRadius: 2, 
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                        transform: 'translateY(-2px)'
+                      }
+                    }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar
+                              sx={{ 
+                                width: 36, 
+                                height: 36, 
+                                bgcolor: '#667eea',
+                                fontSize: '0.875rem',
+                                fontWeight: 600
+                              }}
+                            >
+                              {order.customerName ? order.customerName.split(' ').map(n => n.charAt(0)).join('').slice(0, 2) : 'BM'}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                                {order.customerName || 'Bilinmeyen Müşteri'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                #{order.id}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Chip 
+                            label={getStatusText(order.status)}
+                            size="small"
+                            sx={{
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              color: getStatusColor(order.status),
+                              backgroundColor: alpha(getStatusColor(order.status), 0.1),
+                              border: `1px solid ${alpha(getStatusColor(order.status), 0.3)}`
+                            }}
+                          />
+                        </Box>
+                        
+                        <Divider sx={{ my: 1.5 }} />
+                        
+                        <Grid container spacing={1}>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Ürün:</strong> {order.productType || 'Belirtilmemiş'}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Tutar:</strong> {order.totalPrice ? formatCurrency(order.totalPrice) : '₺0'}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Tarih:</strong> {order.orderDate ? new Date(order.orderDate).toLocaleDateString('tr-TR') : '-'}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Stack>
+              ) : (
+                <Card sx={{ borderRadius: 2, textAlign: 'center', py: 6 }}>
+                  <CardContent>
+                    <Typography variant="h6" color="text.secondary">
+                      Henüz sipariş bulunmuyor
+                    </Typography>
+                  </CardContent>
+                </Card>
+              )}
+            </Box>
+          </Box>
         </ModernPaper>
 
         {/* Sipariş Durumları Grafiği */}
@@ -564,7 +677,7 @@ const Dashboard = () => {
           }
         }}>
           <Box sx={{ 
-            p: 4, 
+            p: { xs: 3, md: 4 }, 
             borderBottom: '1px solid rgba(102, 126, 234, 0.08)',
             background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(255, 255, 255, 0.5) 100%)',
             position: 'relative',
@@ -577,7 +690,7 @@ const Dashboard = () => {
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 borderRadius: '3px'
               }} />
-              <Typography variant="h5" sx={{ 
+              <Typography variant={isMobile ? "h6" : "h5"} sx={{ 
                 fontWeight: 700,
                 color: '#1e293b',
                 background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)',
@@ -598,8 +711,8 @@ const Dashboard = () => {
           </Box>
           
           <Box sx={{ 
-            p: 4, 
-            height: 450,
+            p: { xs: 2, md: 4 }, 
+            height: { xs: 300, md: 450 },
             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(248, 250, 252, 0.8) 100%)',
             position: 'relative',
             '&::before': {

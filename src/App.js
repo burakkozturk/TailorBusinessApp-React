@@ -53,7 +53,7 @@ function App() {
             {/* Sadece Admin Erişimi Olan Sayfalar */}
             <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
             <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
-            <Route path="user-management" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
+            <Route path="managers" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
             
             {/* Tüm roller erişebilir */}
             <Route path="settings" element={<AdminSettings />} />

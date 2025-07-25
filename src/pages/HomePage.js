@@ -15,7 +15,7 @@ function HomePage() {
   return (
     <div className="home-page">
       <Navbar />
-      <HeroSlider />
+      <HeroSlider contactRoute="/randevu" />
       <About />
       <Services />
       <HomeGallerySlider />

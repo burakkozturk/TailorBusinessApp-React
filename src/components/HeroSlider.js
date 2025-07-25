@@ -23,7 +23,7 @@ const slides = [
   }
 ];
 
-function HeroSlider() {
+function HeroSlider({ contactRoute = '/contact' }) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ function HeroSlider() {
         <h2 className="hero-subtitle">{slides[current].subtitle}</h2>
         <h1 className="hero-title">{slides[current].title}</h1>
         <p className="hero-description">{slides[current].description}</p>
-        <Link to="/contact" className="btn-primary btn-large">RANDEVU AL</Link>
+        <a href="tel:+903124913630" className="btn-primary btn-large">RANDEVU AL</a>
       </div>
     </div>
   );

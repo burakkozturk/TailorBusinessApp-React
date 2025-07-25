@@ -34,7 +34,10 @@ import {
   CardContent,
   Container,
   Badge,
-  Grid
+  Grid,
+  Stack,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import { 
@@ -157,6 +160,10 @@ const getRoleLabel = (role) => {
 
 function UserManagement() {
   useDocumentTitle('Kullanıcı Yönetimi');
+  
+  // Responsive hooks
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Existing user management states
   const [users, setUsers] = useState([]);
@@ -418,24 +425,41 @@ function UserManagement() {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        <CardContent sx={{ py: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <CardContent sx={{ py: { xs: 3, md: 4 } }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', md: 'row' },
+            textAlign: { xs: 'center', md: 'left' },
+            gap: { xs: 2, md: 0 }
+          }}>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center' }}>
-                <AdminPanelSettings sx={{ mr: 2, fontSize: '2.5rem' }} />
+              <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ 
+                fontWeight: 700, 
+                mb: 1, 
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: { xs: 'center', md: 'flex-start' }
+              }}>
+                <AdminPanelSettings sx={{ mr: 2, fontSize: { xs: '2rem', md: '2.5rem' } }} />
                 Kullanıcı Yönetimi
               </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
+              <Typography variant="body1" sx={{ 
+                opacity: 0.9, 
+                fontSize: { xs: '1rem', md: '1.1rem' },
+                maxWidth: { xs: '100%', md: '500px' }
+              }}>
                 Sistem kullanıcılarını yönetin, yeni hesaplar oluşturun ve onay bekleyen kullanıcıları değerlendirin
               </Typography>
             </Box>
             <Avatar sx={{ 
-              width: 80, 
-              height: 80, 
+              width: { xs: 60, md: 80 }, 
+              height: { xs: 60, md: 80 }, 
               backgroundColor: 'rgba(255,255,255,0.2)',
               backdropFilter: 'blur(10px)'
             }}>
-              <AdminPanelSettings sx={{ fontSize: '2.5rem' }} />
+              <AdminPanelSettings sx={{ fontSize: { xs: '2rem', md: '2.5rem' } }} />
             </Avatar>
           </Box>
         </CardContent>
@@ -443,7 +467,7 @@ function UserManagement() {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ 
             borderRadius: '12px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
@@ -452,21 +476,21 @@ function UserManagement() {
           }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                   {users.length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Toplam Kullanıcı
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'primary.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 48, md: 56 }, height: { xs: 48, md: 56 } }}>
                 <Person />
               </Avatar>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ 
             borderRadius: '12px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
@@ -475,21 +499,21 @@ function UserManagement() {
           }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 'bold', color: 'error.main' }}>
                   {users.filter(u => u.role === 'ADMIN').length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Yöneticiler
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'error.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'error.main', width: { xs: 48, md: 56 }, height: { xs: 48, md: 56 } }}>
                 <AdminPanelSettings />
               </Avatar>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ 
             borderRadius: '12px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
@@ -498,21 +522,21 @@ function UserManagement() {
           }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 'bold', color: 'warning.main' }}>
                   {users.filter(u => u.role === 'USTA').length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Ustalar
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'warning.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'warning.main', width: { xs: 48, md: 56 }, height: { xs: 48, md: 56 } }}>
                 <Build />
               </Avatar>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ 
             borderRadius: '12px', 
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
@@ -521,14 +545,14 @@ function UserManagement() {
           }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
                   {pendingUsers.length}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Onay Bekleyen
                 </Typography>
               </Box>
-              <Avatar sx={{ bgcolor: 'secondary.main', width: 56, height: 56 }}>
+              <Avatar sx={{ bgcolor: 'secondary.main', width: { xs: 48, md: 56 }, height: { xs: 48, md: 56 } }}>
                 <PendingActions />
               </Avatar>
             </CardContent>
@@ -593,29 +617,32 @@ function UserManagement() {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                {tabValue === 4 ? (
-                  // Onay bekleyen kullanıcılar için başlıklar
-                  <>
-                    <StyledTableCell>Kullanıcı Bilgileri</StyledTableCell>
-                    <StyledTableCell>İletişim</StyledTableCell>
-                    <StyledTableCell>Rol & Tarih</StyledTableCell>
-                    <StyledTableCell align="right">İşlemler</StyledTableCell>
-                  </>
-                ) : (
-                  // Normal kullanıcılar için başlıklar
-                  <>
-                    <StyledTableCell>Kullanıcı</StyledTableCell>
-                    <StyledTableCell>Rol</StyledTableCell>
-                    <StyledTableCell align="right">İşlemler</StyledTableCell>
-                  </>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <>
+          {/* Desktop Table View */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <TableContainer component={Paper} sx={{ borderRadius: '12px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)' }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    {tabValue === 4 ? (
+                      // Onay bekleyen kullanıcılar için başlıklar
+                      <>
+                        <StyledTableCell>Kullanıcı Bilgileri</StyledTableCell>
+                        <StyledTableCell>İletişim</StyledTableCell>
+                        <StyledTableCell>Rol & Tarih</StyledTableCell>
+                        <StyledTableCell align="right">İşlemler</StyledTableCell>
+                      </>
+                    ) : (
+                      // Normal kullanıcılar için başlıklar
+                      <>
+                        <StyledTableCell>Kullanıcı</StyledTableCell>
+                        <StyledTableCell>Rol</StyledTableCell>
+                        <StyledTableCell align="right">İşlemler</StyledTableCell>
+                      </>
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
               {filteredUsers.length === 0 ? (
                 <StyledTableRow>
                   <TableCell colSpan={tabValue === 4 ? 4 : 3} align="center" sx={{ py: 4 }}>
@@ -760,9 +787,162 @@ function UserManagement() {
                   </StyledTableRow>
                 ))
               )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+
+          {/* Mobile Card View */}
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            {filteredUsers.length === 0 ? (
+              <Card sx={{ borderRadius: 2, textAlign: 'center', py: 8 }}>
+                <CardContent>
+                  <AdminPanelSettings sx={{ fontSize: '4rem', color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    {tabValue === 4 
+                      ? 'Onay bekleyen kullanıcı bulunmuyor' 
+                      : tabValue === 0 
+                      ? 'Henüz bir kullanıcı bulunmuyor' 
+                      : 'Bu rolde kullanıcı bulunmuyor'
+                    }
+                  </Typography>
+                </CardContent>
+              </Card>
+            ) : (
+              <Stack spacing={2}>
+                {filteredUsers.map((user) => (
+                  <Card key={user.id || user.username} sx={{ 
+                    borderRadius: 2, 
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                      transform: 'translateY(-2px)'
+                    }
+                  }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                          <UserAvatar role={user.role}>
+                            {user.username.charAt(0).toUpperCase()}
+                          </UserAvatar>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                              {user.username}
+                            </Typography>
+                            {user.fullName && (
+                              <Typography variant="body2" color="text.secondary">
+                                {user.fullName}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {tabValue === 4 ? (
+                            // Onay bekleyen kullanıcılar için butonlar
+                            <>
+                              <Tooltip title="Kullanıcıyı Onayla" arrow>
+                                <IconButton 
+                                  color="success"
+                                  size="small"
+                                  onClick={() => handleOpenApproveDialog(user)}
+                                  sx={{ 
+                                    backgroundColor: 'success.main',
+                                    color: 'white',
+                                    '&:hover': { backgroundColor: 'success.dark' }
+                                  }}
+                                >
+                                  <CheckCircle fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Başvuruyu Reddet" arrow>
+                                <IconButton 
+                                  color="error"
+                                  size="small"
+                                  onClick={() => handleOpenRejectDialog(user)}
+                                  sx={{ 
+                                    backgroundColor: 'error.main',
+                                    color: 'white',
+                                    '&:hover': { backgroundColor: 'error.dark' }
+                                  }}
+                                >
+                                  <Cancel fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </>
+                          ) : (
+                            // Normal kullanıcılar için sil butonu
+                            user.role !== 'ADMIN' && (
+                              <Tooltip title="Kullanıcıyı Sil" arrow>
+                                <IconButton 
+                                  color="error"
+                                  size="small"
+                                  onClick={() => handleOpenDeleteDialog(user.username)}
+                                  sx={{ 
+                                    backgroundColor: 'error.main',
+                                    color: 'white',
+                                    '&:hover': { backgroundColor: 'error.dark' }
+                                  }}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )
+                          )}
+                        </Box>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <RoleChip 
+                          icon={getRoleIcon(user.role)}
+                          label={getRoleLabel(user.role)} 
+                          role={user.role}
+                          size="small"
+                        />
+                      </Box>
+                      
+                      {tabValue === 4 && (
+                        <Box sx={{ mt: 2 }}>
+                          <Divider sx={{ mb: 2 }} />
+                          <Grid container spacing={1}>
+                            {user.email && (
+                              <Grid item xs={12}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Email sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                  <Typography variant="body2" color="text.secondary">
+                                    {user.email}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                            )}
+                            {user.phone && (
+                              <Grid item xs={12}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Phone sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                  <Typography variant="body2" color="text.secondary">
+                                    {user.phone}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                            )}
+                            <Grid item xs={12}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CalendarToday sx={{ fontSize: 16, color: 'text.secondary' }} />
+                                <Typography variant="body2" color="text.secondary">
+                                  {formatDate(user.createdAt)}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+          </Box>
+        </>
       )}
 
       {/* Yeni Kullanıcı Dialog */}

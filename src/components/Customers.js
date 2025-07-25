@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import {
   Table,
@@ -37,13 +37,16 @@ import {
   InputBase,
   Card,
   CardContent,
-  Badge
+  Badge,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
-import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Event, LocalShipping, Person, Refresh, Groups, PhotoCamera, DeleteOutline, CloudUpload } from '@mui/icons-material';
-import { styled, alpha } from '@mui/material/styles';
+import { Edit, Delete, Search, KeyboardArrowDown, KeyboardArrowUp, Add, Refresh, Groups, PhotoCamera, DeleteOutline, CloudUpload } from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Customers.css';
 import { Order } from '../constants/orderTypes';
+
 
 // Stillendirilmiş bileşenler
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -95,55 +98,12 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
     height: '',
     weight: '',
     address: '',
-    measurements: {
-      chest: '',
-      waist: '',
-      hip: '',
-      shoulder: '',
-      neck: '',
-      leftArm: '',
-      rightArm: '',
-      leftThigh: '',
-      rightThigh: '',
-      leftCalf: '',
-      rightCalf: '',
-      elbowLength: ''
-    }
+
   });
 
   const [loading, setLoading] = useState(false);
 
-  const fetchMeasurements = useCallback(async () => {
-    if (!customer) return;
 
-    try {
-      setLoading(true);
-      const response = await apiService.measurements.getByCustomer(customer.id);
-      if (response.data) {
-        setFormData(prev => ({
-          ...prev,
-          measurements: {
-            chest: response.data.chest || '',
-            waist: response.data.waist || '',
-            hip: response.data.hip || '',
-            shoulder: response.data.shoulder || '',
-            neck: response.data.neck || '',
-            leftArm: response.data.leftArm || '',
-            rightArm: response.data.rightArm || '',
-            leftThigh: response.data.leftThigh || '',
-            rightThigh: response.data.rightThigh || '',
-            leftCalf: response.data.leftCalf || '',
-            rightCalf: response.data.rightCalf || '',
-            elbowLength: response.data.elbowLength || ''
-          }
-        }));
-      }
-    } catch (error) {
-      console.error('Ölçüler yüklenirken hata oluştu:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [customer]);
 
   useEffect(() => {
     if (customer) {
@@ -155,25 +115,10 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
         height: customer.height || '',
         weight: customer.weight || '',
         address: customer.address || '',
-        measurements: {
-          chest: '',
-          waist: '',
-          hip: '',
-          shoulder: '',
-          neck: '',
-          leftArm: '',
-          rightArm: '',
-          leftThigh: '',
-          rightThigh: '',
-          leftCalf: '',
-          rightCalf: '',
-          elbowLength: ''
-        }
-      });
 
-      fetchMeasurements();
+              });
     }
-  }, [customer, fetchMeasurements]);
+  }, [customer]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -183,16 +128,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
     }));
   };
 
-  const handleMeasurementChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      measurements: {
-        ...prev.measurements,
-        [name]: value
-      }
-    }));
-  };
+
 
   const handleSubmit = async () => {
     try {
@@ -204,28 +140,8 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
         height: parseFloat(formData.height),
         weight: parseFloat(formData.weight)
       };
-      delete customerData.measurements;
 
       const customerResponse = await apiService.customers.update(customer.id, customerData);
-
-      // Ölçüleri güncelle
-      const measurementData = {
-        ...formData.measurements,
-        chest: formData.measurements.chest ? parseFloat(formData.measurements.chest) : null,
-        waist: formData.measurements.waist ? parseFloat(formData.measurements.waist) : null,
-        hip: formData.measurements.hip ? parseFloat(formData.measurements.hip) : null,
-        shoulder: formData.measurements.shoulder ? parseFloat(formData.measurements.shoulder) : null,
-        neck: formData.measurements.neck ? parseFloat(formData.measurements.neck) : null,
-        leftArm: formData.measurements.leftArm ? parseFloat(formData.measurements.leftArm) : null,
-        rightArm: formData.measurements.rightArm ? parseFloat(formData.measurements.rightArm) : null,
-        leftThigh: formData.measurements.leftThigh ? parseFloat(formData.measurements.leftThigh) : null,
-        rightThigh: formData.measurements.rightThigh ? parseFloat(formData.measurements.rightThigh) : null,
-        leftCalf: formData.measurements.leftCalf ? parseFloat(formData.measurements.leftCalf) : null,
-        rightCalf: formData.measurements.rightCalf ? parseFloat(formData.measurements.rightCalf) : null,
-        elbowLength: formData.measurements.elbowLength ? parseFloat(formData.measurements.elbowLength) : null
-      };
-
-      await apiService.measurements.update(customer.id, measurementData);
 
       onUpdate(customerResponse.data);
       onClose();
@@ -377,170 +293,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
               sx={inputStyle}
             />
 
-            {/* Ölçüler */}
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              Ölçüler
-            </Typography>
 
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="chest"
-                  label="Göğüs"
-                  type="number"
-                  value={formData.measurements.chest}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="waist"
-                  label="Bel"
-                  type="number"
-                  value={formData.measurements.waist}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="hip"
-                  label="Kalça"
-                  type="number"
-                  value={formData.measurements.hip}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="shoulder"
-                  label="Omuz"
-                  type="number"
-                  value={formData.measurements.shoulder}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="neck"
-                  label="Boyun"
-                  type="number"
-                  value={formData.measurements.neck}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="leftArm"
-                  label="Sol Kol"
-                  type="number"
-                  value={formData.measurements.leftArm}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="rightArm"
-                  label="Sağ Kol"
-                  type="number"
-                  value={formData.measurements.rightArm}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="leftThigh"
-                  label="Sol Uyluk"
-                  type="number"
-                  value={formData.measurements.leftThigh}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="rightThigh"
-                  label="Sağ Uyluk"
-                  type="number"
-                  value={formData.measurements.rightThigh}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="leftCalf"
-                  label="Sol Baldır"
-                  type="number"
-                  value={formData.measurements.leftCalf}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="rightCalf"
-                  label="Sağ Baldır"
-                  type="number"
-                  value={formData.measurements.rightCalf}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  name="elbowLength"
-                  label="Dirsek Uzunluğu"
-                  type="number"
-                  value={formData.measurements.elbowLength}
-                  onChange={handleMeasurementChange}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  sx={inputStyle}
-                />
-              </Grid>
-            </Grid>
           </Stack>
         )}
       </DialogContent>
@@ -590,7 +343,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
   );
 };
 
-export const OrderDialog = ({ open, onClose, customer = null, order = null, onSave }) => {
+export const OrderDialog = ({ open, onClose, customer = null, order = null, onSave, handleFileUpload }) => {
   const [formData, setFormData] = useState({
     productType: order?.productType || 'CEKET',
     status: order?.status || 'PREPARING',
@@ -621,12 +374,34 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const [searchTerm, setSearchTerm] = useState('');
   const [customerInputValue, setCustomerInputValue] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
+  const [measurementOpen, setMeasurementOpen] = useState(false);
   
   // Fotoğraf yükleme state'leri
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageUploading, setImageUploading] = useState(false);
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+
+  // handleFileUpload fonksiyonunu burada tanımla eğer prop olarak gelmediyse
+  const localHandleFileUpload = handleFileUpload || (async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await apiService.measurements.uploadFile(formData);
+      if (response.data.success) {
+        alert('Ölçüler başarıyla yüklendi!');
+      } else {
+        alert('Ölçüler yüklenirken hata oluştu.');
+      }
+    } catch (error) {
+      console.error('Fotoğraf yükleme hatası:', error);
+      alert('Fotoğraf yüklenirken hata oluştu.');
+    }
+  });
 
   useEffect(() => {
     fetchCustomers();
@@ -1122,7 +897,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                    formData.productType === 'TAKIM' ? 'Takım Elbise' : 
                    'Diğer'} Özelleştirmeleri
                 </Typography>
-                <Grid container spacing={2}>
+          <Grid container spacing={2}>
                   {Object.entries(customizationOptions).map(([optionKey, optionValues]) => (
                     <Grid item xs={12} sm={6} md={4} key={optionKey}>
                       <FormControl fullWidth>
@@ -1137,10 +912,10 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                            optionKey === 'ventType' ? 'Yırtmaç Türü' :
                            optionKey === 'backType' ? 'Sırt Türü' : optionKey}
                         </InputLabel>
-                        <Select
+                <Select
                           name={optionKey}
                           value={formData[optionKey] || ''}
-                          onChange={handleChange}
+                  onChange={handleChange}
                           label={optionKey === 'collarType' ? 'Yaka Türü' :
                                  optionKey === 'sleeveType' ? 'Kol Türü' :
                                  optionKey === 'waistType' ? 'Bel Türü' :
@@ -1155,13 +930,13 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                             <em>Seçiniz</em>
                           </MenuItem>
                           {Object.entries(optionValues).map(([key, value]) => (
-                            <MenuItem key={key} value={key}>
-                              {value.displayName}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
+                    <MenuItem key={key} value={key}>
+                      {value.displayName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
                   ))}
                 </Grid>
               </>
@@ -1288,31 +1063,44 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
             {/* Fotoğraf seçimi ve önizleme */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <Button
-                  component="label"
+                <StyledButton
                   variant="outlined"
-                  startIcon={<CloudUpload />}
-                  disabled={imageUploading}
+                  color="primary"
+                  size="small"
+                  onClick={() => setMeasurementOpen(true)}
+                  sx={{
+                    borderColor: 'primary.main',
+                    color: 'primary.main',
+                    '&:hover': {
+                      borderColor: 'primary.dark',
+                      backgroundColor: 'primary.50'
+                    }
+                  }}
                 >
-                  Fotoğraf Seç
+                  Ölçüler
+                </StyledButton>
+                <StyledButton
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  component="label"
+                  sx={{
+                    borderColor: 'primary.main',
+                    color: 'primary.main',
+                    '&:hover': {
+                      borderColor: 'primary.dark',
+                      backgroundColor: 'primary.50'
+                    }
+                  }}
+                >
+                  Fotoğraf Yükle
                   <input
                     type="file"
-                    hidden
                     accept="image/*"
-                    onChange={handleImageChange}
+                    hidden
+                    onChange={localHandleFileUpload}
                   />
-                </Button>
-                
-                {imageFile && (
-                  <Button
-                    variant="contained"
-                    onClick={handleImageUpload}
-                    disabled={imageUploading}
-                    startIcon={imageUploading ? <CircularProgress size={16} /> : <PhotoCamera />}
-                  >
-                    {imageUploading ? 'Yükleniyor...' : 'Yükle'}
-                  </Button>
-                )}
+                </StyledButton>
               </Box>
 
               {/* Önizleme */}
@@ -1388,34 +1176,103 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   );
 };
 
-const Row = ({ customer, onDelete, onEdit }) => {
+const Row = ({ customer, onDelete, onEdit, onSnackbar, onFileUpload }) => {
   const [open, setOpen] = useState(false);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [measurementOpen, setMeasurementOpen] = useState(false);
-  const [measurementValues, setMeasurementValues] = useState({
-    chest: '',
-    waist: '',
-    hip: '',
-    shoulder: '',
-    neck: '',
-    leftArm: '',
-    rightArm: '',
-    leftThigh: '',
-    rightThigh: '',
-    leftCalf: '',
-    rightCalf: '',
-    elbowLength: ''
-  });
+  const [measurements, setMeasurements] = useState([]);
+  const [orderSortBy, setOrderSortBy] = useState('orderDate');
+  const [orderSortOrder, setOrderSortOrder] = useState('desc');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const handleOrderSave = (savedOrder) => {
+    // Sipariş kaydedildikten sonra yapılacak işlemler
+    setOrderDialogOpen(false);
+    if (onSnackbar) {
+      onSnackbar({
+        open: true,
+        message: 'Sipariş başarıyla kaydedildi',
+        severity: 'success'
+      });
+    }
+    // Orders listesini yenile
+    fetchOrders();
+  };
+
+  // Dosya yükleme işlemi
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // OCR ile ölçü verilerini işle
+      const response = await apiService.measurements.uploadFile(customer.id, formData);
+      if (response.data && response.data.success) {
+        if (onSnackbar) {
+          onSnackbar({
+            open: true,
+            message: `${response.data.count || 0} ölçü başarıyla kaydedildi!`,
+            severity: 'success'
+          });
+        }
+        // Ölçüleri yenile
+        fetchMeasurements();
+        // Siparişleri yenile (güncel veriler için)
+        fetchOrders();
+      } else {
+        if (onSnackbar) {
+          onSnackbar({
+            open: true,
+            message: response.data?.error || 'Ölçüler yüklenirken hata oluştu.',
+            severity: 'error'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('OCR yükleme hatası:', error);
+      let errorMessage = 'Fotoğraf yüklenirken hata oluştu.';
+      
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      if (onSnackbar) {
+        onSnackbar({
+          open: true,
+          message: errorMessage,
+          severity: 'error'
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (open) {
       fetchOrders();
-      fetchMeasurements();
     }
   }, [open, customer.id]);
+
+  // Ölçüleri getir
+  const fetchMeasurements = async () => {
+    try {
+      const response = await apiService.measurements.getByCustomer(customer.id);
+      if (response.data && response.data.success) {
+        setMeasurements(response.data.measurements || []);
+      } else {
+        setMeasurements([]);
+      }
+    } catch (error) {
+      console.error('Ölçüler yüklenirken hata oluştu:', error);
+      setMeasurements([]);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
@@ -1433,68 +1290,55 @@ const Row = ({ customer, onDelete, onEdit }) => {
     }
   };
 
-  const fetchMeasurements = async () => {
-    try {
-      const response = await apiService.measurements.getByCustomer(customer.id);
-      if (response.data) {
-        setMeasurementValues({
-          chest: response.data.chest || '',
-          waist: response.data.waist || '',
-          hip: response.data.hip || '',
-          shoulder: response.data.shoulder || '',
-          neck: response.data.neck || '',
-          leftArm: response.data.leftArm || '',
-          rightArm: response.data.rightArm || '',
-          leftThigh: response.data.leftThigh || '',
-          rightThigh: response.data.rightThigh || '',
-          leftCalf: response.data.leftCalf || '',
-          rightCalf: response.data.rightCalf || '',
-          elbowLength: response.data.elbowLength || ''
-        });
-      }
-    } catch (error) {
-      console.error('Ölçüler yüklenirken hata oluştu:', error);
-    }
-  };
 
-  const handleMeasurementChange = (e) => {
-    const { name, value } = e.target;
-    setMeasurementValues(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
-  const handleMeasurementSubmit = async () => {
-    try {
-      const method = orders.length > 0 ? 'put' : 'post';
-      const response = method === 'put' 
-        ? await apiService.measurements.update(customer.id, measurementValues)
-        : await apiService.measurements.create(measurementValues);
-      if (method === 'put') {
-        setOrders(prevOrders =>
-          prevOrders.map(o => o.id === response.data.id ? response.data : o)
-        );
-      } else {
-        setOrders(prevOrders => [response.data, ...prevOrders]);
-      }
-      setMeasurementOpen(false);
-      alert('Ölçüler başarıyla kaydedildi');
-    } catch (error) {
-      console.error('Ölçüler kaydedilirken hata oluştu:', error);
-      alert('Ölçüler kaydedilirken bir hata oluştu');
-    }
-  };
+
+
+
 
   const handleOrderClick = (order) => {
     setSelectedOrder(order);
     setOrderDialogOpen(true);
   };
 
-  const handleOrderSave = (savedOrder) => {
-    fetchOrders();
-    setOrderDialogOpen(false);
+  const handleOrderSort = (field) => {
+    const newOrder = orderSortBy === field && orderSortOrder === 'asc' ? 'desc' : 'asc';
+    setOrderSortBy(field);
+    setOrderSortOrder(newOrder);
   };
+
+  // Sıralanmış siparişler
+  const sortedOrders = [...orders].sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (orderSortBy) {
+      case 'orderDate':
+        aValue = new Date(a.orderDate || a.createdAt);
+        bValue = new Date(b.orderDate || b.createdAt);
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'totalPrice':
+        aValue = a.totalPrice || 0;
+        bValue = b.totalPrice || 0;
+        break;
+      case 'estimatedDeliveryDate':
+        aValue = new Date(a.estimatedDeliveryDate || '9999-12-31');
+        bValue = new Date(b.estimatedDeliveryDate || '9999-12-31');
+        break;
+      default:
+        aValue = new Date(a.orderDate || a.createdAt);
+        bValue = new Date(b.orderDate || b.createdAt);
+    }
+    
+    if (orderSortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -1606,27 +1450,44 @@ const Row = ({ customer, onDelete, onEdit }) => {
                 <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
                   Müşteri Detayı
                 </Typography>
-                <Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
                   <StyledButton
                     variant="outlined"
                     color="primary"
                     size="small"
                     onClick={() => setMeasurementOpen(true)}
-                    sx={{ mr: 1 }}
+                    sx={{
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
+                      '&:hover': {
+                        borderColor: 'primary.dark',
+                        backgroundColor: 'primary.50'
+                      }
+                    }}
                   >
                     Ölçüler
                   </StyledButton>
                   <StyledButton
-                    variant="contained"
+                    variant="outlined"
                     color="primary"
                     size="small"
-                    startIcon={<Event />}
-                    onClick={() => {
-                      setSelectedOrder(null);
-                      setOrderDialogOpen(true);
+                    component="label"
+                    sx={{
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
+                      '&:hover': {
+                        borderColor: 'primary.dark',
+                        backgroundColor: 'primary.50'
+                      }
                     }}
                   >
-                    Yeni Sipariş
+                    Fotoğraf Yükle
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handleFileUpload}
+                    />
                   </StyledButton>
                 </Box>
               </Box>
@@ -1634,14 +1495,53 @@ const Row = ({ customer, onDelete, onEdit }) => {
               <Divider sx={{ mb: 2 }} />
               
               {/* Siparişler Listesi */}
-              <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', mt: 3 }}>
-                Siparişler
-              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', mt: 3 }}>
+                  Siparişler
+                </Typography>
+                {orders.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      size="small"
+                      onClick={() => handleOrderSort('orderDate')}
+                      sx={{ 
+                        minWidth: 'auto',
+                        color: orderSortBy === 'orderDate' ? 'primary.main' : 'text.secondary',
+                        fontWeight: orderSortBy === 'orderDate' ? 'bold' : 'normal'
+                      }}
+                    >
+                      Tarih {orderSortBy === 'orderDate' && (orderSortOrder === 'asc' ? '↑' : '↓')}
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => handleOrderSort('status')}
+                      sx={{ 
+                        minWidth: 'auto',
+                        color: orderSortBy === 'status' ? 'primary.main' : 'text.secondary',
+                        fontWeight: orderSortBy === 'status' ? 'bold' : 'normal'
+                      }}
+                    >
+                      Durum {orderSortBy === 'status' && (orderSortOrder === 'asc' ? '↑' : '↓')}
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => handleOrderSort('totalPrice')}
+                      sx={{ 
+                        minWidth: 'auto',
+                        color: orderSortBy === 'totalPrice' ? 'primary.main' : 'text.secondary',
+                        fontWeight: orderSortBy === 'totalPrice' ? 'bold' : 'normal'
+                      }}
+                    >
+                      Tutar {orderSortBy === 'totalPrice' && (orderSortOrder === 'asc' ? '↑' : '↓')}
+                    </Button>
+                  </Box>
+                )}
+              </Box>
               
               {orders.length > 0 ? (
                 <Box sx={{ mt: 2 }}>
                   <Grid container spacing={2}>
-                    {orders.map((order) => (
+                    {sortedOrders.map((order) => (
                       <Grid item xs={12} sm={6} md={4} lg={3} key={order.id}>
                         <Paper
                           elevation={2}
@@ -1703,218 +1603,16 @@ const Row = ({ customer, onDelete, onEdit }) => {
                   {loading ? 'Siparişler yükleniyor...' : 'Bu müşteriye ait sipariş bulunamadı.'}
                 </Typography>
               )}
-              
-              {/* Ölçü Modalı */}
-              <Dialog 
-                open={measurementOpen} 
+
+              {/* Ölçü Modal */}
+              <MeasurementModal
+                open={measurementOpen}
                 onClose={() => setMeasurementOpen(false)}
-                PaperProps={{
-                  sx: { borderRadius: 3 }
-                }}
-                maxWidth="md"
-                fullWidth
-              >
-                <DialogTitle sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-                  <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                    Ölçüler: {customer.firstName} {customer.lastName}
-                  </Typography>
-                </DialogTitle>
-                <DialogContent sx={{ pt: 3 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="chest"
-                        label="Göğüs"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.chest}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="waist"
-                        label="Bel"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.waist}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="hip"
-                        label="Kalça"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.hip}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="shoulder"
-                        label="Omuz"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.shoulder}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="neck"
-                        label="Boyun"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.neck}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="leftArm"
-                        label="Sol Kol"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.leftArm}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="rightArm"
-                        label="Sağ Kol"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.rightArm}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="leftThigh"
-                        label="Sol Uyluk"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.leftThigh}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="rightThigh"
-                        label="Sağ Uyluk"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.rightThigh}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="leftCalf"
-                        label="Sol Baldır"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.leftCalf}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="rightCalf"
-                        label="Sağ Baldır"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.rightCalf}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        name="elbowLength"
-                        label="Dirsek Uzunluğu"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={measurementValues.elbowLength}
-                        onChange={handleMeasurementChange}
-                        InputProps={{
-                          endAdornment: <InputAdornment position="end">cm</InputAdornment>,
-                        }}
-                        sx={{ mb: 2 }}
-                      />
-                    </Grid>
-                  </Grid>
-                </DialogContent>
-                <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
-                  <Button onClick={() => setMeasurementOpen(false)}>İptal</Button>
-                  <StyledButton
-                    onClick={handleMeasurementSubmit}
-                    color="primary"
-                    variant="contained"
-                  >
-                    Kaydet
-                  </StyledButton>
-                </DialogActions>
-              </Dialog>
-              
+                customer={customer}
+                measurements={measurements}
+                onMeasurementsUpdate={fetchMeasurements}
+              />
+
               {/* Sipariş Modal */}
               <OrderDialog
                 open={orderDialogOpen}
@@ -1922,6 +1620,7 @@ const Row = ({ customer, onDelete, onEdit }) => {
                 customer={customer}
                 order={selectedOrder}
                 onSave={handleOrderSave}
+                handleFileUpload={handleFileUpload}
               />
             </Box>
           </Collapse>
@@ -2158,22 +1857,40 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
   );
 };
 
+
+
+
+
+
+
+
+
+
 const Customers = () => {
   useDocumentTitle('Müşteri Yönetimi');
   
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  
   const [customers, setCustomers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [customerToDelete, setCustomerToDelete] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
-  const customersPerPage = 8;
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [sortBy, setSortBy] = useState('firstName');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const customersPerPage = 10;
+  const [measurementOpen, setMeasurementOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [customer, setCustomer] = useState(null);
 
   const fetchCustomers = async () => {
     try {
@@ -2195,16 +1912,16 @@ const Customers = () => {
   };
 
   const handleDelete = async (customerId) => {
-    setSelectedCustomerId(customerId);
+    setCustomerToDelete(customerId);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     try {
-      const response = await apiService.customers.delete(selectedCustomerId);
+      const response = await apiService.customers.delete(customerToDelete);
       
       if (response.status === 204) {
-        setCustomers(customers.filter(c => c.id !== selectedCustomerId));
+        setCustomers(customers.filter(c => c.id !== customerToDelete));
         setSnackbar({
           open: true,
           message: 'Müşteri başarıyla silindi',
@@ -2232,7 +1949,7 @@ const Customers = () => {
       });
     } finally {
       setDeleteDialogOpen(false);
-      setSelectedCustomerId(null);
+      setCustomerToDelete(null);
     }
   };
 
@@ -2245,10 +1962,55 @@ const Customers = () => {
     setPage(value);
   };
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
+  // Sıralama fonksiyonu
+  const handleSort = (field) => {
+    const newOrder = sortBy === field && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortBy(field);
+    setSortOrder(newOrder);
+  };
+
+  // Sıralanmış müşteriler
+  const sortedCustomers = [...customers].sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case 'firstName':
+        aValue = a.firstName?.toLowerCase() || '';
+        bValue = b.firstName?.toLowerCase() || '';
+        break;
+      case 'lastName':
+        aValue = a.lastName?.toLowerCase() || '';
+        bValue = b.lastName?.toLowerCase() || '';
+        break;
+      case 'phone':
+        aValue = a.phone || '';
+        bValue = b.phone || '';
+        break;
+      case 'height':
+        aValue = a.height || 0;
+        bValue = b.height || 0;
+        break;
+      case 'weight':
+        aValue = a.weight || 0;
+        bValue = b.weight || 0;
+        break;
+      default:
+        aValue = a.firstName?.toLowerCase() || '';
+        bValue = b.firstName?.toLowerCase() || '';
+    }
+    
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  // Filtrelenmiş müşteriler (sıralı)
+  const filteredCustomers = sortedCustomers.filter(customer =>
+    customer.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.phone?.includes(searchTerm)
   );
 
   const paginatedCustomers = filteredCustomers.slice(
@@ -2294,8 +2056,67 @@ const Customers = () => {
     }
   }, [filteredCustomers, customersPerPage, page]);
 
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // Genel dosya yükleme (S3'e sadece upload)
+      const response = await apiService.measurements.uploadFileGeneral(formData);
+      if (response.data && response.data.url) {
+        setSnackbar({
+          open: true,
+          message: 'Dosya başarıyla yüklendi!',
+          severity: 'success'
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: 'Dosya yüklenirken hata oluştu.',
+          severity: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Dosya yükleme hatası:', error);
+      setSnackbar({
+        open: true,
+        message: 'Dosya yüklenirken hata oluştu.',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleSnackbar = (snackbarData) => {
+    setSnackbar(snackbarData);
+  };
+
+  const handleOrderSave = async (savedOrder) => {
+    try {
+      // Siparişler listesini yenile
+      await fetchCustomers(); // Müşteri listesini yenile ki güncel sipariş bilgileri gelsin
+      setOrderDialogOpen(false);
+      setSelectedOrder(null);
+      setCustomer(null);
+      setSnackbar({
+        open: true,
+        message: selectedOrder ? 'Sipariş başarıyla güncellendi' : 'Sipariş başarıyla oluşturuldu',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Sipariş işleminde hata oluştu:', error);
+      setSnackbar({
+        open: true,
+        message: 'Sipariş işleminde bir hata oluştu',
+        severity: 'error'
+      });
+    }
+  };
+
   return (
-    <Container maxWidth="xl" sx={{ py: 3 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
       {/* Header Card */}
       <Card sx={{ 
         mb: 4, 
@@ -2305,11 +2126,23 @@ const Customers = () => {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        <CardContent sx={{ py: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, display: 'flex', alignItems: 'center' }}>
-                <Groups sx={{ mr: 2, fontSize: '2.5rem' }} />
+        <CardContent sx={{ py: { xs: 3, md: 4 } }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2, md: 0 }
+          }}>
+            <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+              <Typography variant={isMobile ? "h5" : "h4"} sx={{ 
+                fontWeight: 700, 
+                mb: 1, 
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: { xs: 'center', md: 'flex-start' }
+              }}>
+                <Groups sx={{ mr: 2, fontSize: { xs: '2rem', md: '2.5rem' } }} />
                 Müşteri Yönetimi
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
@@ -2330,8 +2163,20 @@ const Customers = () => {
 
       {/* Stats and Actions Bar */}
       <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 3,
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: { xs: 3, md: 0 }
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2,
+            flexDirection: { xs: 'column', sm: 'row' }
+          }}>
             <Badge badgeContent={customers.length} color="primary" max={999}>
               <Chip 
                 icon={<Groups />} 
@@ -2356,7 +2201,12 @@ const Customers = () => {
             )}
           </Box>
           
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            flexDirection: { xs: 'column', sm: 'row' },
+            width: { xs: '100%', md: 'auto' }
+          }}>
             <StyledTextField
               variant="outlined"
               placeholder="Ad, soyad veya telefon ile ara..."
@@ -2370,75 +2220,209 @@ const Customers = () => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ minWidth: '280px' }}
+              sx={{ 
+                minWidth: { xs: '100%', sm: '240px', md: '280px' },
+                maxWidth: { xs: '100%', md: '280px' }
+              }}
             />
             
-            <StyledButton
-              variant="outlined"
-              startIcon={<Refresh />}
-              onClick={fetchCustomers}
-              disabled={loading}
-            >
-              Yenile
-            </StyledButton>
-            
-            <StyledButton
-              variant="contained"
-              color="secondary"
-              startIcon={<LocalShipping />}
-              onClick={() => setOrderDialogOpen(true)}
-            >
-              Yeni Sipariş
-            </StyledButton>
-            
-            <StyledButton
-              variant="contained"
-              color="primary"
-              startIcon={<Add />}
-              onClick={() => setAddDialogOpen(true)}
-            >
-              Yeni Müşteri
-            </StyledButton>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 2,
+              flexDirection: { xs: 'row', sm: 'row' },
+              width: { xs: '100%', sm: 'auto' }
+            }}>
+              <StyledButton
+                variant="outlined"
+                startIcon={isMobile ? null : <Refresh />}
+                onClick={fetchCustomers}
+                disabled={loading}
+                sx={{ 
+                  flex: { xs: 1, sm: 'none' },
+                  minWidth: { xs: 'auto', sm: '120px' }
+                }}
+              >
+                {isMobile ? <Refresh /> : 'Yenile'}
+              </StyledButton>
+              
+              <StyledButton
+                variant="contained"
+                color="primary"
+                startIcon={isMobile ? null : <Add />}
+                onClick={() => setAddDialogOpen(true)}
+                sx={{ 
+                  flex: { xs: 1, sm: 'none' },
+                  minWidth: { xs: 'auto', sm: '140px' }
+                }}
+              >
+                {isMobile ? <Add /> : 'Yeni Müşteri'}
+              </StyledButton>
+            </Box>
           </Box>
         </Box>
       </Box>
 
-      <Paper sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.08)', mb: 4 }}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <StyledTableCell style={{ width: '50px' }} />
-                <StyledTableCell>Müşteri</StyledTableCell>
-                <StyledTableCell>Telefon</StyledTableCell>
-                <StyledTableCell>Adres</StyledTableCell>
-                <StyledTableCell>Boy / Kilo</StyledTableCell>
-                <StyledTableCell align="center">İşlemler</StyledTableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedCustomers.length > 0 ? (
-                paginatedCustomers.map((customer) => (
-                  <Row
-                    key={customer.id}
-                    customer={customer}
-                    onDelete={handleDelete}
-                    onEdit={handleEdit}
-                  />
-                ))
-              ) : (
+      {/* Desktop Table View */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <Paper sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.08)', mb: 4 }}>
+          <TableContainer>
+            <Table>
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    <Typography variant="subtitle1" color="text.secondary">
-                      {loading ? 'Müşteriler yükleniyor...' : 'Müşteri bulunamadı'}
-                    </Typography>
-                  </TableCell>
+                  <StyledTableCell style={{ width: '50px' }} />
+                  <StyledTableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => handleSort('firstName')}>
+                      Müşteri
+                      <IconButton size="small" sx={{ color: 'white', ml: 1 }}>
+                        {sortBy === 'firstName' && sortOrder === 'asc' ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      </IconButton>
+                    </Box>
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => handleSort('phone')}>
+                      Telefon
+                      <IconButton size="small" sx={{ color: 'white', ml: 1 }}>
+                        {sortBy === 'phone' && sortOrder === 'asc' ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      </IconButton>
+                    </Box>
+                  </StyledTableCell>
+                  <StyledTableCell>Adres</StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => handleSort('height')}>
+                      Boy / Kilo
+                      <IconButton size="small" sx={{ color: 'white', ml: 1 }}>
+                        {sortBy === 'height' && sortOrder === 'asc' ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                      </IconButton>
+                    </Box>
+                  </StyledTableCell>
+                  <StyledTableCell align="center">İşlemler</StyledTableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+              </TableHead>
+              <TableBody>
+                {paginatedCustomers.length > 0 ? (
+                  paginatedCustomers.map((customer) => (
+                    <Row
+                      key={customer.id}
+                      customer={customer}
+                      onDelete={handleDelete}
+                      onEdit={handleEdit}
+                      onSnackbar={handleSnackbar}
+                      onFileUpload={handleFileUpload}
+                    />
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                      <Typography variant="subtitle1" color="text.secondary">
+                        {loading ? 'Müşteriler yükleniyor...' : 'Müşteri bulunamadı'}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
+
+      {/* Mobile Card View */}
+      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+        <Box sx={{ mb: 4 }}>
+          {paginatedCustomers.length > 0 ? (
+            <Stack spacing={2}>
+              {paginatedCustomers.map((customer) => (
+                <Card key={customer.id} sx={{ 
+                  borderRadius: 3, 
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.12)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <CustomerAvatar>
+                          {customer.firstName ? customer.firstName.charAt(0).toUpperCase() : '?'}
+                        </CustomerAvatar>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                            {customer.firstName} {customer.lastName}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {customer.phone}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(customer)}
+                          sx={{ 
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                            '&:hover': { backgroundColor: 'primary.dark' }
+                          }}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(customer.id)}
+                          sx={{ 
+                            backgroundColor: 'error.main',
+                            color: 'white',
+                            '&:hover': { backgroundColor: 'error.dark' }
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Adres:</strong> {customer.address || 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Boy:</strong> {customer.height ? `${customer.height} cm` : 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Kilo:</strong> {customer.weight ? `${customer.weight} kg` : 'Belirtilmemiş'}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              ))}
+            </Stack>
+          ) : (
+            <Card sx={{ borderRadius: 3, textAlign: 'center', py: 8 }}>
+              <CardContent>
+                <Groups sx={{ fontSize: '4rem', color: 'text.secondary', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary">
+                  {loading ? 'Müşteriler yükleniyor...' : 'Müşteri bulunamadı'}
+                </Typography>
+                {!loading && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    Yeni müşteri eklemek için yukarıdaki butonu kullanabilirsiniz.
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
         <Pagination
@@ -2499,15 +2483,10 @@ const Customers = () => {
       <OrderDialog
         open={orderDialogOpen}
         onClose={() => setOrderDialogOpen(false)}
-        customer={null}
-        onSave={() => {
-          setSnackbar({
-            open: true,
-            message: 'Sipariş başarıyla oluşturuldu',
-            severity: 'success'
-          });
-          setOrderDialogOpen(false);
-        }}
+        customer={customer}
+        order={selectedOrder}
+        onSave={handleOrderSave}
+        handleFileUpload={handleFileUpload}
       />
 
       {/* Bildirim */}
@@ -2527,6 +2506,335 @@ const Customers = () => {
         </Alert>
       </Snackbar>
     </Container>
+  );
+};
+
+// Ölçü Modal Bileşeni
+const MeasurementModal = ({ open, onClose, customer, measurements, onMeasurementsUpdate }) => {
+  const [newMeasurement, setNewMeasurement] = useState({
+    regionName: '',
+    value: '',
+    unit: 'cm'
+  });
+  const [editingMeasurement, setEditingMeasurement] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Modal açıldığında ölçüleri yükle
+  useEffect(() => {
+    if (open && customer && onMeasurementsUpdate) {
+      onMeasurementsUpdate();
+    }
+  }, [open, customer, onMeasurementsUpdate]);
+
+  // Yeni ölçü ekleme
+  const handleAddMeasurement = async () => {
+    if (!newMeasurement.regionName.trim() || !newMeasurement.value) {
+      alert('Lütfen bölge adı ve değer girin');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiService.measurements.add(customer.id, {
+        regionName: newMeasurement.regionName.trim(),
+        value: parseFloat(newMeasurement.value),
+        unit: newMeasurement.unit
+      });
+
+      if (response.data && response.data.success) {
+        setNewMeasurement({ regionName: '', value: '', unit: 'cm' });
+        onMeasurementsUpdate(); // Listeyi yenile
+        alert('Ölçü başarıyla eklendi!');
+      } else {
+        alert(response.data?.error || 'Ölçü eklenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Ölçü ekleme hatası:', error);
+      alert(error.response?.data?.error || 'Ölçü eklenirken hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Ölçü düzenleme
+  const handleEditMeasurement = async (measurementId) => {
+    if (!editingMeasurement.regionName.trim() || !editingMeasurement.value) {
+      alert('Lütfen bölge adı ve değer girin');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiService.measurements.update(measurementId, {
+        regionName: editingMeasurement.regionName.trim(),
+        value: parseFloat(editingMeasurement.value),
+        unit: editingMeasurement.unit
+      });
+
+      if (response.data && response.data.success) {
+        setEditingMeasurement(null);
+        onMeasurementsUpdate(); // Listeyi yenile
+        alert('Ölçü başarıyla güncellendi!');
+      } else {
+        alert(response.data?.error || 'Ölçü güncellenirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Ölçü güncelleme hatası:', error);
+      alert(error.response?.data?.error || 'Ölçü güncellenirken hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Ölçü silme
+  const handleDeleteMeasurement = async (measurementId, regionName) => {
+    if (!window.confirm(`"${regionName}" ölçüsünü silmek istediğinizden emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiService.measurements.delete(measurementId);
+
+      if (response.data && response.data.success) {
+        onMeasurementsUpdate(); // Listeyi yenile
+        alert('Ölçü başarıyla silindi!');
+      } else {
+        alert(response.data?.error || 'Ölçü silinirken hata oluştu');
+      }
+    } catch (error) {
+      console.error('Ölçü silme hatası:', error);
+      alert(error.response?.data?.error || 'Ölçü silinirken hata oluştu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMeasurementFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // OCR ile ölçü verilerini işle
+      const response = await apiService.measurements.uploadFile(customer.id, formData);
+      if (response.data && response.data.success) {
+        alert(`${response.data.count || 0} ölçü başarıyla kaydedildi!`);
+        // Ölçüleri yenile
+        if (onMeasurementsUpdate) {
+          onMeasurementsUpdate();
+        }
+      } else {
+        alert(response.data?.error || 'Ölçüler yüklenirken hata oluştu.');
+      }
+    } catch (error) {
+      console.error('OCR yükleme hatası:', error);
+      let errorMessage = 'Fotoğraf yüklenirken hata oluştu.';
+      
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
+        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+          📏 Ölçüler: {customer?.firstName} {customer?.lastName}
+        </Typography>
+      </DialogTitle>
+      
+      <DialogContent sx={{ pt: 3 }}>
+        {/* Yeni Ölçü Ekleme */}
+        <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+          <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
+            ➕ Yeni Ölçü Ekle
+          </Typography>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Bölge Adı"
+                value={newMeasurement.regionName}
+                onChange={(e) => setNewMeasurement(prev => ({ ...prev, regionName: e.target.value }))}
+                fullWidth
+                size="small"
+                placeholder="örn: Göğüs, Bel, Sol Kol..."
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                label="Değer"
+                type="number"
+                value={newMeasurement.value}
+                onChange={(e) => setNewMeasurement(prev => ({ ...prev, value: e.target.value }))}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <TextField
+                select
+                label="Birim"
+                value={newMeasurement.unit}
+                onChange={(e) => setNewMeasurement(prev => ({ ...prev, unit: e.target.value }))}
+                fullWidth
+                size="small"
+              >
+                <MenuItem value="cm">cm</MenuItem>
+                <MenuItem value="mm">mm</MenuItem>
+                <MenuItem value="m">m</MenuItem>
+                <MenuItem value="inch">inch</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Button
+                variant="contained"
+                onClick={handleAddMeasurement}
+                disabled={loading}
+                fullWidth
+                sx={{ py: 1 }}
+              >
+                Ekle
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Mevcut Ölçüler */}
+        <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
+          📋 Mevcut Ölçüler ({measurements?.length || 0})
+        </Typography>
+
+        {measurements?.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+              Henüz ölçü eklenmemiş. Yukarıdaki formu kullanarak ölçü ekleyebilirsiniz.
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+            {measurements?.map((measurement) => (
+              <Box
+                key={measurement.id}
+                sx={{
+                  p: 2,
+                  mb: 1,
+                  border: '1px solid',
+                  borderColor: 'grey.200',
+                  borderRadius: 2,
+                  '&:hover': { bgcolor: 'grey.50' }
+                }}
+              >
+                {editingMeasurement?.id === measurement.id ? (
+                  // Düzenleme modu
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={4}>
+                      <TextField
+                        label="Bölge Adı"
+                        value={editingMeasurement.regionName}
+                        onChange={(e) => setEditingMeasurement(prev => ({ ...prev, regionName: e.target.value }))}
+                        fullWidth
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <TextField
+                        label="Değer"
+                        type="number"
+                        value={editingMeasurement.value}
+                        onChange={(e) => setEditingMeasurement(prev => ({ ...prev, value: e.target.value }))}
+                        fullWidth
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                      <TextField
+                        select
+                        label="Birim"
+                        value={editingMeasurement.unit}
+                        onChange={(e) => setEditingMeasurement(prev => ({ ...prev, unit: e.target.value }))}
+                        fullWidth
+                        size="small"
+                      >
+                        <MenuItem value="cm">cm</MenuItem>
+                        <MenuItem value="mm">mm</MenuItem>
+                        <MenuItem value="m">m</MenuItem>
+                        <MenuItem value="inch">inch</MenuItem>
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={3}>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleEditMeasurement(measurement.id)}
+                          disabled={loading}
+                        >
+                          Kaydet
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => setEditingMeasurement(null)}
+                          disabled={loading}
+                        >
+                          İptal
+                        </Button>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                ) : (
+                  // Görüntüleme modu
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="body1" fontWeight="medium">
+                        {measurement.regionName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {measurement.value} {measurement.unit}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => setEditingMeasurement({
+                          id: measurement.id,
+                          regionName: measurement.regionName,
+                          value: measurement.value,
+                          unit: measurement.unit
+                        })}
+                        disabled={loading}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteMeasurement(measurement.id, measurement.regionName)}
+                        disabled={loading}
+                        color="error"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </DialogContent>
+      
+      <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
+        <Button onClick={onClose}>Kapat</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

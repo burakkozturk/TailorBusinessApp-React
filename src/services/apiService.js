@@ -62,12 +62,7 @@ const apiService = {
     getTopCustomers: (minOrders = 1) => api.get(`/api/orders/statistics/top-customers?minOrders=${minOrders}`)
   },
 
-  // ÖLÇÜ İŞLEMLERİ
-  measurements: {
-    getByCustomer: (customerId) => api.get(`/api/measurements/${customerId}`),
-    update: (customerId, measurementData) => api.put(`/api/measurements/${customerId}`, measurementData),
-    create: (measurementData) => api.post('/api/measurements', measurementData)
-  },
+
 
   // BLOG İŞLEMLERİ
   blogs: {
@@ -100,7 +95,8 @@ const apiService = {
     create: (messageData) => api.post('/api/messages', messageData),
     markAsRead: (id) => api.put(`/api/messages/${id}/read`),
     delete: (id) => api.delete(`/api/messages/${id}`),
-    getUnreadCount: () => api.get('/api/messages/unread/count')
+    getUnreadCount: () => api.get('/api/messages/unread/count'),
+    reply: (id, replyData) => api.post(`/api/messages/${id}/reply`, replyData)
   },
 
   // RAPOR İŞLEMLERİ
@@ -122,7 +118,40 @@ const apiService = {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+
+  // ÖLÇÜ İŞLEMLERİ - Dinamik Ölçü Sistemi
+  measurements: {
+    // Müşterinin tüm ölçülerini getir
+    getByCustomer: (customerId) => api.get(`/api/measurements/customer/${customerId}`),
+    
+    // Yeni ölçü ekle
+    add: (customerId, measurementData) => api.post(`/api/measurements/customer/${customerId}`, measurementData),
+    
+    // Ölçü güncelle
+    update: (measurementId, measurementData) => api.put(`/api/measurements/${measurementId}`, measurementData),
+    
+    // Ölçü sil
+    delete: (measurementId) => api.delete(`/api/measurements/${measurementId}`),
+    
+    // Müşterinin tüm ölçülerini sil
+    deleteAll: (customerId) => api.delete(`/api/measurements/customer/${customerId}`),
+    
+    // Ölçü fotoğrafı yükle ve OCR ile işle
+    uploadFile: (customerId, formData) => api.post(`/api/measurements/upload-measurements/${customerId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }),
+    
+    // Genel dosya yükleme (eski sistem ile uyumluluk için)
+    uploadFileGeneral: (formData) => api.post('/api/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
+
 };
 
 export default apiService; 

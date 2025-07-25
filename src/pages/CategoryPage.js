@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { Box, Typography, Container, Grid, Card, CardMedia, CardContent, CircularProgress, Paper, Breadcrumbs, Divider } from '@mui/material';
+import { YouTube, PlayCircle } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { extractYouTubeVideoId, getYouTubeThumbnail } from '../utils/youtubeUtils';
 import '../styles/CategoryPage.css';
 
 const CategoryPage = () => {
@@ -101,33 +103,76 @@ const CategoryPage = () => {
 
             {posts.length > 0 ? (
               <Grid container spacing={4}>
-                {posts.map(post => (
-                  <Grid item xs={12} sm={6} md={4} key={post.id}>
-                    <Card sx={{ 
-                      height: '100%', 
-                      display: 'flex', 
-                      flexDirection: 'column',
-                      transition: 'transform 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-8px)',
-                        boxShadow: 6
-                      }
-                    }}>
-                      {post.imageUrl ? (
-                        <CardMedia
-                          component="img"
-                          height="200"
-                          image={post.imageUrl}
-                          alt={post.title}
-                        />
-                      ) : (
-                        <CardMedia
-                          component="img"
-                          height="200"
-                          image="/img/default-blog.jpg"
-                          alt={post.title}
-                        />
-                      )}
+                {posts.map(post => {
+                  // YouTube video ID'si varsa thumbnail kullan
+                  const youtubeVideoId = post.youtubeUrl ? extractYouTubeVideoId(post.youtubeUrl) : null;
+                  const thumbnailUrl = youtubeVideoId 
+                    ? getYouTubeThumbnail(youtubeVideoId, 'hqdefault')
+                    : post.imageUrl || '/img/default-blog.jpg';
+                  
+                  return (
+                    <Grid item xs={12} sm={6} md={4} key={post.id}>
+                      <Card sx={{ 
+                        height: '100%', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        transition: 'transform 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-8px)',
+                          boxShadow: 6
+                        }
+                      }}>
+                        <Box sx={{ position: 'relative' }}>
+                          <CardMedia
+                            component="img"
+                            height="200"
+                            image={thumbnailUrl}
+                            alt={post.title}
+                          />
+                          
+                          {/* Video Play Overlay */}
+                          {youtubeVideoId && (
+                            <Box sx={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              opacity: 0,
+                              transition: 'opacity 0.3s ease',
+                              '&:hover': { opacity: 1 }
+                            }}>
+                              <PlayCircle sx={{ 
+                                fontSize: 60, 
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                              }} />
+                              
+                              {/* YouTube Badge */}
+                              <Box sx={{
+                                position: 'absolute',
+                                bottom: 8,
+                                right: 8,
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                borderRadius: 1,
+                                px: 1,
+                                py: 0.5,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5
+                              }}>
+                                <YouTube sx={{ color: '#ff0000', fontSize: 16 }} />
+                                <Typography variant="caption" sx={{ color: 'white', fontWeight: 'bold', fontSize: '0.7rem' }}>
+                                  YouTube
+                                </Typography>
+                              </Box>
+                            </Box>
+                          )}
+                        </Box>
                       
                       <CardContent sx={{ flexGrow: 1 }}>
                         <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -148,7 +193,8 @@ const CategoryPage = () => {
                       </CardContent>
                     </Card>
                   </Grid>
-                ))}
+                  );
+                })}
               </Grid>
             ) : (
               <Paper elevation={2} sx={{ p: 4, textAlign: 'center' }}>

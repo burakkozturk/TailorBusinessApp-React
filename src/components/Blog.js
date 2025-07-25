@@ -4,11 +4,10 @@ import apiService from '../services/apiService';
 import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress } from '@mui/material';
 import '../styles/Blog.css';
 
-export default function Blog({ homePage = false, selectedCategory = null }) {
+export default function Blog({ homePage = false }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,21 +33,6 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
     fetchData();
   }, [homePage]);
 
-  // Kategori değişikliğinde veya posts değiştiğinde filtreleme yapma
-  useEffect(() => {
-    if (selectedCategory === null) {
-      // Kategori seçilmemişse tüm postları göster
-      setFilteredPosts(posts);
-    } else {
-      // Seçilen kategoriye göre postları filtrele
-      const filtered = posts.filter(post => 
-        post.categories && 
-        post.categories.some(category => category.id === selectedCategory)
-      );
-      setFilteredPosts(filtered);
-    }
-  }, [selectedCategory, posts]);
-
   const truncateText = (text, maxLength) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
@@ -69,7 +53,7 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
   };
 
   // Gösterilecek post listesini belirle
-  const postsToDisplay = selectedCategory !== null ? filteredPosts : posts;
+  const postsToDisplay = posts;
 
   return (
     <section className="blog-section">
@@ -99,21 +83,15 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
           </Box>
         ) : (
           <div className="blog-grid">
-            {postsToDisplay.map(post => (
+                        {postsToDisplay.map(post => (
               <article key={post.id} className="blog-post">
-                <div className="blog-image-container">
-                  <img
-                    src={post.imageUrl || '/img/default-blog.jpg'}
-                    alt={post.title}
-                    className="blog-image"
-                  />
+                <div className="blog-content">
+                  {/* Kategori */}
                   {post.categories && post.categories.length > 0 && (
                     <span className="blog-category">{post.categories[0].name}</span>
                   )}
-                </div>
-                <div className="blog-content">
                   <h3 className="blog-post-title">{post.title}</h3>
-                  <p className="blog-excerpt">{truncateText(post.content, 100)}</p>
+                  <p className="blog-excerpt">{truncateText(post.content, 150)}</p>
                   <div className="blog-footer">
                     <Link to={`/blog/${post.slug}`} className="blog-read-more">
                       DEVAMINI OKU
@@ -123,7 +101,7 @@ export default function Blog({ homePage = false, selectedCategory = null }) {
                 </div>
               </article>
             ))}
-          </div>
+            </div>
         )}
         
         {/* Ana sayfada olup olmadığına göre tüm blog yazıları butonunu göster/gizle */}
