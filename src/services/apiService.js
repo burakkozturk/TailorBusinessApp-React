@@ -124,10 +124,9 @@ const apiService = {
   measurements: {
     // Müşterinin tüm ölçülerini getir
     getByCustomer: (customerId) => api.get(`/api/measurements/customer/${customerId}`),
-    
+    getByOrderId: (orderId) => api.get(`/api/measurements/order/${orderId}`),
     // Yeni ölçü ekle
     add: (customerId, measurementData) => api.post(`/api/measurements/customer/${customerId}`, measurementData),
-    
     // Ölçü güncelle
     update: (measurementId, measurementData) => api.put(`/api/measurements/${measurementId}`, measurementData),
     
@@ -150,6 +149,18 @@ const apiService = {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+
+  // AI İŞLEMLERİ
+  ai: {
+    // AI chat - prompt gönder ve yanıt al
+    chat: (prompt) => api.post('/api/ai/chat', { prompt }),
+    
+    // API key doğrulama (backend'de yapılandırılmış key'i kontrol eder)
+    validateKey: () => api.post('/api/ai/validate-key'),
+    
+    // AI durumu kontrol et
+    getStatus: () => api.get('/api/ai/status')
   }
 
 };

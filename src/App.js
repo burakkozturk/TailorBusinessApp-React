@@ -19,6 +19,7 @@ import AdminBlog from './pages/AdminBlog';
 import AdminMessages from './pages/AdminMessages';
 import AdminSettings from './pages/AdminSettings';
 import UserManagement from './pages/AdminManagers';
+import AdminAI from './pages/AdminAI';
 import TestPage from './components/TestPage';
 import './styles/App.css';
 import './styles/GlobalButtons.css';
@@ -50,10 +51,13 @@ function App() {
             <Route path="customers" element={<RequireMuhasebeci><Customers /></RequireMuhasebeci>} />
             <Route path="orders" element={<RequireMuhasebeci><Orders /></RequireMuhasebeci>} />
             
+
+            
             {/* Sadece Admin Erişimi Olan Sayfalar */}
             <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
             <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
             <Route path="managers" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
+            <Route path="ai" element={<RequireAdmin><AdminAI /></RequireAdmin>} />
             
             {/* Tüm roller erişebilir */}
             <Route path="settings" element={<AdminSettings />} />

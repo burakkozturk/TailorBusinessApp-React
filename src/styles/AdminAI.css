@@ -1,0 +1,35 @@
+/* Ultra Minimal Dark Design */
+.ultra-minimal-container {
+  min-height: calc(100vh - 64px);
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.development-text {
+  color: #ffffff;
+  font-weight: 400;
+  font-size: 1.5rem;
+  text-align: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .development-text {
+    font-size: 1.2rem;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .development-text {
+    font-size: 1rem;
+    padding: 0 15px;
+  }
+}

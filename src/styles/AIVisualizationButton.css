@@ -1,0 +1,98 @@
+/* AI Görselleştirme Button Special Styles */
+.ai-visualization-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: 2px solid transparent !important;
+  border-radius: 12px !important;
+  margin: 8px 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ai-visualization-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.ai-visualization-button:hover::before {
+  left: 100%;
+}
+
+.ai-visualization-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+}
+
+.ai-visualization-button .MuiListItemIcon-root {
+  color: #ffffff !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.ai-visualization-button .MuiListItemText-root {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.ai-visualization-button .MuiListItemText-primary {
+  font-size: 0.95rem !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Active state */
+.ai-visualization-button[isactive="true"] {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+  box-shadow: 0 6px 20px rgba(90, 103, 216, 0.5) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Collapsed state */
+.ai-visualization-button[iscollapsed="true"] {
+  justify-content: center !important;
+  border-radius: 50% !important;
+  width: 48px !important;
+  height: 48px !important;
+  margin: 8px auto !important;
+}
+
+.ai-visualization-button[iscollapsed="true"] .MuiListItemIcon-root {
+  margin: 0 !important;
+  min-width: auto !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .ai-visualization-button {
+    margin: 6px 0 !important;
+    border-radius: 10px !important;
+  }
+  
+  .ai-visualization-button .MuiListItemText-primary {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Pulsing animation for special attention */
+@keyframes aiPulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+}
+
+.ai-visualization-button {
+  animation: aiPulse 3s ease-in-out infinite;
+}

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
+import pdfService from '../services/pdfService';
+import templateOverlayService from '../services/templateOverlayService';
+import aestheticPdfService from '../services/aestheticPdfService';
+import professionalPdfService from '../services/professionalPdfService';
 import {
   Table,
   TableBody,
@@ -37,6 +41,9 @@ import {
   MenuItem,
   useTheme,
   useMediaQuery,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 
   Divider
 } from '@mui/material';
@@ -54,7 +61,8 @@ import {
   Refresh,
   Assignment,
   Sort,
-  PhotoCamera
+  PhotoCamera,
+  PictureAsPdf
 } from '@mui/icons-material';
 import { styled, alpha } from '@mui/material/styles';
 import useDocumentTitle from '../hooks/useDocumentTitle';
@@ -138,7 +146,7 @@ const getStatusChip = (status) => {
   );
 };
 
-const Row = ({ order, onDelete, onEdit }) => {
+const Row = ({ order, onDelete, onEdit, onGeneratePDF, pdfLoading, handlePdfMenuOpen, pdfMenuAnchor, handlePdfMenuClose, handlePdfTypeSelect }) => {
   const [open, setOpen] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
@@ -234,7 +242,7 @@ const Row = ({ order, onDelete, onEdit }) => {
           {getStatusChip(order.status)}
         </TableCell>
         <TableCell>
-          <Box sx={{ display: 'flex' }}>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
             <IconButton 
               color="primary" 
               size="small"
@@ -245,11 +253,56 @@ const Row = ({ order, onDelete, onEdit }) => {
               sx={{ 
                 transition: 'transform 0.2s', 
                 '&:hover': { transform: 'scale(1.2)' },
-                mr: 1
+                mr: 0.5
               }}
             >
               <Edit />
             </IconButton>
+            <IconButton 
+              color="secondary" 
+              size="small"
+              onClick={(e) => handlePdfMenuOpen(e, order.id)}
+              disabled={pdfLoading[order.id]}
+              sx={{ 
+                transition: 'transform 0.2s', 
+                '&:hover': { transform: 'scale(1.2)' },
+                mr: 0.5,
+                '&:disabled': { opacity: 0.6 }
+              }}
+            >
+              {pdfLoading[order.id] ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdf />}
+            </IconButton>
+            <Menu
+              anchorEl={pdfMenuAnchor[order.id]}
+              open={Boolean(pdfMenuAnchor[order.id])}
+              onClose={() => handlePdfMenuClose(order.id)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MenuItem onClick={() => handlePdfTypeSelect(order, 'professional')}>
+                <ListItemIcon>
+                  <PictureAsPdf fontSize="small" style={{ color: '#d4af37' }} />
+                </ListItemIcon>
+                <ListItemText primary="Profesyonel Pattern" secondary="Tam terzi formu - ölçülerle" />
+              </MenuItem>
+              <MenuItem onClick={() => handlePdfTypeSelect(order, 'basic')}>
+                <ListItemIcon>
+                  <PictureAsPdf fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Basit PDF" secondary="Sadece metin tabanlı" />
+              </MenuItem>
+              <MenuItem onClick={() => handlePdfTypeSelect(order, 'aesthetic')}>
+                <ListItemIcon>
+                  <PictureAsPdf fontSize="small" color="primary" />
+                </ListItemIcon>
+                <ListItemText primary="Estetik PDF" secondary="Renkli ve profesyonel" />
+              </MenuItem>
+              <MenuItem onClick={() => handlePdfTypeSelect(order, 'template')}>
+                <ListItemIcon>
+                  <PictureAsPdf fontSize="small" color="secondary" />
+                </ListItemIcon>
+                <ListItemText primary="Template PDF" secondary="Pattern şablonu üzerine" />
+              </MenuItem>
+            </Menu>
             <IconButton 
               color="error" 
               size="small"
@@ -590,6 +643,8 @@ const Orders = () => {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [sortBy, setSortBy] = useState('date_desc'); // Varsayılan: Yeni siparişler önce
+  const [pdfLoading, setPdfLoading] = useState({}); // PDF oluşturma loading state'i
+  const [pdfMenuAnchor, setPdfMenuAnchor] = useState({}); // PDF menu anchor state'i
   const ordersPerPage = 8;
 
   const fetchOrders = async () => {
@@ -723,6 +778,93 @@ const Orders = () => {
         severity: 'error'
       });
     }
+  };
+
+  // PDF oluşturma fonksiyonu
+  const handleGeneratePDF = async (order, pdfType = 'basic') => {
+    try {
+      console.log('🎯 PDF oluşturma başladı:', order.id, 'Tip:', pdfType);
+      
+      // Loading state'i başlat
+      setPdfLoading(prev => ({ ...prev, [order.id]: true }));
+      
+      // Sipariş ID ile ölçüleri getir (yeni backend endpoint)
+    console.log('🔍 Fetching measurements for order:', order.id);
+    const measurementsResponse = await apiService.measurements.getByOrderId(order.id);
+    console.log('📊 Measurements API response:', measurementsResponse);
+    
+    // Response'dan measurements array'ını çıkar
+    const measurements = measurementsResponse?.data?.measurements || measurementsResponse?.measurements || [];
+    console.log('📋 Extracted measurements array:', measurements);
+    
+    // Eğer measurements boşsa veya hatalıysa uyar
+    if (!measurements || measurements.length === 0) {
+      console.warn('⚠️ NO MEASUREMENTS FOUND for order:', order.id);
+      console.log('🔍 Order object:', order);
+      console.log('🔍 Full response:', measurementsResponse);
+    }
+      
+      let pdfBytes, filename;
+      
+      // PDF tipine göre service seç
+      switch (pdfType) {
+        case 'professional':
+          pdfBytes = await professionalPdfService.generatePatternPDF(order, measurements);
+          filename = professionalPdfService.generateFilename(order);
+          professionalPdfService.downloadPDF(pdfBytes, filename);
+          break;
+          
+        case 'template':
+          pdfBytes = await templateOverlayService.generatePatternPDF(order, measurements);
+          filename = templateOverlayService.generateFilename(order);
+          templateOverlayService.downloadPDF(pdfBytes, filename);
+          break;
+          
+        case 'aesthetic':
+          pdfBytes = await aestheticPdfService.generatePatternPDF(order, measurements);
+          filename = aestheticPdfService.generateFilename(order);
+          aestheticPdfService.downloadPDF(pdfBytes, filename);
+          break;
+          
+        default: // 'basic'
+          pdfBytes = await pdfService.generatePatternPDF(order, measurements);
+          filename = pdfService.generateFilename(order);
+          pdfService.downloadPDF(pdfBytes, filename);
+          break;
+      }
+      
+      setSnackbar({
+        open: true,
+        message: `${pdfType.toUpperCase()} PDF başarıyla oluşturuldu ve indirildi`,
+        severity: 'success'
+      });
+      
+    } catch (error) {
+      console.error('❌ PDF oluşturma hatası:', error);
+      setSnackbar({
+        open: true,
+        message: `PDF oluşturma hatası: ${error.message}`,
+        severity: 'error'
+      });
+    } finally {
+      // Loading state'i bitir
+      setPdfLoading(prev => ({ ...prev, [order.id]: false }));
+    }
+  };
+
+  // PDF menu açma/kapama fonksiyonları
+  const handlePdfMenuOpen = (event, orderId) => {
+    event.stopPropagation();
+    setPdfMenuAnchor(prev => ({ ...prev, [orderId]: event.currentTarget }));
+  };
+
+  const handlePdfMenuClose = (orderId) => {
+    setPdfMenuAnchor(prev => ({ ...prev, [orderId]: null }));
+  };
+
+  const handlePdfTypeSelect = async (order, pdfType) => {
+    handlePdfMenuClose(order.id);
+    await handleGeneratePDF(order, pdfType);
   };
 
   useEffect(() => {
@@ -945,6 +1087,12 @@ const Orders = () => {
                       order={order} 
                       onDelete={handleDelete}
                       onEdit={handleEdit}
+                      onGeneratePDF={handleGeneratePDF}
+                      pdfLoading={pdfLoading}
+                      handlePdfMenuOpen={handlePdfMenuOpen}
+                      pdfMenuAnchor={pdfMenuAnchor}
+                      handlePdfMenuClose={handlePdfMenuClose}
+                      handlePdfTypeSelect={handlePdfTypeSelect}
                     />
                   ))
                 ) : (
@@ -1012,6 +1160,20 @@ const Orders = () => {
                           }}
                         >
                           <Edit />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="secondary"
+                          onClick={() => handleGeneratePDF(order)}
+                          disabled={pdfLoading[order.id]}
+                          sx={{ 
+                            backgroundColor: 'secondary.main',
+                            color: 'white',
+                            '&:hover': { backgroundColor: 'secondary.dark' },
+                            '&:disabled': { backgroundColor: 'grey.400' }
+                          }}
+                        >
+                          {pdfLoading[order.id] ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdf />}
                         </IconButton>
                         <IconButton
                           size="small"

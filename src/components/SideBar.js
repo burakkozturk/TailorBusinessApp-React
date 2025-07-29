@@ -12,7 +12,9 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaEnvelope,
-  FaUsersCog
+  FaUsersCog,
+  FaPalette,
+  FaRobot
 } from 'react-icons/fa';
 import { 
   Box, 
@@ -31,6 +33,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../context/AuthContext';
+import '../styles/AIVisualizationButton.css';
 import api from '../api/axiosConfig';
 
 // Responsive constants
@@ -309,6 +312,7 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
     { path: '', icon: FaHome, label: 'Genel Bakış' },
     { path: 'customers', icon: FaUser, label: 'Müşteriler' },
     { path: 'orders', icon: FaTshirt, label: 'Siparişler' },
+    ...(user?.role === 'ADMIN' ? [{ path: 'ai', icon: () => <span style={{fontSize: '20px'}}>✨</span>, label: 'AI Görselleştirme', special: true }] : []),
     { path: 'messages', icon: FaEnvelope, label: 'Mesajlar', badge: unreadCount },
     { path: 'blog', icon: FaBlog, label: 'Blog Yönetimi' },
     ...(user?.role === 'ADMIN' ? [{ path: 'managers', icon: FaUsersCog, label: 'Kullanıcı Yönetimi', badge: pendingUsersCount }] : []),
@@ -380,6 +384,7 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
                 iscollapsed={collapsed.toString()}
                 ismobile={isMobile.toString()}
                 onClick={handleNavClick}
+                className={item.special ? 'ai-visualization-button' : ''}
               >
                 <NavIcon 
                   iscollapsed={collapsed.toString()}
