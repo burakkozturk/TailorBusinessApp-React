@@ -45,16 +45,20 @@ export function AuthProvider({ children }) {
     loading,
     login,
     logout,
-    isAdmin: user?.role === 'ADMIN',
-    isUsta: user?.role === 'USTA',
-    isMuhasebeci: user?.role === 'MUHASEBECI',
+
     isAuthenticated: !!user,
     isAdminUser: user?.userType === 'ADMIN', // Admin panel kullanıcısı
     isRegularUser: user?.userType === 'USER', // Normal kayıtlı kullanıcı
-    // Rol hiyerarşisi kontrolleri
-    hasAdminAccess: user?.role === 'ADMIN',
-    hasUstaAccess: user?.role === 'ADMIN' || user?.role === 'USTA',
-    hasMuhasebeciAccess: user?.role === 'ADMIN' || user?.role === 'USTA' || user?.role === 'MUHASEBECI'
+    isOlcum: user?.role === 'ÖLÇÜM',
+    isKesimhane: user?.role === 'KESIMHANE',
+    isDikimhane: user?.role === 'DIKIMHANE',
+    isAdmin: user?.role === 'ADMIN',
+    
+    // Yetki kontrolleri
+    hasKesimhaneAccess: user?.role === 'ADMIN' || user?.role === 'KESIMHANE',
+    hasDikimhaneAccess: user?.role === 'ADMIN' || user?.role === 'DIKIMHANE',
+    hasOlcumAccess: user?.role === 'ADMIN' || user?.role === 'ÖLÇÜM',
+    hasAllRolesAccess: user?.role === 'ADMIN' || user?.role === 'KESIMHANE' || user?.role === 'DIKIMHANE' || user?.role === 'ÖLÇÜM'
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -105,9 +109,9 @@ export function RequireAdmin({ children }) {
   return children;
 }
 
-// Usta ve üzeri erişim (ADMIN + USTA)
-export function RequireUsta({ children }) {
-  const { user, loading, hasUstaAccess } = useAuth();
+// Kesimhane erişimi (ADMIN + KESIMHANE)
+export function RequireKesimhane({ children }) {
+  const { user, loading, hasKesimhaneAccess } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -118,16 +122,16 @@ export function RequireUsta({ children }) {
     return <Navigate to="/giris" state={{ from: location }} replace />;
   }
 
-  if (!hasUstaAccess) {
+  if (!hasKesimhaneAccess) {
     return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 
   return children;
 }
 
-// Muhasebeci ve üzeri erişim (ADMIN + USTA + MUHASEBECI)
-export function RequireMuhasebeci({ children }) {
-  const { user, loading, hasMuhasebeciAccess } = useAuth();
+// Dikimhane erişimi (ADMIN + DIKIMHANE)
+export function RequireDikimhane({ children }) {
+  const { user, loading, hasDikimhaneAccess } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -138,7 +142,47 @@ export function RequireMuhasebeci({ children }) {
     return <Navigate to="/giris" state={{ from: location }} replace />;
   }
 
-  if (!hasMuhasebeciAccess) {
+  if (!hasDikimhaneAccess) {
+    return <Navigate to="/admin" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+// Ölçüm erişimi (ADMIN + ÖLÇÜM)
+export function RequireOlcum({ children }) {
+  const { user, loading, hasOlcumAccess } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <div>Yükleniyor...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/giris" state={{ from: location }} replace />;
+  }
+
+  if (!hasOlcumAccess) {
+    return <Navigate to="/admin" state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+// Tüm roller için erişim (ADMIN + KESIMHANE + DIKIMHANE + ÖLÇÜM)
+export function RequireMuhasebeci({ children }) {
+  const { user, loading, hasAllRolesAccess } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <div>Yükleniyor...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/giris" state={{ from: location }} replace />;
+  }
+
+  if (!hasAllRolesAccess) {
     return <Navigate to="/admin" state={{ from: location }} replace />;
   }
 

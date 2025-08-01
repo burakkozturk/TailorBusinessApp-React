@@ -21,6 +21,7 @@ import AdminSettings from './pages/AdminSettings';
 import UserManagement from './pages/AdminManagers';
 import AdminAI from './pages/AdminAI';
 import TestPage from './components/TestPage';
+import ImageUploadPDF from './components/ImageUploadPDF';
 import './styles/App.css';
 import './styles/GlobalButtons.css';
 import { AuthProvider, RequireAuth, RequireAdmin, RequireUsta, RequireMuhasebeci } from './context/AuthContext';
@@ -42,12 +43,13 @@ function App() {
           <Route path="/giris" element={<Login />} />
           <Route path="/kayit" element={<Register />} />
           <Route path="/test" element={<TestPage />} />
+          <Route path="/image-pdf" element={<ImageUploadPDF />} />
           
           {/* Admin Dashboard - Kimlik Doğrulama Gerektirir */}
           <Route path="/admin" element={<RequireAuth><DashboardLayout /></RequireAuth>}>
             <Route index element={<Dashboard />} />
             
-            {/* Muhasebeci ve üzeri erişimli sayfalar (ADMIN + USTA + MUHASEBECI) */}
+            {/* Tüm roller için erişimli sayfalar (ADMIN + KESIMHANE + DIKIMHANE + ÖLÇÜM) */}
             <Route path="customers" element={<RequireMuhasebeci><Customers /></RequireMuhasebeci>} />
             <Route path="orders" element={<RequireMuhasebeci><Orders /></RequireMuhasebeci>} />
             

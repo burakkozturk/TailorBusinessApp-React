@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
+import { jwtDecode } from 'jwt-decode';
 import pdfService from '../services/pdfService';
 import templateOverlayService from '../services/templateOverlayService';
 import aestheticPdfService from '../services/aestheticPdfService';
@@ -146,7 +147,7 @@ const getStatusChip = (status) => {
   );
 };
 
-const Row = ({ order, onDelete, onEdit, onGeneratePDF, pdfLoading, handlePdfMenuOpen, pdfMenuAnchor, handlePdfMenuClose, handlePdfTypeSelect }) => {
+const Row = ({ order, onDelete, onEdit, pdfLoading, handlePdfTypeSelect, canSeePrices, canEditAll, userRole, handleStatusOnlyEdit }) => {
   const [open, setOpen] = useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
@@ -234,34 +235,64 @@ const Row = ({ order, onDelete, onEdit, onGeneratePDF, pdfLoading, handlePdfMenu
           </Box>
         </TableCell>
         <TableCell>
-          <Typography sx={{ color: 'success.main', fontWeight: 600 }}>
-            {order.totalPrice?.toLocaleString('tr-TR')} ₺
-          </Typography>
+          {canSeePrices ? (
+            <Typography sx={{ color: 'success.main', fontWeight: 600 }}>
+              {order.totalPrice?.toLocaleString('tr-TR')} ₺
+            </Typography>
+          ) : (
+            <Typography sx={{ color: 'text.disabled', fontStyle: 'italic' }}>
+              Gizli
+            </Typography>
+          )}
         </TableCell>
         <TableCell>
           {getStatusChip(order.status)}
         </TableCell>
         <TableCell>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <IconButton 
-              color="primary" 
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(order);
-              }}
-              sx={{ 
-                transition: 'transform 0.2s', 
-                '&:hover': { transform: 'scale(1.2)' },
-                mr: 0.5
-              }}
-            >
-              <Edit />
-            </IconButton>
+            {canEditAll ? (
+              <IconButton 
+                color="primary" 
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(order);
+                }}
+                sx={{ 
+                  transition: 'transform 0.2s', 
+                  '&:hover': { transform: 'scale(1.2)' },
+                  mr: 0.5
+                }}
+                title="Siparişi Düzenle"
+              >
+                <Edit />
+              </IconButton>
+            ) : (
+              <IconButton 
+                color="warning" 
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Sadece durum değiştirme için özel dialog aç
+                  handleStatusOnlyEdit(order);
+                }}
+                sx={{ 
+                  transition: 'transform 0.2s', 
+                  '&:hover': { transform: 'scale(1.2)' },
+                  mr: 0.5
+                }}
+                title="Durum Güncelle"
+              >
+                <Update />
+              </IconButton>
+            )}
             <IconButton 
               color="secondary" 
               size="small"
-              onClick={(e) => handlePdfMenuOpen(e, order.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePdfTypeSelect(order, 'professional');
+              }}
               disabled={pdfLoading[order.id]}
               sx={{ 
                 transition: 'transform 0.2s', 
@@ -269,40 +300,10 @@ const Row = ({ order, onDelete, onEdit, onGeneratePDF, pdfLoading, handlePdfMenu
                 mr: 0.5,
                 '&:disabled': { opacity: 0.6 }
               }}
+              title="Profesyonel PDF Oluştur"
             >
               {pdfLoading[order.id] ? <CircularProgress size={16} color="inherit" /> : <PictureAsPdf />}
             </IconButton>
-            <Menu
-              anchorEl={pdfMenuAnchor[order.id]}
-              open={Boolean(pdfMenuAnchor[order.id])}
-              onClose={() => handlePdfMenuClose(order.id)}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <MenuItem onClick={() => handlePdfTypeSelect(order, 'professional')}>
-                <ListItemIcon>
-                  <PictureAsPdf fontSize="small" style={{ color: '#d4af37' }} />
-                </ListItemIcon>
-                <ListItemText primary="Profesyonel Pattern" secondary="Tam terzi formu - ölçülerle" />
-              </MenuItem>
-              <MenuItem onClick={() => handlePdfTypeSelect(order, 'basic')}>
-                <ListItemIcon>
-                  <PictureAsPdf fontSize="small" />
-                </ListItemIcon>
-                <ListItemText primary="Basit PDF" secondary="Sadece metin tabanlı" />
-              </MenuItem>
-              <MenuItem onClick={() => handlePdfTypeSelect(order, 'aesthetic')}>
-                <ListItemIcon>
-                  <PictureAsPdf fontSize="small" color="primary" />
-                </ListItemIcon>
-                <ListItemText primary="Estetik PDF" secondary="Renkli ve profesyonel" />
-              </MenuItem>
-              <MenuItem onClick={() => handlePdfTypeSelect(order, 'template')}>
-                <ListItemIcon>
-                  <PictureAsPdf fontSize="small" color="secondary" />
-                </ListItemIcon>
-                <ListItemText primary="Template PDF" secondary="Pattern şablonu üzerine" />
-              </MenuItem>
-            </Menu>
             <IconButton 
               color="error" 
               size="small"
@@ -632,6 +633,24 @@ const Orders = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   
+  // Kullanıcı rolünü kontrol et
+  const getUserRole = () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded = jwtDecode(token);
+        return decoded.role;
+      }
+    } catch (error) {
+      console.error('Token decode hatası:', error);
+    }
+    return null;
+  };
+  
+  const userRole = getUserRole();
+  const canSeePrices = userRole === 'ADMIN' || userRole === 'ÖLÇÜM'; // Sadece ADMIN ve ÖLÇÜM fiyat görebilir
+  const canEditAll = userRole === 'ADMIN' || userRole === 'ÖLÇÜM'; // Sadece ADMIN ve ÖLÇÜM tüm alanları düzenleyebilir
+  
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -644,7 +663,10 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [sortBy, setSortBy] = useState('date_desc'); // Varsayılan: Yeni siparişler önce
   const [pdfLoading, setPdfLoading] = useState({}); // PDF oluşturma loading state'i
-  const [pdfMenuAnchor, setPdfMenuAnchor] = useState({}); // PDF menu anchor state'i
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [selectedOrderForStatus, setSelectedOrderForStatus] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+
   const ordersPerPage = 8;
 
   const fetchOrders = async () => {
@@ -745,6 +767,42 @@ const Orders = () => {
   const handleEdit = (order) => {
     setSelectedOrder(order);
     setOrderDialogOpen(true);
+  };
+
+  // Sadece durum değiştirme için özel fonksiyon (DIKIMHANE/KESIMHANE için)
+  const handleStatusOnlyEdit = (order) => {
+    setSelectedOrderForStatus(order);
+    setNewStatus(order.status);
+    setStatusDialogOpen(true);
+  };
+
+  // Durum güncelleme fonksiyonu
+  const handleStatusUpdate = async () => {
+    try {
+      const response = await apiService.orders.updateStatus(selectedOrderForStatus.id, newStatus);
+      
+      // Orders listesini güncelle
+      setOrders(prevOrders => 
+        prevOrders.map(o => o.id === selectedOrderForStatus.id ? { ...o, status: newStatus } : o)
+      );
+      
+      setSnackbar({
+        open: true,
+        message: 'Sipariş durumu başarıyla güncellendi',
+        severity: 'success'
+      });
+      
+      setStatusDialogOpen(false);
+      setSelectedOrderForStatus(null);
+      setNewStatus('');
+    } catch (error) {
+      console.error('Durum güncelleme hatası:', error);
+      setSnackbar({
+        open: true,
+        message: 'Durum güncellenirken bir hata oluştu',
+        severity: 'error'
+      });
+    }
   };
 
   const handleOrderSave = async (savedOrder) => {
@@ -852,18 +910,8 @@ const Orders = () => {
     }
   };
 
-  // PDF menu açma/kapama fonksiyonları
-  const handlePdfMenuOpen = (event, orderId) => {
-    event.stopPropagation();
-    setPdfMenuAnchor(prev => ({ ...prev, [orderId]: event.currentTarget }));
-  };
-
-  const handlePdfMenuClose = (orderId) => {
-    setPdfMenuAnchor(prev => ({ ...prev, [orderId]: null }));
-  };
-
-  const handlePdfTypeSelect = async (order, pdfType) => {
-    handlePdfMenuClose(order.id);
+  // Direkt profesyonel PDF oluşturma
+  const handlePdfTypeSelect = async (order, pdfType = 'professional') => {
     await handleGeneratePDF(order, pdfType);
   };
 
@@ -1087,12 +1135,12 @@ const Orders = () => {
                       order={order} 
                       onDelete={handleDelete}
                       onEdit={handleEdit}
-                      onGeneratePDF={handleGeneratePDF}
                       pdfLoading={pdfLoading}
-                      handlePdfMenuOpen={handlePdfMenuOpen}
-                      pdfMenuAnchor={pdfMenuAnchor}
-                      handlePdfMenuClose={handlePdfMenuClose}
                       handlePdfTypeSelect={handlePdfTypeSelect}
+                      canSeePrices={canSeePrices}
+                      canEditAll={canEditAll}
+                      userRole={userRole}
+                      handleStatusOnlyEdit={handleStatusOnlyEdit}
                     />
                   ))
                 ) : (
@@ -1295,7 +1343,51 @@ const Orders = () => {
         </Alert>
       </Snackbar>
       
-      {/* Sipariş Ekleme/Düzenleme Dialog */}
+      {/* Durum Güncelleme Dialogu (DIKIMHANE/KESIMHANE için) */}
+      <Dialog open={statusDialogOpen} onClose={() => setStatusDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Update color="warning" />
+            Sipariş Durumu Güncelle
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <strong>Müşteri:</strong> {selectedOrderForStatus?.customer?.firstName} {selectedOrderForStatus?.customer?.lastName}
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel>Yeni Durum</InputLabel>
+              <Select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                label="Yeni Durum"
+              >
+                <MenuItem value="PREPARING">Hazırlanıyor</MenuItem>
+                <MenuItem value="CUTTING">Kesim</MenuItem>
+                <MenuItem value="SEWING">Dikim</MenuItem>
+                <MenuItem value="FITTING">Prova</MenuItem>
+                <MenuItem value="READY">Hazır</MenuItem>
+                <MenuItem value="DELIVERED">Teslim Edildi</MenuItem>
+                <MenuItem value="CANCELLED">İptal</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setStatusDialogOpen(false)}>İptal</Button>
+          <Button 
+            onClick={handleStatusUpdate} 
+            variant="contained" 
+            color="warning"
+            startIcon={<Update />}
+          >
+            Durumu Güncelle
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* Sipariş Ekleme/Düzenle Dialog */}
       <OrderDialog
         open={orderDialogOpen}
         onClose={() => {

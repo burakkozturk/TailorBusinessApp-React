@@ -382,25 +382,13 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const [imageUploading, setImageUploading] = useState(false);
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
 
-  // handleFileUpload fonksiyonunu burada tanımla eğer prop olarak gelmediyse
-  const localHandleFileUpload = handleFileUpload || (async (event) => {
+  // Sipariş fotoğrafı yükleme için AWS S3 kullan
+  const localHandleFileUpload = handleFileUpload || ((event) => {
     const file = event.target.files[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await apiService.measurements.uploadFile(formData);
-      if (response.data.success) {
-        alert('Ölçüler başarıyla yüklendi!');
-      } else {
-        alert('Ölçüler yüklenirken hata oluştu.');
-      }
-    } catch (error) {
-      console.error('Fotoğraf yükleme hatası:', error);
-      alert('Fotoğraf yüklenirken hata oluştu.');
-    }
+    
+    // handleImageChange fonksiyonunu kullan (AWS S3 için)
+    handleImageChange(event);
   });
 
   useEffect(() => {
@@ -1103,7 +1091,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                 </StyledButton>
               </Box>
 
-              {/* Önizleme */}
+              {/* Önizleme ve S3 Yükleme */}
               {imagePreview && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -1120,6 +1108,49 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
                       border: '1px solid #ddd'
                     }}
                   />
+                  
+                  {/* S3'e Yükle Butonu */}
+                  <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                    <StyledButton
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      onClick={handleImageUpload}
+                      disabled={imageUploading || !imageFile}
+                      sx={{
+                        bgcolor: 'success.main',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: 'success.dark'
+                        },
+                        '&:disabled': {
+                          bgcolor: 'grey.300'
+                        }
+                      }}
+                    >
+                      {imageUploading ? 'Yükleniyor...' : 'Yükle'}
+                    </StyledButton>
+                    
+                    <StyledButton
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview(null);
+                      }}
+                      sx={{
+                        borderColor: 'error.main',
+                        color: 'error.main',
+                        '&:hover': {
+                          borderColor: 'error.dark',
+                          backgroundColor: 'error.50'
+                        }
+                      }}
+                    >
+                      İptal
+                    </StyledButton>
+                  </Box>
                 </Box>
               )}
             </Box>

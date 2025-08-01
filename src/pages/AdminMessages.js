@@ -31,7 +31,14 @@ import {
   Stack,
   Container,
   Grid,
-  TextField
+  TextField,
+  useTheme,
+  useMediaQuery,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction
 } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import {
@@ -124,6 +131,10 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 const AdminMessages = () => {
   useDocumentTitle('Mesaj Yönetimi');
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);

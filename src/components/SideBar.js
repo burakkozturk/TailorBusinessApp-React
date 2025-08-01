@@ -29,7 +29,8 @@ import {
   IconButton, 
   Badge,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  AppBar
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../context/AuthContext';
@@ -63,6 +64,25 @@ const SidebarContainer = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
     width: '100%',
     height: '100%',
   },
+}));
+
+// Mobil AppBar
+const MobileAppBar = styled(AppBar)(({ theme }) => ({
+  background: 'linear-gradient(90deg, #1A2C42 0%, #2D4A6B 100%)',
+  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+  [theme.breakpoints.up('md')]: {
+    display: 'none',
+  },
+}));
+
+// Drawer için özel stil
+const DrawerContent = styled(Box)(({ theme }) => ({
+  width: 280,
+  height: '100%',
+  background: 'linear-gradient(180deg, #1A2C42 0%, #0B1625 100%)',
+  color: '#fff',
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 const Logo = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
@@ -238,24 +258,23 @@ const ScrollBox = styled(Box)(({ theme }) => ({
 }));
 
 const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) => {
-  const theme = useTheme();
+  const { user, logout } = useAuth();
   const location = useLocation();
-  const currentPath = location.pathname.split('/')[2] || '';
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobileScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const isTabletScreen = useMediaQuery(theme.breakpoints.down('lg'));
+  
   const [collapsed, setCollapsed] = useState(isCollapsed);
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingUsersCount, setPendingUsersCount] = useState(0);
-  const { user, logout, isAdmin } = useAuth();
+  
+  const currentPath = location.pathname.split('/admin/')[1] || 'dashboard';
 
-  // Collapse durumunu prop'tan al
-  useEffect(() => {
-    setCollapsed(isCollapsed);
-  }, [isCollapsed]);
-
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     e.preventDefault();
-    logout();
-    navigate('/');
+    await logout();
+    navigate('/giris');
   };
 
   const handleNavClick = () => {
@@ -332,14 +351,12 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
     }
   };
 
-  return (
-    <SidebarContainer 
-      iscollapsed={collapsed.toString()} 
-      ismobile={isMobile.toString()}
-    >
+  // Sidebar içeriğini oluşturan fonksiyon
+  const renderSidebarContent = (isMobileDrawer = false) => (
+    <>
       <Logo 
-        iscollapsed={collapsed.toString()} 
-        ismobile={isMobile.toString()}
+        iscollapsed={(!isMobileDrawer && collapsed).toString()} 
+        ismobile={isMobileDrawer.toString()}
       >
         <Avatar
           src="/img/logo.png"
@@ -353,17 +370,17 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
         />
         <LogoText 
           variant="h6" 
-          iscollapsed={collapsed.toString()} 
-          ismobile={isMobile.toString()}
+          iscollapsed={(!isMobileDrawer && collapsed).toString()} 
+          ismobile={isMobileDrawer.toString()}
         >
           Erdal Güda
         </LogoText>
       </Logo>
 
-      {!isMobile && (
+      {!isMobileDrawer && !isMobileScreen && (
         <ToggleButton 
           onClick={toggleSidebar}
-          ismobile={isMobile.toString()}
+          ismobile={isMobileDrawer.toString()}
         >
           {collapsed ? <FaChevronRight size={14} /> : <FaChevronLeft size={14} />}
         </ToggleButton>
@@ -374,21 +391,21 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
           {menuItems.map((item, index) => (
             <Tooltip 
               key={index} 
-              title={collapsed && !isMobile ? item.label : ""} 
+              title={(!isMobileDrawer && collapsed) ? item.label : ""} 
               placement="right"
             >
               <NavItem
                 component={Link}
                 to={`/admin/${item.path}`}
                 isactive={(currentPath === item.path).toString()}
-                iscollapsed={collapsed.toString()}
-                ismobile={isMobile.toString()}
+                iscollapsed={(!isMobileDrawer && collapsed).toString()}
+                ismobile={isMobileDrawer.toString()}
                 onClick={handleNavClick}
                 className={item.special ? 'ai-visualization-button' : ''}
               >
                 <NavIcon 
-                  iscollapsed={collapsed.toString()}
-                  ismobile={isMobile.toString()}
+                  iscollapsed={(!isMobileDrawer && collapsed).toString()}
+                  ismobile={isMobileDrawer.toString()}
                 >
                   {item.badge && item.badge > 0 ? (
                     <Badge 
@@ -404,8 +421,8 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
                 </NavIcon>
                 <NavText 
                   primary={item.label}
-                  iscollapsed={collapsed.toString()}
-                  ismobile={isMobile.toString()}
+                  iscollapsed={(!isMobileDrawer && collapsed).toString()}
+                  ismobile={isMobileDrawer.toString()}
                 />
               </NavItem>
             </Tooltip>
@@ -416,15 +433,15 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
       <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
 
       <ProfileSection 
-        iscollapsed={collapsed.toString()} 
-        ismobile={isMobile.toString()}
+        iscollapsed={(!isMobileDrawer && collapsed).toString()} 
+        ismobile={isMobileDrawer.toString()}
       >
         <ProfileAvatar>
           {user?.firstName ? user.firstName.charAt(0).toUpperCase() : 'EG'}
         </ProfileAvatar>
         <ProfileInfo 
-          iscollapsed={collapsed.toString()} 
-          ismobile={isMobile.toString()}
+          iscollapsed={(!isMobileDrawer && collapsed).toString()} 
+          ismobile={isMobileDrawer.toString()}
         >
           <ProfileName>
             {user?.firstName || 'Erdal'} {user?.lastName || 'Güda'}
@@ -439,13 +456,13 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
 
       <Box sx={{ p: 1 }}>
         <Tooltip 
-          title={collapsed && !isMobile ? "Çıkış Yap" : ""} 
+          title={(!isMobileDrawer && collapsed) ? "Çıkış Yap" : ""} 
           placement="right"
         >
           <NavItem 
             onClick={handleLogout}
-            iscollapsed={collapsed.toString()}
-            ismobile={isMobile.toString()}
+            iscollapsed={(!isMobileDrawer && collapsed).toString()}
+            ismobile={isMobileDrawer.toString()}
             sx={{ 
               '&:hover': { 
                 backgroundColor: 'rgba(244, 67, 54, 0.1)' 
@@ -453,16 +470,16 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
             }}
           >
             <NavIcon 
-              iscollapsed={collapsed.toString()}
-              ismobile={isMobile.toString()}
+              iscollapsed={(!isMobileDrawer && collapsed).toString()}
+              ismobile={isMobileDrawer.toString()}
               sx={{ color: '#f44336' }}
             >
               <FaSignOutAlt size={20} />
             </NavIcon>
             <NavText 
               primary="Çıkış Yap"
-              iscollapsed={collapsed.toString()}
-              ismobile={isMobile.toString()}
+              iscollapsed={(!isMobileDrawer && collapsed).toString()}
+              ismobile={isMobileDrawer.toString()}
               sx={{ 
                 '& .MuiListItemText-primary': { 
                   color: '#f44336' 
@@ -472,6 +489,26 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
           </NavItem>
         </Tooltip>
       </Box>
+    </>
+  );
+
+  // Mobilde DashboardLayout AppBar'ini kullan, SideBar sadece drawer olarak çalışsın
+  if (isMobileScreen) {
+    // Mobil için sadece drawer content'i döndür
+    return (
+      <DrawerContent>
+        {renderSidebarContent(true)}
+      </DrawerContent>
+    );
+  }
+
+  // Desktop için normal sidebar
+  return (
+    <SidebarContainer 
+      iscollapsed={collapsed.toString()} 
+      ismobile="false"
+    >
+      {renderSidebarContent(false)}
     </SidebarContainer>
   );
 };

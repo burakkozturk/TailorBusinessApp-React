@@ -61,7 +61,7 @@ const ChangePassword = () => {
     try {
       const response = await api.post('/auth/change-password', {
         username: user.username,
-        currentPassword,
+        oldPassword: currentPassword, // Backend oldPassword bekliyor
         newPassword
       });
 

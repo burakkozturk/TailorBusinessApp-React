@@ -57,7 +57,7 @@ const StatsContainer = styled(Box)({
 });
 
 const StatItem = styled(Box)(({ theme, gradient }) => ({
-  padding: '1.5rem',
+  padding: theme.spacing(2),
   borderRadius: '20px',
   background: gradient || 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
   border: '1px solid rgba(255, 255, 255, 0.8)',
@@ -66,6 +66,14 @@ const StatItem = styled(Box)(({ theme, gradient }) => ({
   position: 'relative',
   overflow: 'hidden',
   minHeight: '140px',
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(1.5),
+    minHeight: '120px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1.2),
+    minHeight: '100px',
+  },
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -82,11 +90,14 @@ const StatItem = styled(Box)(({ theme, gradient }) => ({
     '& .icon-box': {
       transform: 'rotate(3deg) scale(1.05)',
       boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)',
+    },
+    [theme.breakpoints.down('sm')]: {
+      transform: 'translateY(-2px) scale(1.005)',
     }
   }
 }));
 
-const IconBox = styled(Box)(({ bgcolor }) => ({
+const IconBox = styled(Box)(({ theme, bgcolor }) => ({
   width: '48px',
   height: '48px',
   borderRadius: '16px',
@@ -99,6 +110,18 @@ const IconBox = styled(Box)(({ bgcolor }) => ({
   right: '20px',
   boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  [theme.breakpoints.down('md')]: {
+    width: '40px',
+    height: '40px',
+    top: '16px',
+    right: '16px',
+  },
+  [theme.breakpoints.down('sm')]: {
+    width: '36px',
+    height: '36px',
+    top: '12px',
+    right: '12px',
+  },
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -329,11 +352,11 @@ const Dashboard = () => {
             Önemli Metriklerin Özeti
           </Typography>
           
-          <Grid container spacing={{ xs: 2, md: 4 }}>
-            <Grid item xs={12} sm={6} md={4}>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
+            <Grid item xs={12} sm={6} lg={4}>
               <StatItem gradient="linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)">
                 <IconBox bgcolor="#10B981" className="icon-box">
-                  <FaUsers size={22} color="white" />
+                  <FaUsers size={isMobile ? 18 : 22} color="white" />
                 </IconBox>
                 <Box sx={{ position: 'relative', zIndex: 1, pr: 8 }}>
                   <Typography variant="h4" sx={{ fontWeight: 800, color: '#065f46', mb: 0.5, lineHeight: 1 }}>

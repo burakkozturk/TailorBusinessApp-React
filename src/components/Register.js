@@ -14,10 +14,7 @@ function Register() {
     username: '',
     password: '',
     confirmPassword: '',
-    fullName: '',
-    email: '',
-    phone: '',
-    role: 'MUHASEBECI' // Varsayılan rol
+    role: 'ÖLÇÜM' // Varsayılan rol
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -94,7 +91,7 @@ function Register() {
       console.log('Kayıt yanıtı:', registerRes.data);
       
       if (registerRes.data.status === 'PENDING_APPROVAL') {
-        const roleName = formData.role === 'MUHASEBECI' ? 'Muhasebeci' : formData.role === 'USTA' ? 'Usta' : 'Admin';
+        const roleName = formData.role === 'ÖLÇÜM' ? 'Ölçüm' : formData.role === 'KESIMHANE' ? 'Kesimhane' : formData.role === 'DIKIMHANE' ? 'Dikimhane' : 'Admin';
         setSuccess(`Kayıt başarılı! ${roleName} rolü ile hesabınız admin onayı bekliyor. Onaylandıktan sonra giriş yapabilirsiniz.`);
         
         // Form'u temizle
@@ -102,10 +99,7 @@ function Register() {
           username: '',
           password: '',
           confirmPassword: '',
-          fullName: '',
-          email: '',
-          phone: '',
-          role: 'MUHASEBECI'
+          role: 'ÖLÇÜM'
         });
         
         // 3 saniye sonra giriş sayfasına yönlendir
@@ -148,35 +142,11 @@ function Register() {
           <form onSubmit={handleSubmit}>
             <input
               type="text"
-              name="fullName"
-              placeholder="Ad Soyad (İsteğe bağlı)"
-              value={formData.fullName}
-              onChange={handleChange}
-            />
-            
-            <input
-              type="text"
               name="username"
               placeholder="Kullanıcı Adı *"
               value={formData.username}
               onChange={handleChange}
               required
-            />
-            
-            <input
-              type="email"
-              name="email"
-              placeholder="E-posta (İsteğe bağlı)"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Telefon (İsteğe bağlı)"
-              value={formData.phone}
-              onChange={handleChange}
             />
             
             <div style={{ marginBottom: '15px' }}>
@@ -209,9 +179,11 @@ function Register() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="MUHASEBECI">Muhasebeci - Müşteri ve Sipariş Görüntüleme</option>
-                <option value="USTA">Usta - Kumaş ve Şablon Yönetimi + Muhasebeci Yetkileri</option>
-                <option value="ADMIN">Admin - Tam Yetki (Tüm Modüller)</option>
+                <option value="ADMIN">Admin - Tam Yetki</option>
+                <option value="KESIMHANE">Kesimhane - Sipariş Durumu İlerletme</option>
+                <option value="DIKIMHANE">Dikimhane - Sipariş Durumu İlerletme</option>
+                <option value="ÖLÇÜM">Ölçüm - Sipariş Oluşturma ve Ölçü Girme</option>
+
               </select>
             </div>
             
