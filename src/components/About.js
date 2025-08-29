@@ -12,9 +12,17 @@ const About = () => (
         <p className="about-section-subtitle">Hakkımızda</p>
         <h2 className="about-section-title">Ustalığımızla Fark Yaratıyoruz</h2>
         <p className="about-section-desc">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          Hoşgeldiniz!<br></br><br></br><br></br>
+
+          Erdal Güda Terzilik Atölyesi olarak, size özel tasarlanmış, vücut ölçülerinize uygun kıyafetler sunuyoruz. Her bir parça, el işçiliğiyle özenle hazırlanır. Tarzınızı yansıtan, rahat ve şık takımlarımızla fark yaratın.
+          <br></br>
+          <br></br>
+          Özel Tasarımlar, Kaliteli Kumaşlar
+          Her bedene uygun, özgün ve kaliteli kıyafetlerimizle tanışın. Günlük yaşamda ve özel günlerde şıklığınızı tamamlayın.
+          <br></br>
+          <br></br>
+          Randevunuzu Alın
+          Size en uygun tasarımı oluşturmak için hemen randevunuzu alın. Profesyonel ekibimizle sizi bekliyoruz.
         </p>
         <button className="btn-outline">Daha Fazla</button>
       </div>

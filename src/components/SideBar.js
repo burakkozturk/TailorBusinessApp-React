@@ -13,8 +13,7 @@ import {
   FaChevronRight,
   FaEnvelope,
   FaUsersCog,
-  FaPalette,
-  FaRobot
+  FaPalette
 } from 'react-icons/fa';
 import { 
   Box, 
@@ -34,7 +33,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../context/AuthContext';
-import '../styles/AIVisualizationButton.css';
+
 import api from '../api/axiosConfig';
 
 // Responsive constants
@@ -258,7 +257,7 @@ const ScrollBox = styled(Box)(({ theme }) => ({
 }));
 
 const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, canViewCustomers } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -329,11 +328,11 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
 
   const menuItems = [
     { path: '', icon: FaHome, label: 'Genel Bakış' },
-    { path: 'customers', icon: FaUser, label: 'Müşteriler' },
+    ...(canViewCustomers ? [{ path: 'customers', icon: FaUser, label: 'Müşteriler' }] : []),
     { path: 'orders', icon: FaTshirt, label: 'Siparişler' },
-    ...(user?.role === 'ADMIN' ? [{ path: 'ai', icon: () => <span style={{fontSize: '20px'}}>✨</span>, label: 'AI Görselleştirme', special: true }] : []),
-    { path: 'messages', icon: FaEnvelope, label: 'Mesajlar', badge: unreadCount },
-    { path: 'blog', icon: FaBlog, label: 'Blog Yönetimi' },
+    { path: 'ai-image', icon: '🎨', label: 'AI Manken' },
+    ...(user?.role === 'ADMIN' ? [{ path: 'messages', icon: FaEnvelope, label: 'Mesajlar', badge: unreadCount }] : []),
+    ...(user?.role === 'ADMIN' ? [{ path: 'blog', icon: FaBlog, label: 'Blog Yönetimi' }] : []),
     ...(user?.role === 'ADMIN' ? [{ path: 'managers', icon: FaUsersCog, label: 'Kullanıcı Yönetimi', badge: pendingUsersCount }] : []),
     { path: 'settings', icon: FaCogs, label: 'Ayarlar' },
   ];
@@ -346,6 +345,12 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
         return 'Usta';
       case 'MUHASEBECI':
         return 'Muhasebeci';
+      case 'DIKIMHANE':
+        return 'Dikimhane';
+      case 'KESIMHANE':
+        return 'Kesimhane';
+      case 'ÖLÇÜM':
+        return 'Ölçüm';
       default:
         return 'Kullanıcı';
     }
@@ -413,10 +418,18 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
                       color="error"
                       max={99}
                     >
-                      <item.icon size={20} />
+                      {typeof item.icon === 'string' ? (
+                        <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                      ) : (
+                        <item.icon size={20} />
+                      )}
                     </Badge>
                   ) : (
-                    <item.icon size={20} />
+                    typeof item.icon === 'string' ? (
+                      <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                    ) : (
+                      <item.icon size={20} />
+                    )
                   )}
                 </NavIcon>
                 <NavText 

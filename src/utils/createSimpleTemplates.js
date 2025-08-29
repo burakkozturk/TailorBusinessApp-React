@@ -8,7 +8,7 @@ export const createAndSaveTemplates = async () => {
     jacketDoc.setFontSize(20);
     jacketDoc.text('CEKET PATTERN ŞABLONU', 20, 30);
     jacketDoc.setFontSize(12);
-    jacketDoc.text('Bu bir örnek ceket pattern şablonudur.', 20, 60);
+    jacketDoc.text('Erdal Güda profesyonel ceket pattern şablonu.', 20, 60);
     jacketDoc.rect(20, 80, 170, 200);
     jacketDoc.setFontSize(10);
     jacketDoc.text('Ölçü alanları burada gösterilecek', 25, 100);
@@ -20,7 +20,7 @@ export const createAndSaveTemplates = async () => {
     shirtDoc.setFontSize(20);
     shirtDoc.text('GÖMLEK PATTERN ŞABLONU', 20, 30);
     shirtDoc.setFontSize(12);
-    shirtDoc.text('Bu bir örnek gömlek pattern şablonudur.', 20, 60);
+    shirtDoc.text('Erdal Güda profesyonel gömlek pattern şablonu.', 20, 60);
     shirtDoc.rect(20, 80, 170, 180);
     shirtDoc.setFontSize(10);
     shirtDoc.text('Ölçü alanları burada gösterilecek', 25, 100);
@@ -32,7 +32,7 @@ export const createAndSaveTemplates = async () => {
     pantsDoc.setFontSize(20);
     pantsDoc.text('PANTOLON PATTERN ŞABLONU', 20, 30);
     pantsDoc.setFontSize(12);
-    pantsDoc.text('Bu bir örnek pantolon pattern şablonudur.', 20, 60);
+    pantsDoc.text('Erdal Güda profesyonel pantolon pattern şablonu.', 20, 60);
     pantsDoc.rect(20, 80, 170, 200);
     shirtDoc.setFontSize(10);
     pantsDoc.text('Ölçü alanları burada gösterilecek', 25, 100);

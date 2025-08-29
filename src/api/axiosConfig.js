@@ -2,19 +2,17 @@ import axios from 'axios';
 
 // Environment-based API configuration
 const getBaseURL = () => {
-  // Production: Environment variable'dan al, yoksa production domain kullan
+  // Production'da api.erdalguda.com kullan, development'ta localhost
   if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_API_BASE_URL || 'https://erdalguda.online';
+    return 'https://api.erdalguda.com';
   }
-  
-  // Development: Local server kullan
   return process.env.REACT_APP_API_BASE_URL || 'http://localhost:6767';
 };
 
 // Axios instance oluşturma
 const api = axios.create({
   baseURL: getBaseURL(),
-  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 30000, // Production için daha uzun timeout
+  timeout: parseInt(process.env.REACT_APP_API_TIMEOUT) || 120000, // AI işlemleri için 2 dakika timeout
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

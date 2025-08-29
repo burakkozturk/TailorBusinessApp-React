@@ -25,228 +25,264 @@ class ProfessionalPdfService {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    let yPosition = this.pageHeight - this.margin;
-
-    // Header - Logo ve Kumaş Numunesi
-    await this.drawHeader(page, boldFont, yPosition);
-    yPosition -= 100;
-
-    // Müşteri Bilgileri
-    yPosition = await this.drawCustomerInfo(page, font, boldFont, order, yPosition);
-    yPosition -= 30;
-
-    // Ölçü Tabloları ve Gömlek Şeması
-    yPosition = await this.drawMeasurementsAndSchema(page, font, boldFont, measurements, order, yPosition, pdfDoc);
-    yPosition -= 30;
-
-    // Model Notları
-    await this.drawModelNotes(page, font, boldFont, order, yPosition);
+    // Modern ve profesyonel PDF tasarımı
+    await this.drawModernLayout(page, font, boldFont, order, measurements, pdfDoc);
 
     return await pdfDoc.save();
   }
 
-  async drawHeader(page, boldFont, yPosition) {
-    // Minimal ve profesyonel header tasarımı
+  async drawModernLayout(page, font, boldFont, order, measurements, pdfDoc) {
+    const leftColumnWidth = 280;
+    const rightColumnWidth = 250;
+    const columnGap = 25;
     
-    // ERDAL GUDA - Temiz tipografi (renkli arkaplan yok)
-    page.drawText('ERDAL GUDA', {
-      x: this.margin,
-      y: yPosition - 20,
-      size: 20,
-      font: boldFont,
-      color: rgb(0, 0, 0),
-    });
+    // HEADER - Modern ve temiz
+    await this.drawModernHeader(page, font, boldFont, order);
+    
+    // SOL KOLON - Müşteri bilgileri ve ölçüler
+    await this.drawLeftColumn(page, font, boldFont, order, measurements, leftColumnWidth);
+    
+    // SAĞ KOLON - Pattern resmi
+    await this.drawRightColumn(page, font, boldFont, order, pdfDoc, leftColumnWidth + columnGap, rightColumnWidth);
+    
+    // FOOTER - Notlar ve imza alanı
+    await this.drawModernFooter(page, font, boldFont, order);
+  }
 
-    page.drawText(this.sanitizeText('KİŞİSEL ÖZEL DİKİM'), {
+  async drawModernHeader(page, font, boldFont, order) {
+    const headerHeight = 80;
+    const yStart = this.pageHeight - this.margin;
+    
+    // Üst çizgi - marka rengi
+    page.drawRectangle({
+      x: 0,
+      y: yStart - 5,
+      width: this.pageWidth,
+      height: 5,
+      color: rgb(0.2, 0.3, 0.5), // Koyu mavi
+    });
+    
+    // Başlık alanı arka planı
+    page.drawRectangle({
+      x: 0,
+      y: yStart - headerHeight,
+      width: this.pageWidth,
+      height: headerHeight - 5,
+      color: rgb(0.98, 0.98, 0.99), // Çok açık gri
+    });
+    
+    // SIPARIS PATTERN DOKUMANI - Ana başlık
+    page.drawText('SIPARIS PATTERN DOKUMANI', {
       x: this.margin,
-      y: yPosition - 40,
-      size: 10,
+      y: yStart - 25,
+      size: 18,
+      font: boldFont,
+      color: rgb(0.1, 0.1, 0.1),
+    });
+    
+    // MUSTERI BILGILERI - Alt başlık
+    page.drawText('MUSTERI BILGILERI', {
+      x: this.pageWidth - this.margin - 150,
+      y: yStart - 25,
+      size: 12,
       font: boldFont,
       color: rgb(0.4, 0.4, 0.4),
     });
-
-    // İnce çizgi ayırıcı
-    page.drawLine({
-      start: { x: this.margin, y: yPosition - 55 },
-      end: { x: this.pageWidth - this.margin, y: yPosition - 55 },
-      thickness: 0.5,
-      color: rgb(0.8, 0.8, 0.8),
-    });
-
-    // KUMAŞ NUMUNESİ - Minimal çerçeve
-    page.drawRectangle({
-      x: this.pageWidth - this.margin - 120,
-      y: yPosition - 45,
-      width: 120,
-      height: 30,
-      borderColor: rgb(0.6, 0.6, 0.6),
-      borderWidth: 1,
-    });
-
-    page.drawText(this.sanitizeText('KUMAŞ NUMUNESİ'), {
-      x: this.pageWidth - this.margin - 110,
-      y: yPosition - 35,
-      size: 9,
-      font: boldFont,
-      color: rgb(0.3, 0.3, 0.3),
-    });
-  }
-
-  async drawCustomerInfo(page, font, boldFont, order, yPosition) {
-    // Profesyonel müşteri bilgileri layout'u
     
-    // Müşteri adı - temiz tipografi
-    page.drawText(this.sanitizeText('MÜŞTERİ:'), {
-      x: this.margin,
-      y: yPosition,
-      size: 11,
-      font: boldFont,
-      color: rgb(0.2, 0.2, 0.2),
-    });
-
-    const customerName = this.sanitizeText(`${order.customer.firstName} ${order.customer.lastName}`);
-    page.drawText(customerName, {
-      x: this.margin + 80,
-      y: yPosition,
-      size: 11,
-      font: font,
-      color: rgb(0, 0, 0),
-    });
-
-    yPosition -= 25;
-
-    // İnce ayırıcı çizgi
-    page.drawLine({
-      start: { x: this.margin, y: yPosition },
-      end: { x: this.margin + 300, y: yPosition },
-      thickness: 0.3,
-      color: rgb(0.9, 0.9, 0.9),
-    });
-
-    yPosition -= 20;
-
-    // Özellikler başlığı - minimal
-    page.drawText(this.sanitizeText('ÜRÜN ÖZELLİKLERİ:'), {
-      x: this.margin,
-      y: yPosition,
-      size: 10,
-      font: boldFont,
-      color: rgb(0.3, 0.3, 0.3),
-    });
-
-    yPosition -= 15;
-
-    // Sipariş özelliklerini minimal listele
-    const features = this.getOrderFeatures(order);
-    features.forEach((feature, index) => {
-      // Bullet point
-      page.drawText('•', {
-        x: this.margin + 5,
-        y: yPosition - (index * 12),
-        size: 8,
-        font: font,
-        color: rgb(0.5, 0.5, 0.5),
-      });
+    // Sipariş bilgileri - kompakt
+    const orderInfo = [
+      `Siparis No: ${order.id || 'N/A'}`,
+      `Urun Tipi: ${this.getProductTypeDisplay(order.productType)}`,
+      `Siparis Tarihi: ${this.formatDate(order.orderDate)}`,
+      `Teslim Tarihi: ${this.formatDate(order.estimatedDeliveryDate)}`,
+      `Durum: ${this.getStatusDisplay(order.status)}`,
+      `Toplam Fiyat: ${order.totalPrice || 'Belirtilmemis'} TL`
+    ];
+    
+    orderInfo.forEach((info, index) => {
+      const xPos = index < 3 ? this.margin : this.margin + 280;
+      const yPos = yStart - 45 - ((index % 3) * 12);
       
-      page.drawText(this.sanitizeText(feature), {
-        x: this.margin + 15,
-        y: yPosition - (index * 12),
+      page.drawText(info, {
+        x: xPos,
+        y: yPos,
         size: 9,
         font: font,
         color: rgb(0.2, 0.2, 0.2),
       });
     });
-
-    return yPosition - (features.length * 12) - 10;
   }
 
-  async drawMeasurementsAndSchema(page, font, boldFont, measurements, order, yPosition, pdfDoc) {
-    // Profesyonel ölçü listesi layout'u
-    const leftColumnX = this.margin;
-    let leftY = yPosition;
-
-    // Ölçüler başlığı - minimal
-    page.drawText(this.sanitizeText('ÖLÇÜLER:'), {
-      x: leftColumnX,
-      y: leftY,
+  async drawLeftColumn(page, font, boldFont, order, measurements, columnWidth) {
+    let yPos = this.pageHeight - this.margin - 100; // Header'dan sonra başla
+    
+    // MÜŞTERİ BİLGİLERİ BÖLÜMÜ
+    yPos = await this.drawCustomerSection(page, font, boldFont, order, yPos, columnWidth);
+    yPos -= 25;
+    
+    // ÖLÇÜLER BÖLÜMÜ
+    yPos = await this.drawMeasurementsSection(page, font, boldFont, measurements, yPos, columnWidth);
+    yPos -= 25;
+    
+    // ÖZELLEŞTİRMELER BÖLÜMÜ
+    await this.drawCustomizationsSection(page, font, boldFont, order, yPos, columnWidth);
+  }
+  
+  async drawCustomerSection(page, font, boldFont, order, yPos, columnWidth) {
+    // Bölüm başlığı
+    page.drawRectangle({
+      x: this.margin,
+      y: yPos - 20,
+      width: columnWidth,
+      height: 20,
+      color: rgb(0.95, 0.95, 0.97),
+    });
+    
+    page.drawText('MUSTERI BILGILERI', {
+      x: this.margin + 10,
+      y: yPos - 15,
       size: 11,
       font: boldFont,
       color: rgb(0.2, 0.2, 0.2),
     });
-
-    leftY -= 20;
-
-    // İnce ayırıcı çizgi
-    page.drawLine({
-      start: { x: leftColumnX, y: leftY },
-      end: { x: leftColumnX + 300, y: leftY },
-      thickness: 0.3,
-      color: rgb(0.9, 0.9, 0.9),
+    
+    yPos -= 35;
+    
+    // Müşteri detayları - tablo formatında
+    const customerData = [
+      ['Ad Soyad:', `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`],
+      ['Telefon:', order.customer?.phone || 'Belirtilmemis'],
+      ['E-posta:', order.customer?.email || 'Belirtilmemis'],
+      ['Boy:', order.customer?.height ? `${order.customer.height} cm` : 'Belirtilmemis'],
+      ['Kilo:', order.customer?.weight ? `${order.customer.weight} kg` : 'Belirtilmemis'],
+      ['Adres:', order.customer?.address || 'Belirtilmemis']
+    ];
+    
+    customerData.forEach((row, index) => {
+      // Label
+      page.drawText(row[0], {
+        x: this.margin + 10,
+        y: yPos - (index * 16),
+        size: 9,
+        font: boldFont,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      
+      // Value
+      page.drawText(this.sanitizeText(row[1]), {
+        x: this.margin + 80,
+        y: yPos - (index * 16),
+        size: 9,
+        font: font,
+        color: rgb(0.1, 0.1, 0.1),
+      });
     });
+    
+    return yPos - (customerData.length * 16);
+  }
 
-    leftY -= 15;
-
-    // Ölçüleri DB'den al ve minimal göster
+  async drawMeasurementsSection(page, font, boldFont, measurements, yPos, columnWidth) {
+    // Bölüm başlığı
+    page.drawRectangle({
+      x: this.margin,
+      y: yPos - 20,
+      width: columnWidth,
+      height: 20,
+      color: rgb(0.95, 0.95, 0.97),
+    });
+    
+    page.drawText('OLCULER', {
+      x: this.margin + 10,
+      y: yPos - 15,
+      size: 11,
+      font: boldFont,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    
+    yPos -= 35;
+    
     const measurementMap = this.createMeasurementMap(measurements);
     
     if (Object.keys(measurementMap).length === 0) {
-      page.drawText('Veri bulunamadı', {
-        x: leftColumnX,
-        y: leftY,
+      page.drawText('Veri bulunamadi', {
+        x: this.margin + 10,
+        y: yPos,
         size: 9,
         font: font,
         color: rgb(0.5, 0.5, 0.5),
       });
-      leftY -= 20;
-    } else {
-      // ULTRA DEDUPLICATION: Temiz ve unique ölçüler
-      const uniqueMeasurements = new Map();
-      const seenValues = new Set();
-      
-      Object.entries(measurementMap).forEach(([measurementName, measurementValue]) => {
-        if (measurementValue && measurementValue !== '' && measurementValue !== null && measurementValue !== undefined) {
-          const cleanName = this.sanitizeText(measurementName.toUpperCase().trim());
-          const cleanValue = measurementValue.toString().trim();
-          const uniqueKey = `${cleanName}:${cleanValue}`;
-          
-          if (!uniqueMeasurements.has(uniqueKey) && !seenValues.has(uniqueKey)) {
-            uniqueMeasurements.set(uniqueKey, { name: cleanName, value: cleanValue });
-            seenValues.add(uniqueKey);
-          }
-        }
-      });
-      
-      // Minimal ölçü listesi
-      uniqueMeasurements.forEach(({ name, value }) => {
-        // Ölçü adı - koyu gri
-        page.drawText(name, {
-          x: leftColumnX,
-          y: leftY,
-          size: 9,
-          font: boldFont,
-          color: rgb(0.3, 0.3, 0.3),
-        });
-        
-        // Ölçü değeri - sağda hizalı
-        page.drawText(value, {
-          x: leftColumnX + 150,
-          y: leftY,
-          size: 9,
-          font: font,
-          color: rgb(0.1, 0.1, 0.1),
-        });
-        
-        leftY -= 14;
-      });
+      return yPos - 20;
     }
-
-    // Sağ taraf - SADECE gerçek giysi görseli (veri yok!)
-    const rightColumnX = this.pageWidth - this.margin - 200;
-    await this.drawGarmentImage(page, font, boldFont, rightColumnX, yPosition, order, pdfDoc);
+    
+    // Ölçüleri 2 kolonlu tablo formatında göster
+    const measurements_array = Object.entries(measurementMap).filter(([name, value]) => 
+      value && value !== '' && value !== null && value !== undefined
+    );
+    
+    const itemsPerColumn = Math.ceil(measurements_array.length / 2);
+    
+    measurements_array.forEach(([name, value], index) => {
+      const isRightColumn = index >= itemsPerColumn;
+      const rowIndex = isRightColumn ? index - itemsPerColumn : index;
+      
+      const xOffset = isRightColumn ? 140 : 0;
+      const yOffset = rowIndex * 14;
+      
+      // Ölçü adı
+      page.drawText(this.sanitizeText(name), {
+        x: this.margin + 10 + xOffset,
+        y: yPos - yOffset,
+        size: 8,
+        font: boldFont,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      
+      // Ölçü değeri
+      page.drawText(`${value}`, {
+        x: this.margin + 80 + xOffset,
+        y: yPos - yOffset,
+        size: 8,
+        font: font,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+    });
+    
+    return yPos - (itemsPerColumn * 14);
+  }
   
-    // Ölçü tabloları KALDIRILDI - sadece görsel gösterilecek
-
-    return leftY;
+  async drawCustomizationsSection(page, font, boldFont, order, yPos, columnWidth) {
+    // Bölüm başlığı
+    page.drawRectangle({
+      x: this.margin,
+      y: yPos - 20,
+      width: columnWidth,
+      height: 20,
+      color: rgb(0.95, 0.95, 0.97),
+    });
+    
+    page.drawText('OZELLESTIRMELER', {
+      x: this.margin + 10,
+      y: yPos - 15,
+      size: 11,
+      font: boldFont,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    
+    yPos -= 35;
+    
+    const features = this.getOrderFeatures(order);
+    
+    features.forEach((feature, index) => {
+      page.drawText(`• ${this.sanitizeText(feature)}`, {
+        x: this.margin + 10,
+        y: yPos - (index * 12),
+        size: 8,
+        font: font,
+        color: rgb(0.2, 0.2, 0.2),
+      });
+    });
+    
+    return yPos - (features.length * 12);
   }
 
   // Ölçü haritası oluştur (DUPLICATE'SUZZ)
@@ -383,26 +419,100 @@ class ProfessionalPdfService {
       features.push(`ACILIYET: ${this.sanitizeText(order.urgency.toUpperCase())}`);
     }
     
-    return features.length > 0 ? features : ['STANDART OZELLIKLER'];
+    return features.length > 0 ? features.slice(0, 8) : ['STANDART OZELLIKLER']; // Maksimum 8 özellik
   }
 
-  async drawGarmentImage(page, font, boldFont, x, y, order, pdfDoc) {
-  // SADECE GÖRSEL ALANI - daha büyük ve temiz
-  // Çerçeve kaldırıldı - sadece temiz görsel
-  
-  // Sipariş tipine göre gerçek ürün görselini göster
-  const productType = order?.productType?.toLowerCase() || 'gomlek';
-  
-  if (productType.includes('pantolon') || productType.includes('pants')) {
-    await this.drawProfessionalPantsImage(page, font, x, y, pdfDoc);
-  } else if (productType.includes('ceket') || productType.includes('jacket') || productType.includes('takim') || productType.includes('takım')) {
-    // Ceket, Takım için aynı template (ceket-gomlek-pattern-revize.png)
-    await this.drawProfessionalJacketImage(page, font, x, y, pdfDoc);
-  } else {
-    // Varsayılan: Gömlek (ceket-gomlek-pattern-revize.png)
-    await this.drawProfessionalShirtImage(page, font, x, y, pdfDoc);
+  async drawRightColumn(page, font, boldFont, order, pdfDoc, xStart, columnWidth) {
+    const yStart = this.pageHeight - this.margin - 100;
+    
+    // Pattern resmi bölümü başlığı
+    page.drawRectangle({
+      x: xStart,
+      y: yStart - 20,
+      width: columnWidth,
+      height: 20,
+      color: rgb(0.95, 0.95, 0.97),
+    });
+    
+    page.drawText('PATTERN SABLONU', {
+      x: xStart + 10,
+      y: yStart - 15,
+      size: 11,
+      font: boldFont,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    
+    // Pattern resmi
+    await this.drawPatternImage(page, font, boldFont, xStart, yStart - 40, order, pdfDoc, columnWidth);
   }
-}
+  
+  async drawPatternImage(page, font, boldFont, x, y, order, pdfDoc, maxWidth) {
+    try {
+      const productType = order?.productType?.toLowerCase() || 'gomlek';
+      let imagePath = '/ceket-gomlek-pattern-revize.png'; // Varsayılan
+      
+      if (productType.includes('pantolon') || productType.includes('pants')) {
+        imagePath = '/pantolon-pattern-revize.png';
+      }
+      
+      console.log(`🎨 Pattern resmi yükleniyor: ${imagePath}`);
+      
+      const response = await fetch(imagePath);
+      if (!response.ok) {
+        throw new Error(`Resim yüklenemedi: ${response.status}`);
+      }
+      
+      const imageBytes = await response.arrayBuffer();
+      const image = await pdfDoc.embedPng(imageBytes);
+      
+      // Resmi sağ kolona sığacak şekilde boyutlandır
+      const maxHeight = 400;
+      const scale = Math.min(maxWidth / image.width, maxHeight / image.height);
+      const scaledWidth = image.width * scale;
+      const scaledHeight = image.height * scale;
+      
+      // Resmi ortalayarak yerleştir
+      const centerX = x + (maxWidth - scaledWidth) / 2;
+      
+      page.drawImage(image, {
+        x: centerX,
+        y: y - scaledHeight,
+        width: scaledWidth,
+        height: scaledHeight,
+      });
+      
+      console.log('✅ Pattern resmi başarıyla eklendi!');
+    } catch (error) {
+      console.error('❌ Pattern resmi eklenirken hata:', error);
+      
+      // Hata durumunda placeholder
+      page.drawRectangle({
+        x: x + 10,
+        y: y - 200,
+        width: maxWidth - 20,
+        height: 180,
+        borderColor: rgb(0.8, 0.8, 0.8),
+        borderWidth: 1,
+        color: rgb(0.98, 0.98, 0.98),
+      });
+      
+      page.drawText('PATTERN RESMI', {
+        x: x + maxWidth/2 - 40,
+        y: y - 100,
+        size: 10,
+        font: boldFont,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      
+      page.drawText('YUKLENEMEDI', {
+        x: x + maxWidth/2 - 35,
+        y: y - 115,
+        size: 10,
+        font: font,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+    }
+  }
 
   // NOT: Görsel yükleme fonksiyonları kaldırıldı
   // Artık sadece kullanıcı tarafından yüklenen görseller kullanılacak
@@ -1316,6 +1426,105 @@ class ProfessionalPdfService {
 
       tableY -= 25;
     });
+  }
+
+  async drawModernFooter(page, font, boldFont, order) {
+    const footerY = 80;
+    
+    // Footer ayırıcı çizgi
+    page.drawLine({
+      start: { x: this.margin, y: footerY + 40 },
+      end: { x: this.pageWidth - this.margin, y: footerY + 40 },
+      thickness: 0.5,
+      color: rgb(0.8, 0.8, 0.8),
+    });
+    
+    // NOTLAR bölümü
+    page.drawText('NOTLAR:', {
+      x: this.margin,
+      y: footerY + 25,
+      size: 10,
+      font: boldFont,
+      color: rgb(0.3, 0.3, 0.3),
+    });
+    
+    const notes = order.notes || 'asd';
+    page.drawText(this.sanitizeText(notes), {
+      x: this.margin + 50,
+      y: footerY + 25,
+      size: 9,
+      font: font,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    
+    // İmza alanları
+    const signatureY = footerY - 10;
+    
+    // Müşteri imzası
+    page.drawLine({
+      start: { x: this.margin, y: signatureY },
+      end: { x: this.margin + 120, y: signatureY },
+      thickness: 0.5,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+    
+    page.drawText('Musteri Imzasi', {
+      x: this.margin + 20,
+      y: signatureY - 15,
+      size: 8,
+      font: font,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+    
+    // Terzi imzası
+    page.drawLine({
+      start: { x: this.pageWidth - this.margin - 120, y: signatureY },
+      end: { x: this.pageWidth - this.margin, y: signatureY },
+      thickness: 0.5,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+    
+    page.drawText('Terzi Imzasi', {
+      x: this.pageWidth - this.margin - 100,
+      y: signatureY - 15,
+      size: 8,
+      font: font,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+  }
+  
+  // Yardımcı fonksiyonlar
+  getProductTypeDisplay(productType) {
+    const types = {
+      'GOMLEK': 'Gomlek',
+      'PANTOLON': 'Pantolon', 
+      'CEKET': 'Ceket',
+      'TAKIM': 'Takim Elbise'
+    };
+    return types[productType?.toUpperCase()] || productType || 'Belirtilmemis';
+  }
+  
+  getStatusDisplay(status) {
+    const statuses = {
+      'PREPARING': 'Hazirlaniyor',
+      'CUTTING': 'Kesim Asamasinda',
+      'SEWING': 'Dikim Asamasinda',
+      'FITTING': 'Prova Asamasinda',
+      'READY': 'Hazir',
+      'DELIVERED': 'Teslim Edildi',
+      'CANCELLED': 'Iptal Edildi'
+    };
+    return statuses[status?.toUpperCase()] || status || 'Belirtilmemis';
+  }
+  
+  formatDate(dateString) {
+    if (!dateString) return 'Belirtilmemis';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('tr-TR');
+    } catch {
+      return dateString;
+    }
   }
 
   async drawModelNotes(page, font, boldFont, order, yPosition) {

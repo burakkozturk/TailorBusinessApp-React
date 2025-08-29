@@ -136,7 +136,7 @@ const apiService = {
     // Müşterinin tüm ölçülerini sil
     deleteAll: (customerId) => api.delete(`/api/measurements/customer/${customerId}`),
     
-    // Ölçü fotoğrafı yükle ve OCR ile işle
+    // EasyOCR ile ölçü fotoğrafı yükle ve işle
     uploadFile: (customerId, formData) => api.post(`/api/measurements/upload-measurements/${customerId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
@@ -148,6 +148,11 @@ const apiService = {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
+    }),
+    
+    // Ölçü verilerini TXT olarak export et
+    exportTxt: (customerId) => api.get(`/api/measurements/export/${customerId}`, {
+      responseType: 'blob'
     })
   },
 

@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { PhotoCamera, Article, Category, Create, YouTube, VideoLibrary } from '@mui/icons-material';
+import { extractYouTubeVideoId, getYouTubeThumbnail, isValidYouTubeUrl } from '../utils/youtubeUtils';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Customers.css';
 
@@ -108,6 +109,33 @@ function AdminBlog() {
         .replace(/^-|-$/g, '');
       
       setNewBlog(prev => ({ ...prev, slug: slug }));
+    }
+    
+    // YouTube URL değiştiğinde otomatik thumbnail çek
+    if (name === 'youtubeUrl') {
+      handleYouTubeUrlChange(value);
+    }
+  };
+
+  // YouTube URL değişikliğini handle et
+  const handleYouTubeUrlChange = (url) => {
+    if (!url || url.trim() === '') {
+      // URL boşsa thumbnail'i temizle
+      setNewBlog(prev => ({ ...prev, imageUrl: '' }));
+      setImagePreview(null);
+      return;
+    }
+    
+    if (isValidYouTubeUrl(url)) {
+      const videoId = extractYouTubeVideoId(url);
+      if (videoId) {
+        const thumbnailUrl = getYouTubeThumbnail(videoId, 'maxresdefault');
+        setNewBlog(prev => ({ ...prev, imageUrl: thumbnailUrl }));
+        setImagePreview(thumbnailUrl);
+        setSuccess('YouTube thumbnail otomatik olarak alındı!');
+      }
+    } else {
+      setError('Geçersiz YouTube URL formatı');
     }
   };
 
@@ -735,13 +763,18 @@ function AdminBlog() {
                 Öne Çıkan Resim
               </Typography>
               
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                YouTube URL'i girdiğinizde thumbnail otomatik olarak alınır. İsterseniz manuel resim de yükleyebilirsiniz.
+              </Typography>
+              
               <Button
                 component="label"
                 variant="outlined"
                 startIcon={<PhotoCamera />}
                 sx={{ mb: 2 }}
+                disabled={!!newBlog.youtubeUrl}
               >
-                Resim Seç
+                {newBlog.youtubeUrl ? 'YouTube Thumbnail Kullanılıyor' : 'Manuel Resim Seç'}
                 <input
                   type="file"
                   hidden
@@ -763,6 +796,9 @@ function AdminBlog() {
                       border: '1px solid #ddd'
                     }} 
                   />
+                  <Typography variant="caption" display="block" sx={{ mt: 1, textAlign: 'center' }}>
+                    {newBlog.youtubeUrl ? 'YouTube Thumbnail' : 'Manuel Yüklenen Resim'}
+                  </Typography>
                 </Box>
               )}
             </Box>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress } from '@mui/material';
+import { extractYouTubeVideoId, getYouTubeThumbnail } from '../utils/youtubeUtils';
 import '../styles/Blog.css';
 
 export default function Blog({ homePage = false }) {
@@ -83,24 +84,53 @@ export default function Blog({ homePage = false }) {
           </Box>
         ) : (
           <div className="blog-grid">
-                        {postsToDisplay.map(post => (
-              <article key={post.id} className="blog-post">
-                <div className="blog-content">
-                  {/* Kategori */}
-                  {post.categories && post.categories.length > 0 && (
-                    <span className="blog-category">{post.categories[0].name}</span>
+            {postsToDisplay.map(post => {
+              // Thumbnail URL'ini belirle
+              let thumbnailUrl = post.imageUrl;
+              
+              // Eğer YouTube URL'i varsa ve imageUrl yoksa, YouTube thumbnail'ini kullan
+              if (!thumbnailUrl && post.youtubeUrl) {
+                const videoId = extractYouTubeVideoId(post.youtubeUrl);
+                if (videoId) {
+                  thumbnailUrl = getYouTubeThumbnail(videoId, 'hqdefault');
+                }
+              }
+              
+              return (
+                <article key={post.id} className="blog-post">
+                  {/* Thumbnail Image */}
+                  {thumbnailUrl && (
+                    <div className="blog-image">
+                      <img 
+                        src={thumbnailUrl} 
+                        alt={post.title}
+                        style={{
+                          width: '100%',
+                          height: '200px',
+                          objectFit: 'cover',
+                          borderRadius: '8px 8px 0 0'
+                        }}
+                      />
+                    </div>
                   )}
-                  <h3 className="blog-post-title">{post.title}</h3>
-                  <p className="blog-excerpt">{truncateText(post.content, 150)}</p>
-                  <div className="blog-footer">
-                    <Link to={`/blog/${post.slug}`} className="blog-read-more">
-                      DEVAMINI OKU
-                    </Link>
-                    <span className="blog-date">{formatDate(post.createdAt)}</span>
+                  
+                  <div className="blog-content">
+                    {/* Kategori */}
+                    {post.categories && post.categories.length > 0 && (
+                      <span className="blog-category">{post.categories[0].name}</span>
+                    )}
+                    <h3 className="blog-post-title">{post.title}</h3>
+                    <p className="blog-excerpt">{truncateText(post.content, 150)}</p>
+                    <div className="blog-footer">
+                      <Link to={`/blog/${post.slug}`} className="blog-read-more">
+                        DEVAMINI OKU
+                      </Link>
+                      <span className="blog-date">{formatDate(post.createdAt)}</span>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
             </div>
         )}
         

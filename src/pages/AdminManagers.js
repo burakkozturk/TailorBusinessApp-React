@@ -217,8 +217,14 @@ function UserManagement() {
   // Approve user
   const handleApproveUser = async (userId) => {
     try {
-      console.log('Kullanıcı onaylama isteği gönderiliyor:', `/api/admin/users/${userId}/approve`);
-      const response = await api.post(`/api/admin/users/${userId}/approve`);
+      console.log('Kullanıcı onaylama isteği gönderiliyor:', `/auth/admin/approve-user/${userId}`);
+      
+      // Backend'in beklediği format - approvedBy alanı gerekli
+      const requestData = {
+        approvedBy: user?.username || 'erdalguda' // Mevcut kullanıcı adını kullan
+      };
+      
+      const response = await api.post(`/auth/admin/approve-user/${userId}`, requestData);
       console.log('Onaylama yanıtı:', response.data);
       setSuccess('Kullanıcı başarıyla onaylandı');
       fetchUsers();
@@ -229,15 +235,25 @@ function UserManagement() {
     }
   };
 
-  // Delete user
+  // Delete user 
   const handleDeleteUser = async (userId) => {
     try {
-      await api.delete(`/admin/users/${userId}`);
-      setSuccess('Kullanıcı başarıyla silindi');
+      // Eğer pending users'daysa reject endpoint'ini kullan
+      if (selectedFilter === 'pending') {
+        await api.delete(`/auth/admin/reject-user/${userId}`);
+        setSuccess('Kullanıcı kaydı reddedildi');
+      } else {
+        // Normal kullanıcı silme - username kullanarak
+        const userToDelete = users.find(u => u.id === userId);
+        if (userToDelete) {
+          await api.delete(`/auth/admin/users/${userToDelete.username}`);
+          setSuccess('Kullanıcı başarıyla silindi');
+        }
+      }
       fetchUsers();
     } catch (error) {
       console.error('Kullanıcı silinirken hata:', error);
-      setError('Kullanıcı silinirken hata oluştu');
+      setError('Kullanıcı silinirken hata oluştu: ' + (error.response?.data?.message || error.message));
     }
   };
 
