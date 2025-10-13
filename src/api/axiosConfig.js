@@ -1,12 +1,15 @@
 import axios from 'axios';
 
-// Environment-based API configuration
+// API configuration - Environment'a göre otomatik URL seç
 const getBaseURL = () => {
-  // Production'da api.erdalguda.com kullan, development'ta localhost
-  if (process.env.NODE_ENV === 'production') {
+  // Production environment kontrolü
+  if (window.location.hostname === 'erdalguda.netlify.app' || 
+      window.location.hostname === 'erdalguda.com' ||
+      window.location.hostname === 'www.erdalguda.com') {
     return 'https://api.erdalguda.com';
   }
-  return process.env.REACT_APP_API_BASE_URL || 'http://localhost:6767';
+  // Development/local
+  return 'http://localhost:6767';
 };
 
 // Axios instance oluşturma
@@ -183,9 +186,7 @@ api.interceptors.response.use(
   }
 );
 
-// Production'da console'da API base URL'ini göster
-if (isProduction) {
-  console.log(`🌐 API Base URL: ${getBaseURL()}`);
-}
+// Console'da API base URL'ini göster
+console.log(`🌐 API Base URL: ${getBaseURL()}`);
 
 export default api; 
