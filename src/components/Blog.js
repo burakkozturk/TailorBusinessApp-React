@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import apiService from '../services/apiService';
 import { Box, Typography, Grid, Card, CardMedia, CardContent, Chip, Button, CircularProgress } from '@mui/material';
 import { extractYouTubeVideoId, getYouTubeThumbnail } from '../utils/youtubeUtils';
 import '../styles/Blog.css';
 
 export default function Blog({ homePage = false }) {
+  const { t } = useTranslation('common');
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,8 +26,8 @@ export default function Blog({ homePage = false }) {
         setPosts(response.data);
         setError(null);
       } catch (err) {
-        console.error('Veri çekilirken hata oluştu:', err);
-        setError('Blog yazıları yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+        console.error(t('blog.dataFetchError'), err);
+        setError(t('blog.error'));
       } finally {
         setLoading(false);
       }
@@ -49,7 +51,7 @@ export default function Blog({ homePage = false }) {
         year: 'numeric'
       });
     } catch (error) {
-      return 'Geçersiz tarih';
+      return t('blog.invalidDate');
     }
   };
 
@@ -62,10 +64,10 @@ export default function Blog({ homePage = false }) {
         {/* Başlık Kısmı - Diğer bileşenlerle uyumlu */}
         {homePage && (
           <div className="blog-header">
-            <p className="blog-subtitle">Blogumuz</p>
-            <h2 className="blog-title">Son Yazılarımız</h2>
+            <p className="blog-subtitle">{t('blog.subtitle')}</p>
+            <h2 className="blog-title">{t('blog.title')}</h2>
             <p className="blog-description">
-              Moda ve tekstil dünyasından son gelişmeleri, tasarımları ve ipuçlarını sizlerle paylaşıyoruz.
+              {t('blog.description')}
             </p>
           </div>
         )}
@@ -80,7 +82,7 @@ export default function Blog({ homePage = false }) {
           </Box>
         ) : postsToDisplay.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 5 }}>
-            <Typography>Bu kategoride henüz blog yazısı bulunmuyor.</Typography>
+            <Typography>{t('blog.noPosts')}</Typography>
           </Box>
         ) : (
           <div className="blog-grid">
@@ -123,7 +125,7 @@ export default function Blog({ homePage = false }) {
                     <p className="blog-excerpt">{truncateText(post.content, 150)}</p>
                     <div className="blog-footer">
                       <Link to={`/blog/${post.slug}`} className="blog-read-more">
-                        DEVAMINI OKU
+                        {t('blog.readMore')}
                       </Link>
                       <span className="blog-date">{formatDate(post.createdAt)}</span>
                     </div>
@@ -138,7 +140,7 @@ export default function Blog({ homePage = false }) {
         {homePage && (
           <div className="blog-view-all">
             <Link to="/blog" className="btn-primary">
-              TÜM BLOG YAZILARI
+              {t('blog.viewAll') || 'TÜM BLOG YAZILARI'}
             </Link>
           </div>
         )}

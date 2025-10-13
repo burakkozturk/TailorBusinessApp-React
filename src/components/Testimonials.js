@@ -1,23 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../styles/Testimonials.css';
 
-const testimonialsData = [
- {
-    quote: 'Gerçekten harika hizmet! Kıyafetim tam istediğim gibi oldu, ustalık müthiş.',
-    name: 'Ahmet Yılmaz',
- },
- {
-    quote: 'Terzilikte sınır tanımıyorlar. Kumaş kalitesi ve işçilik kusursuz.',
-    name: 'Mehmet Demir',
- },
- {
-    quote: 'Beklentilerimin çok ötesindeydi. Kesim ve dikiş tam profesyonel.',
-    name: 'Ayşe Kara',
- }
-];
-
 export default function Testimonials() {
+  const { t } = useTranslation('common');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const testimonialsData = t('testimonials.testimonialData', { returnObjects: true });
   const { quote, name, role } = testimonialsData[currentIndex];
 
   const prev = () => {
@@ -34,8 +22,8 @@ export default function Testimonials() {
         {/* Left Column - Testimonial Content */}
         <div className="testimonials-content">
           <div className="testimonials-header">
-            <h3 className="testimonials-subtitle">Müşterilerimizin Yorumları</h3>
-            <h2 className="testimonials-title">Ne Dediler ? </h2>
+            <h3 className="testimonials-subtitle">{t('testimonials.sectionTitle')}</h3>
+            <h2 className="testimonials-title">{t('testimonials.sectionSubtitle')}</h2>
           </div>
           
           <div className="testimonial-box">
@@ -52,14 +40,14 @@ export default function Testimonials() {
               onClick={prev}
               className="nav-button"
             >
-              <span className="visually-hidden">Previous</span>
+              <span className="visually-hidden">{t('testimonials.navigation.previous')}</span>
               &lt;
             </button>
             <button 
               onClick={next}
               className="nav-button"
             >
-              <span className="visually-hidden">Next</span>
+              <span className="visually-hidden">{t('testimonials.navigation.next')}</span>
               &gt;
             </button>
           </div>

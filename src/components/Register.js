@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '../styles/Login.css';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -8,7 +9,8 @@ import api from '../api/axiosConfig';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function Register() {
-  useDocumentTitle('Kayıt Ol');
+  const { t } = useTranslation('common');
+  useDocumentTitle(t('auth.register.title'));
   
   const [formData, setFormData] = useState({
     username: '',
@@ -31,27 +33,27 @@ function Register() {
 
   const validateForm = () => {
     if (!formData.username || !formData.password || !formData.confirmPassword) {
-      setError('Kullanıcı adı, şifre ve şifre tekrarı zorunludur');
+      setError(t('auth.register.requiredFields') || 'Kullanıcı adı, şifre ve şifre tekrarı zorunludur');
       return false;
     }
     
     if (formData.username.length < 3) {
-      setError('Kullanıcı adı en az 3 karakter olmalıdır');
+      setError(t('auth.register.usernameMinLength') || 'Kullanıcı adı en az 3 karakter olmalıdır');
       return false;
     }
     
     if (formData.password.length < 6) {
-      setError('Şifre en az 6 karakter olmalıdır');
+      setError(t('auth.register.passwordMinLength') || 'Şifre en az 6 karakter olmalıdır');
       return false;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      setError('Şifreler eşleşmiyor');
+      setError(t('auth.register.passwordMismatch'));
       return false;
     }
     
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-      setError('Geçerli bir e-posta adresi girin');
+      setError(t('auth.register.invalidEmail') || 'Geçerli bir e-posta adresi girin');
       return false;
     }
     
@@ -135,7 +137,7 @@ function Register() {
       <Navbar />
       <div className="login-wrapper">
         <div className="login-box" style={{ maxWidth: '450px' }}>
-          <h2 className="login-title">Kayıt Ol</h2>
+          <h2 className="login-title">{t('auth.register.title')}</h2>
           {error && <p className="login-error">{error}</p>}
           {success && <p className="login-success" style={{ color: '#4CAF50', textAlign: 'center', marginBottom: '15px' }}>{success}</p>}
           
@@ -143,7 +145,7 @@ function Register() {
             <input
               type="text"
               name="username"
-              placeholder="Kullanıcı Adı *"
+              placeholder={`${t('auth.register.username')} *`}
               value={formData.username}
               onChange={handleChange}
               required
@@ -160,7 +162,7 @@ function Register() {
                   fontWeight: '500'
                 }}
               >
-                Rol Seçimi *
+                {t('auth.register.role')} *
               </label>
               <select
                 id="role"
@@ -179,10 +181,10 @@ function Register() {
                   cursor: 'pointer'
                 }}
               >
-                <option value="ADMIN">Admin - Tam Yetki</option>
-                <option value="KESIMHANE">Kesimhane - Sipariş Durumu İlerletme</option>
-                <option value="DIKIMHANE">Dikimhane - Sipariş Durumu İlerletme</option>
-                <option value="ÖLÇÜM">Ölçüm - Sipariş Oluşturma ve Ölçü Girme</option>
+                <option value="ADMIN">{t('auth.register.roles.ADMIN')}</option>
+                <option value="KESIMHANE">{t('auth.register.roles.KESIMHANE')}</option>
+                <option value="DIKIMHANE">{t('auth.register.roles.DIKIMHANE')}</option>
+                <option value="ÖLÇÜM">{t('auth.register.roles.ÖLÇÜM')}</option>
 
               </select>
             </div>
@@ -190,7 +192,7 @@ function Register() {
             <input
               type="password"
               name="password"
-              placeholder="Şifre *"
+              placeholder={`${t('auth.register.password')} *`}
               value={formData.password}
               onChange={handleChange}
               required
@@ -199,7 +201,7 @@ function Register() {
             <input
               type="password"
               name="confirmPassword"
-              placeholder="Şifre Tekrarı *"
+              placeholder={`${t('auth.register.confirmPassword')} *`}
               value={formData.confirmPassword}
               onChange={handleChange}
               required
@@ -210,12 +212,12 @@ function Register() {
               className="btn-secondary"
               disabled={loading}
             >
-              {loading ? 'Kayıt Yapılıyor...' : 'Kayıt Ol'}
+              {loading ? (t('auth.register.registering') || 'Kayıt Yapılıyor...') : t('auth.register.registerButton')}
             </button>
           </form>
           
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
-            <span style={{ color: '#666' }}>Zaten hesabınız var mı? </span>
+            <span style={{ color: '#666' }}>{t('auth.register.hasAccount') || 'Zaten hesabınız var mı?'} </span>
             <Link 
               to="/giris" 
               style={{ 
@@ -224,7 +226,7 @@ function Register() {
                 fontWeight: 'bold'
               }}
             >
-              Giriş Yap
+              {t('navigation.login')}
             </Link>
           </div>
         </div>

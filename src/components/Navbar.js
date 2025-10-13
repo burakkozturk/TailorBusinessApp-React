@@ -2,10 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiLogIn, FiMenu, FiX } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLanguage } from '../hooks/useLanguage';
 import '../styles/Navbar.css';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation('common');
+  const { isRTL, direction } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,7 +29,7 @@ function Navbar() {
   }, []);
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" dir={direction}>
       <div className="navbar-container">
         <div className="navbar-logo">
           <Link to="/">
@@ -34,29 +39,42 @@ function Navbar() {
 
         <ul className={isOpen ? 'nav-menu active' : 'nav-menu'}>
           <li className="nav-item">
-            <Link to="/" className="nav-links" onClick={() => setIsOpen(false)}>Ana Sayfa</Link>
+            <Link to="/" className="nav-links" onClick={() => setIsOpen(false)}>
+              {t('navigation.home')}
+            </Link>
           </li>
           <li className="nav-item">
-            <Link to="/hakkimizda" className="nav-links" onClick={() => setIsOpen(false)}>Hakkımızda</Link>
+            <Link to="/hakkimizda" className="nav-links" onClick={() => setIsOpen(false)}>
+              {t('navigation.about')}
+            </Link>
           </li>
           <li className="nav-item">
-            <Link to="/blog" className="nav-links" onClick={() => setIsOpen(false)}>Blog</Link>
+            <Link to="/blog" className="nav-links" onClick={() => setIsOpen(false)}>
+              {t('navigation.blog')}
+            </Link>
           </li>
           <li className="nav-item">
-            <Link to="/cebinizdeki-terziniz" className="nav-links" onClick={() => setIsOpen(false)} style={{ color: '#f5e6b0' }} ><i>Cebinizdeki Terziniz</i></Link>
+            <Link to="/cebinizdeki-terziniz" className="nav-links" onClick={() => setIsOpen(false)} style={{ color: '#f5e6b0' }}>
+              <i>{t('specialPages.pocketTailor')}</i>
+            </Link>
           </li>
           <li className="nav-item">
-            <Link to="/iletisim" className="nav-links" onClick={() => setIsOpen(false)}>İletişim</Link>
+            <Link to="/iletisim" className="nav-links" onClick={() => setIsOpen(false)}>
+              {t('navigation.contact')}
+            </Link>
           </li>
         </ul>
 
         {/* Menü ve Giriş ikonları - sağ tarafta */}
         <div className="navbar-right">
+          {/* Dil Değiştirici */}
+          <LanguageSwitcher variant="compact" className="navbar-language-switcher" />
+          
           <div className="menu-icon" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <FiX size={28} color="#f5e6b0" /> : <FiMenu size={28} color="#f5e6b0" />}
           </div>
           
-          <Link to="/giris" className="login-icon">
+          <Link to="/giris" className="login-icon" title={t('navigation.login')}>
             <FiLogIn size={24} color="#f5e6b0" />
           </Link>
         </div>

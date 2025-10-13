@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Typography, 
   Box, 
@@ -144,7 +145,8 @@ const ModernPaper = styled(Paper)({
 });
 
 const Dashboard = () => {
-  useDocumentTitle('Genel Bakış');
+  const { t } = useTranslation('admin');
+  useDocumentTitle(t('dashboard.title'));
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -253,16 +255,7 @@ const Dashboard = () => {
   };
 
   const getStatusText = (status) => {
-    switch(status) {
-      case 'PREPARING': return 'Hazırlanıyor';
-      case 'CUTTING': return 'Kesim';
-      case 'SEWING': return 'Dikim';
-      case 'FITTING': return 'Prova';
-      case 'READY': return 'Hazır';
-      case 'DELIVERED': return 'Teslim Edildi';
-      case 'CANCELLED': return 'İptal';
-      default: return status;
-    }
+    return t(`orderStatuses.${status}`, status);
   };
 
   const formatCurrency = (amount) => {
@@ -311,7 +304,7 @@ const Dashboard = () => {
           }}>
             <CircularProgress size={60} thickness={4} sx={{ color: '#667eea' }} />
             <Typography variant="h6" sx={{ color: '#64748b', fontWeight: 500 }}>
-              Dashboard veriler yükleniyor...
+              {t('dashboard.loading')}
             </Typography>
           </Box>
         </Container>
@@ -330,14 +323,14 @@ const Dashboard = () => {
             mb: 1,
             textAlign: { xs: 'center', md: 'left' }
           }}>
-            Genel Bakış
+            {t('dashboard.title')}
           </Typography>
           <Typography variant={isMobile ? "body1" : "h6"} sx={{ 
             color: '#64748b', 
             fontWeight: 400,
             textAlign: { xs: 'center', md: 'left' }
           }}>
-            İşletmenizin genel performans özeti
+            {t('dashboard.subtitle')}
           </Typography>
         </Box>
 

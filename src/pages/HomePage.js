@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import HeroSlider from '../components/HeroSlider';
@@ -10,7 +11,8 @@ import Blog from '../components/Blog';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function HomePage() {
-  useDocumentTitle('Ana Sayfa');
+  const { t } = useTranslation('common');
+  useDocumentTitle(t('navigation.home'));
   
   return (
     <div className="home-page">

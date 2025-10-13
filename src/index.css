@@ -1,3 +1,8 @@
+/* Global RTL and Language Support */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +10,78 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: direction 0.3s ease;
+}
+
+/* RTL Support */
+body.rtl {
+  direction: rtl;
+}
+
+/* Arabic Font Support */
+html[lang="ar"], html[lang="ar"] * {
+  font-family: 'Cairo', 'Amiri', 'Noto Sans Arabic', 'Traditional Arabic', 
+    -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* French Font Support */
+html[lang="fr"], html[lang="fr"] * {
+  font-family: 'Inter', 'Segoe UI', 'Roboto', -apple-system, 
+    BlinkMacSystemFont, sans-serif;
+}
+
+/* Turkish and English use default fonts */
+html[lang="tr"], html[lang="en"] {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* RTL Text Alignment */
+.rtl {
+  text-align: right;
+}
+
+.rtl .text-left {
+  text-align: right;
+}
+
+.rtl .text-right {
+  text-align: left;
+}
+
+.rtl .text-center {
+  text-align: center;
+}
+
+/* RTL Margin and Padding Adjustments */
+.rtl .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.rtl .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Language-specific Typography */
+html[lang="ar"] {
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+html[lang="fr"] {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+html[lang="tr"], html[lang="en"] {
+  font-size: 16px;
+  line-height: 1.6;
 }

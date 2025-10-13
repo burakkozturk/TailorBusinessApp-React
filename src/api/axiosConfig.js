@@ -6,7 +6,7 @@ const getBaseURL = () => {
   if (window.location.hostname === 'erdalguda.netlify.app' || 
       window.location.hostname === 'erdalguda.com' ||
       window.location.hostname === 'www.erdalguda.com') {
-    return 'https://api.erdalguda.com';
+    return 'https://erdalguda.online';
   }
   // Development/local
   return 'http://localhost:6767';

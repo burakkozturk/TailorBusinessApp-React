@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 import { 
   FaHome, 
   FaUser, 
@@ -13,7 +15,6 @@ import {
   FaChevronRight,
   FaEnvelope,
   FaUsersCog,
-  FaPalette
 } from 'react-icons/fa';
 import { 
   Box, 
@@ -40,7 +41,23 @@ import api from '../api/axiosConfig';
 const SIDEBAR_WIDTH = 280;
 const SIDEBAR_COLLAPSED_WIDTH = 80;
 
-// Stillendirilmiş bileşenler
+// Özel AI Model ikonu component'i
+const AIModelIcon = styled('span')(({ theme }) => ({
+  fontSize: '22px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '24px',
+  height: '24px',
+  borderRadius: '50%',
+  color: '#1A2C42',
+  fontWeight: 'bold',
+  boxShadow: '0 2px 8px rgba(255, 215, 0, 0.3)',
+  '&:before': {
+    content: '"✨"',
+    fontSize: '20px'
+  }
+}));
 const SidebarContainer = styled(Box)(({ theme, iscollapsed, ismobile }) => ({
   width: iscollapsed === 'true' && ismobile !== 'true' ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
   height: '100vh',
@@ -258,6 +275,7 @@ const ScrollBox = styled(Box)(({ theme }) => ({
 
 const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) => {
   const { user, logout, canViewCustomers } = useAuth();
+  const { t } = useTranslation('admin');
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -327,33 +345,18 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
   };
 
   const menuItems = [
-    { path: '', icon: FaHome, label: 'Genel Bakış' },
-    ...(canViewCustomers ? [{ path: 'customers', icon: FaUser, label: 'Müşteriler' }] : []),
-    { path: 'orders', icon: FaTshirt, label: 'Siparişler' },
-    { path: 'ai-image', icon: '🎨', label: 'AI Manken' },
-    ...(user?.role === 'ADMIN' ? [{ path: 'messages', icon: FaEnvelope, label: 'Mesajlar', badge: unreadCount }] : []),
-    ...(user?.role === 'ADMIN' ? [{ path: 'blog', icon: FaBlog, label: 'Blog Yönetimi' }] : []),
-    ...(user?.role === 'ADMIN' ? [{ path: 'managers', icon: FaUsersCog, label: 'Kullanıcı Yönetimi', badge: pendingUsersCount }] : []),
-    { path: 'settings', icon: FaCogs, label: 'Ayarlar' },
+    { path: '', icon: FaHome, label: t('sidebar.overview') },
+    ...(canViewCustomers ? [{ path: 'customers', icon: FaUser, label: t('sidebar.customers') }] : []),
+    { path: 'orders', icon: FaTshirt, label: t('sidebar.orders') },
+    ...(user?.role === 'ADMIN' ? [{ path: 'ai-model', icon: AIModelIcon, label: t('sidebar.aiModel') || 'AI Manken', isCustomIcon: true }] : []),
+    ...(user?.role === 'ADMIN' ? [{ path: 'messages', icon: FaEnvelope, label: t('sidebar.messages'), badge: unreadCount }] : []),
+    ...(user?.role === 'ADMIN' ? [{ path: 'blog', icon: FaBlog, label: t('sidebar.blogManagement') }] : []),
+    ...(user?.role === 'ADMIN' ? [{ path: 'managers', icon: FaUsersCog, label: t('sidebar.userManagement'), badge: pendingUsersCount }] : []),
+    { path: 'settings', icon: FaCogs, label: t('sidebar.settings') },
   ];
 
   const getRoleText = (role) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'Yönetici';
-      case 'USTA':
-        return 'Usta';
-      case 'MUHASEBECI':
-        return 'Muhasebeci';
-      case 'DIKIMHANE':
-        return 'Dikimhane';
-      case 'KESIMHANE':
-        return 'Kesimhane';
-      case 'ÖLÇÜM':
-        return 'Ölçüm';
-      default:
-        return 'Kullanıcı';
-    }
+    return t(`roles.${role}`, role);
   };
 
   // Sidebar içeriğini oluşturan fonksiyon
@@ -378,7 +381,7 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
           iscollapsed={(!isMobileDrawer && collapsed).toString()} 
           ismobile={isMobileDrawer.toString()}
         >
-          Erdal Güda
+          {t('sidebar.companyName')}
         </LogoText>
       </Logo>
 
@@ -418,14 +421,18 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
                       color="error"
                       max={99}
                     >
-                      {typeof item.icon === 'string' ? (
+                      {item.isCustomIcon ? (
+                        <item.icon />
+                      ) : typeof item.icon === 'string' ? (
                         <span style={{ fontSize: '20px' }}>{item.icon}</span>
                       ) : (
                         <item.icon size={20} />
                       )}
                     </Badge>
                   ) : (
-                    typeof item.icon === 'string' ? (
+                    item.isCustomIcon ? (
+                      <item.icon />
+                    ) : typeof item.icon === 'string' ? (
                       <span style={{ fontSize: '20px' }}>{item.icon}</span>
                     ) : (
                       <item.icon size={20} />
@@ -467,9 +474,25 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
 
       <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
 
+      {/* Desktop için dil değiştirici - sadece collapsed olmadığında göster */}
+      {!isMobileDrawer && !collapsed && (
+        <Box sx={{ 
+          p: 1.5, 
+          display: 'flex', 
+          justifyContent: 'center'
+        }}>
+          <LanguageSwitcher 
+            variant="compact" 
+            className="sidebar-language-switcher"
+          />
+        </Box>
+      )}
+
+      <Divider sx={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+
       <Box sx={{ p: 1 }}>
         <Tooltip 
-          title={(!isMobileDrawer && collapsed) ? "Çıkış Yap" : ""} 
+          title={(!isMobileDrawer && collapsed) ? t('sidebar.logout') : ""} 
           placement="right"
         >
           <NavItem 
@@ -490,7 +513,7 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
               <FaSignOutAlt size={20} />
             </NavIcon>
             <NavText 
-              primary="Çıkış Yap"
+              primary={t('sidebar.logout')}
               iscollapsed={(!isMobileDrawer && collapsed).toString()}
               ismobile={isMobileDrawer.toString()}
               sx={{ 
@@ -509,7 +532,7 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
   if (isMobileScreen) {
     // Mobil için sadece drawer content'i döndür
     return (
-      <DrawerContent>
+      <DrawerContent className="mobile-sidebar">
         {renderSidebarContent(true)}
       </DrawerContent>
     );
@@ -520,6 +543,7 @@ const SideBar = ({ onToggle, isCollapsed = false, isMobile = false, onClose }) =
     <SidebarContainer 
       iscollapsed={collapsed.toString()} 
       ismobile="false"
+      className={collapsed ? "sidebar-collapsed" : ""}
     >
       {renderSidebarContent(false)}
     </SidebarContainer>

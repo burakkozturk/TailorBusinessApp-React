@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import SideBar from './SideBar';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLanguage } from '../hooks/useLanguage';
 import { 
   Box, 
   styled, 
@@ -64,6 +66,7 @@ const MobileAppBar = styled(AppBar)(({ theme }) => ({
 const DashboardLayout = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { direction } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -84,7 +87,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }} dir={direction}>
       {/* Mobile Top Bar */}
       <MobileAppBar position="fixed">
         <Toolbar>
@@ -100,6 +103,14 @@ const DashboardLayout = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Erdal Güda
           </Typography>
+          
+          {/* Mobil için dil değiştirici */}
+          <Box sx={{ mr: 1 }}>
+            <LanguageSwitcher 
+              variant="compact" 
+              className="mobile-topbar-language-switcher"
+            />
+          </Box>
         </Toolbar>
       </MobileAppBar>
 

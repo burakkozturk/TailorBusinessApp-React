@@ -19,13 +19,16 @@ import AdminBlog from './pages/AdminBlog';
 import AdminMessages from './pages/AdminMessages';
 import AdminSettings from './pages/AdminSettings';
 import UserManagement from './pages/AdminManagers';
-import AIImage from './pages/AIImage';
+import AIModel from './pages/AIModel';
 
 import TestPage from './components/TestPage';
 import ImageUploadPDF from './components/ImageUploadPDF';
 import './styles/App.css';
 import './styles/GlobalButtons.css';
 import { AuthProvider, RequireAuth, RequireAdmin, RequireCustomerManagement, RequireOrderView, RequireMeasurementView } from './context/AuthContext';
+
+// i18n konfigürasyonunu import et
+import './i18n';
 
 function App() {
   return (
@@ -45,7 +48,6 @@ function App() {
           <Route path="/kayit" element={<Register />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/image-pdf" element={<ImageUploadPDF />} />
-          <Route path="/ai-image" element={<AIImage />} />
           
           {/* Admin Dashboard - Kimlik Doğrulama Gerektirir */}
           <Route path="/admin" element={<RequireAuth><DashboardLayout /></RequireAuth>}>
@@ -56,7 +58,6 @@ function App() {
             
             {/* Siparişler - Tüm roller */}
             <Route path="orders" element={<RequireOrderView><Orders /></RequireOrderView>} />
-            <Route path="ai-image" element={<AIImage />} />
             
 
             
@@ -64,6 +65,7 @@ function App() {
             <Route path="messages" element={<RequireAdmin><AdminMessages /></RequireAdmin>} />
             <Route path="blog" element={<RequireAdmin><AdminBlog /></RequireAdmin>} />
             <Route path="managers" element={<RequireAdmin><UserManagement /></RequireAdmin>} />
+            <Route path="ai-model" element={<RequireAdmin><AIModel /></RequireAdmin>} />
 
             
             {/* Tüm roller erişebilir */}

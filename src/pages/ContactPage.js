@@ -1,5 +1,6 @@
 // src/pages/ContactPage.js
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import apiService from '../services/apiService';
@@ -8,7 +9,8 @@ import '../styles/ContactPage.css';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function ContactPage() {
-  useDocumentTitle('İletişim');
+  const { t } = useTranslation('common');
+  useDocumentTitle(t('contact.title'));
   
   const [formData, setFormData] = useState({
     name: '',
@@ -55,7 +57,7 @@ function ContactPage() {
       {/* Sub-Banner */}
       <div className="contact-banner">
         <div className="banner-heading">
-          <p className="banner-subtitle">BİZE ULAŞIN</p>
+          <p className="banner-subtitle">{t('contact.title').toUpperCase()}</p>
         </div>
       </div>
 
@@ -75,58 +77,58 @@ function ContactPage() {
       {/* İletişim formu ve bilgiler */}
       <div className="contact-section">
         <div className="contact-form">
-          <h2>Bize Ulaşın</h2>
+          <h2>{t('contact.title')}</h2>
           <form onSubmit={handleSubmit}>
             <input 
               type="text" 
               name="name" 
-              placeholder="Adınız" 
+              placeholder={t('contact.name')} 
               required 
               value={formData.name}
               onChange={handleChange}
-              aria-label="Adınız"
+              aria-label={t('contact.name')}
             />
             <input 
               type="email" 
               name="email" 
-              placeholder="E-posta" 
+              placeholder={t('contact.email')} 
               required 
               value={formData.email}
               onChange={handleChange}
-              aria-label="E-posta adresiniz"
+              aria-label={t('contact.email')}
             />
             <textarea 
               name="content" 
-              placeholder="Mesajınız" 
+              placeholder={t('contact.message')} 
               required
               value={formData.content}
               onChange={handleChange}
-              aria-label="Mesajınız"
+              aria-label={t('contact.message')}
             ></textarea>
             <button type="submit" disabled={loading} className={`btn-primary ${loading ? 'btn-loading' : ''}`}>
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Gönder'}
+              {loading ? <CircularProgress size={24} color="inherit" /> : t('contact.send')}
             </button>
           </form>
         </div>
 
         <div className="contact-info">
-          <h2>İletişim Bilgileri</h2>
-          <p><strong>Telefon:</strong> 0 (312) 491 36 30</p>
-          <p><strong>E-posta:</strong> info@erdalguda.com</p>
-          <p><strong>Adres:</strong> Nezihe Hanım Apartmanı, Yukarı Dikmen, Ürdün Cd. 3/A, 06450 Çankaya/Ankara</p>
-          <p><strong>Çalışma Saatleri:</strong><br />Pazartesi - Cumartesi: 09:30 - 19:00<br />Pazar: Kapalı</p>
+          <h2>{t('contact.details.title')}</h2>
+          <p><strong>{t('contact.details.phone')}</strong> 0 (312) 491 36 30</p>
+          <p><strong>{t('contact.details.email')}</strong> info@erdalguda.com</p>
+          <p><strong>{t('contact.details.address')}</strong> Nezihe Hanım Apartmanı, Yukarı Dikmen, Ürdün Cd. 3/A, 06450 Çankaya/Ankara</p>
+          <p><strong>{t('contact.details.workingHours')}</strong><br />{t('contact.details.weekdays')}<br />{t('contact.details.sunday')}</p>
         </div>
       </div>
 
       <Snackbar open={successOpen} autoHideDuration={5000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-          Mesajınız başarıyla gönderildi!
+          {t('contact.successMessage') || 'Mesajınız başarıyla gönderildi!'}
         </Alert>
       </Snackbar>
 
       <Snackbar open={errorOpen} autoHideDuration={5000} onClose={handleClose}>
         <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-          Mesaj gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.
+          {t('contact.errorMessage') || 'Mesaj gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.'}
         </Alert>
       </Snackbar>
 

@@ -5,7 +5,7 @@ import apiService from '../services/apiService';
 
 // Axios instance - LOCAL DEVELOPMENT İÇİN
 const api = axios.create({
-  baseURL: 'http://localhost:6767', // Localhost kullan
+  baseURL: 'https://erdalguda.online', // Production domain kullan
   timeout: 10000
 });
 
@@ -109,7 +109,7 @@ const TestPage = () => {
       
       // Kumaşlar - localhost kullan
       try {
-        const fabricsResponse = await axios.get('http://localhost:6767/api/fabrics', { headers });
+        const fabricsResponse = await axios.get('https://erdalguda.online/api/fabrics', { headers });
         console.log('✅ Gerçek kumaşlar endpoint yanıtı:', fabricsResponse.data);
       } catch (error) {
         console.error('❌ Gerçek kumaşlar endpoint hatası:', error);

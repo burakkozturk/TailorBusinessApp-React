@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -130,7 +131,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 const AdminMessages = () => {
-  useDocumentTitle('Mesaj Yönetimi');
+  const { t } = useTranslation('admin');
+  useDocumentTitle(t('messages.title'));
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));

@@ -1,0 +1,375 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "blog": "Blog",
+    "contact": "Contact",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "services": "Services",
+    "admin": "Admin Panel",
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "orders": "Orders",
+    "measurements": "Measurements",
+    "messages": "Messages",
+    "settings": "Settings",
+    "managers": "User Management",
+    "reports": "Reports"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "print": "Print",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "close": "Close",
+    "open": "Open",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "reset": "Reset",
+    "update": "Update",
+    "create": "Create",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "date": "Date",
+    "time": "Time",
+    "status": "Status",
+    "actions": "Actions",
+    "total": "Total",
+    "price": "Price",
+    "quantity": "Quantity",
+    "description": "Description",
+    "notes": "Notes",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "specialPages": {
+    "pocketTailor": "Your Pocket Tailor"
+  },
+  "footer": {
+    "companyName": "Erdal Güda Tailoring",
+    "address": "Istanbul, Turkey",
+    "phone": "Phone",
+    "email": "Email",
+    "aboutUs": "About Us",
+    "services": "Our Services",
+    "contact": "Contact",
+    "followUs": "Follow Us",
+    "allRightsReserved": "All rights reserved"
+  },
+  "heroSection": {
+    "title": "Express Your Style with Custom Tailoring",
+    "subtitle": "Speak your style with custom designs crafted by our master tailors",
+    "cta": "Book Appointment",
+    "experience": "years of experience",
+    "satisfaction": "customer satisfaction"
+  },
+  "heroSlider": {
+    "slides": [
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Mastery in Every Detail",
+        "description": "True style is timeless. Discover the perfection of bespoke tailoring with Erdal Güda."
+      },
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Products Made Just for You",
+        "description": "Express yourself with suits crafted to your body measurements and finished with masterful handiwork."
+      },
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Mastery in Every Detail",
+        "description": "From fabric to buttons, from collar shape to buttonhole stitching - everything is designed with you in mind."
+      }
+    ],
+    "contactButton": "Get in Touch"
+  },
+  "about": {
+    "subtitle": "About Us",
+    "title": "Making a Difference with Our Craftsmanship",
+    "welcomeText": "Welcome!",
+    "description": "As Erdal Güda Tailoring Workshop, we offer you custom-designed clothing that fits your body measurements. Each piece is carefully crafted by hand. Make a difference with our suits that reflect your style, comfortable and elegant.",
+    "specialDesigns": "Custom Designs, Quality Fabrics",
+    "specialDesignsDesc": "Meet our original and quality clothing suitable for every body. Complete your elegance in daily life and special occasions.",
+    "appointmentTitle": "Book Your Appointment",
+    "appointmentDesc": "Book your appointment now to create the most suitable design for you. We are waiting for you with our professional team.",
+    "moreButton": "Learn More"
+  },
+  "services": {
+    "subtitle": "Our Services",
+    "title": "Services Tailored for You",
+    "description": "You can discover all the services we offer with our professional team below.",
+    "items": [
+      {
+        "title": "Measurements",
+        "description": "Professional measurement service perfectly fitted to your body measurements."
+      },
+      {
+        "title": "Tailoring & Sewing",
+        "description": "Flawless, personalized tailoring service with handcraftsmanship."
+      },
+      {
+        "title": "Collection",
+        "description": "Timeless elegance, suits specially prepared for your body."
+      },
+      {
+        "title": "Care & Cleaning",
+        "description": "Professional care solutions that extend the life of your suit."
+      }
+    ]
+  },
+  "smartMeter": {
+    "pageTitle": "Smart Body Measuring Tape",
+    "subtitle": "Connect to your phone's health apps to record measurements faster. Track measurements of more than 20 different body areas for over 10 people regularly.",
+    "features": [
+      "Create clothing cutting templates using measurements with smart measurement system",
+      "Measure more than 20 body parts with the Fitdays+ app downloadable from AppStore or Google Play",
+      "No need to be a tailor, the app guides you step by step"
+    ],
+    "quote": "Being a tailor is now so easy...",
+    "buttons": {
+      "buyNow": "Buy Now",
+      "howItWorks": "How It Works?",
+      "downloadApp": "Download App",
+      "orderNow": "Order Now"
+    },
+    "app": {
+      "title": "Fitdays+ Application",
+      "description": "With the Fitdays+ application that you can download from AppStore or Google Play, you can measure more than twenty body parts. Don't worry, you don't need to be a tailor to take measurements, the application will describe step by step what you need to apply.",
+      "features": [
+        {
+          "title": "Easy to Use",
+          "description": "Take measurements in seconds with user-friendly interface"
+        },
+        {
+          "title": "Fast Synchronization",
+          "description": "Instantly connects to your measuring tape via Bluetooth"
+        }
+      ]
+    },
+    "gallery": {
+      "title": "Product Gallery",
+      "description": "Discover Erdal Güda's carefully prepared product collection. Each piece consists of special designs that reflect craftsmanship and quality."
+    },
+    "howItWorks": {
+      "title": "How It Works?",
+      "subtitle": "Are you having trouble converting your measurements into cutting templates? Here are 4 simple steps for the solution:",
+      "steps": [
+        {
+          "title": "Go to www.erdalguda.com",
+          "description": "Visit our official website and create an account"
+        },
+        {
+          "title": "Upload your measurements in any format you want",
+          "description": "Transfer the measurements you took with the smart tape to the system"
+        },
+        {
+          "title": "Choose the product you want to cut",
+          "description": "Determine your sewing model from our wide product range"
+        },
+        {
+          "title": "And let artificial intelligence prepare the template instantly for you",
+          "description": "Our artificial intelligence technology creates templates according to your special measurements"
+        }
+      ]
+    },
+    "specs": {
+      "title": "Technical Specifications",
+      "subtitle": "Meet your smart body measuring tape that revolutionizes the clothing industry with its modern and practical design",
+      "productFeatures": "Product Features",
+      "technicalData": "Technical Data",
+      "features": {
+        "productName": "Product Name",
+        "productModel": "Product Model",
+        "measurementUnit": "Measurement Unit",
+        "measurementCapacity": "Measurement Capacity",
+        "productDimensions": "Product Dimensions",
+        "errorMargin": "Error Margin",
+        "batteryCapacity": "Battery Capacity",
+        "chargingInput": "Charging Input",
+        "powerConsumption": "Power Consumption",
+        "mobileMeasurement": "Mobile Supported Measurement",
+        "customMeasurements": "Customizable Measurements",
+        "smartPatternDesign": "Smart Pattern Design"
+      },
+      "values": {
+        "productNameValue": "Smart Body Measuring Tape",
+        "productModelValue": "EG-150",
+        "measurementUnitValue": "cm/inch",
+        "measurementCapacityValue": "150cm or 60 inch",
+        "productDimensionsValue": "78x70x27mm",
+        "errorMarginValue": "+- 4mm",
+        "batteryCapacityValue": "300mAh 1.11Wh",
+        "chargingInputValue": "5V 0.5A",
+        "powerConsumptionValue": "2.5W",
+        "yes": "Yes"
+      }
+    },
+    "cta": {
+      "title": "Your Pocket Tailor",
+      "description": "Are you having trouble converting your measurements into cutting templates? With Erdal Güda's smart body measuring tape, all your measurements are automatically converted into templates."
+    }
+  },
+  "blog": {
+    "subtitle": "Our Blog",
+    "title": "Latest Posts",
+    "description": "We share the latest developments, designs and tips from the fashion and textile world with you.",
+    "loading": "Loading...",
+    "error": "An error occurred while loading blog posts. Please try again later.",
+    "noPosts": "There are no blog posts in this category yet.",
+    "invalidDate": "Invalid date",
+    "readMore": "Read More",
+    "viewAll": "ALL BLOG POSTS",
+    "dataFetchError": "Error occurred while fetching data:"
+  },
+  "testimonials": {
+    "title": "The Bond We Build with Our Customers",
+    "subtitle": "Erdal Güda experience is not just shopping, it's a journey. We listen to each customer's story, understand their needs and offer special solutions.",
+    "sectionTitle": "OUR CUSTOMERS' REVIEWS",
+    "sectionSubtitle": "What They Said ?",
+    "testimonialData": [
+      {
+        "quote": "Really great service! My outfit turned out exactly as I wanted, craftsmanship is amazing.",
+        "name": "Ahmet Yılmaz"
+      },
+      {
+        "quote": "They know no limits in tailoring. Fabric quality and workmanship are flawless.",
+        "name": "Mehmet Demir"
+      },
+      {
+        "quote": "It was far beyond my expectations. Cutting and sewing were completely professional.",
+        "name": "Ayşe Kara"
+      }
+    ],
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "gallery": {
+    "title": "Frames from Our Workshop",
+    "subtitle": "Special moments and mastery details from inside Erdal Güda workshop. Each frame is a reflection of quality and care.",
+    "pauseMessage": "Paused",
+    "autoSlideInfo": "Auto sliding gallery • {count} photos • Hover to pause"
+  },
+  "footer": {
+    "cta": {
+      "title": "Send a Message for Detailed Information",
+      "text": "Do you have any questions? Leave your email address.",
+      "placeholder": "Enter your email address",
+      "submit": "Send"
+    },
+    "workingHours": {
+      "title": "Working Hours",
+      "weekdays": "Mon–Fri: 08:00–20:00",
+      "saturday": "Sat: 09:00–17:00",
+      "sunday": "Sun: Closed",
+      "appointment": "Book Appointment"
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "home": "Home",
+      "services": "Services",
+      "blog": "Blog",
+      "about": "About",
+      "contact": "Contact"
+    },
+    "contact": {
+      "title": "Contact"
+    },
+    "location": {
+      "title": "Location"
+    },
+    "copyright": "All rights reserved."
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "username": "Username",
+      "password": "Password",
+      "loginButton": "Login",
+      "notApproved": "not approved",
+      "invalidCredentials": "Invalid credentials!",
+      "accountNotApproved": "Your account has not been approved by admin yet. Please wait for approval.",
+      "noAccount": "Don't have an account?"
+    },
+    "register": {
+      "title": "Register",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phone": "Phone",
+      "role": "Role Selection",
+      "registerButton": "Register",
+      "registering": "Registering...",
+      "passwordMismatch": "Passwords do not match",
+      "requiredFields": "Username, password and password confirmation are required",
+      "usernameMinLength": "Username must be at least 3 characters",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "invalidEmail": "Please enter a valid email address",
+      "hasAccount": "Already have an account?",
+      "roles": {
+        "ÖLÇÜM": "Measurement - Order Creation and Measurement Entry",
+        "KESIMHANE": "Cutting - Order Status Progression",
+        "DIKIMHANE": "Sewing - Order Status Progression",
+        "ADMIN": "Admin - Full Access"
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "name": "Your Name",
+    "email": "Your Email",
+    "subject": "Subject",
+    "message": "Your Message",
+    "send": "Send",
+    "location": "Location",
+    "locationAria": "Erdal Güda Tailor location map",
+    "successMessage": "Your message has been sent successfully!",
+    "errorMessage": "An error occurred while sending the message. Please try again later.",
+    "details": {
+      "title": "Contact Information",
+      "phone": "Phone:",
+      "email": "Email:",
+      "address": "Address:",
+      "workingHours": "Working Hours:",
+      "weekdays": "Monday - Saturday: 09:30 - 19:00",
+      "sunday": "Sunday: Closed"
+    }
+  },
+  "aboutPage": {
+    "brandTitle": "OUR BRAND",
+    "tailoringImageAlt": "Tailoring work image",
+    "craftsmanshipImageAlt": "Craftsmanship image",
+    "section1": {
+      "title": "Where Mastery and Elegance Meet",
+      "paragraph1": "Every garment tells a story. We weave this story for you. As Erdal Güda, we aim for perfection in every stitch with our experience of over 20 years.",
+      "paragraph2": "Our goal is not only to produce wearable products, but also to offer original and quality pieces that reflect your identity and style."
+    },
+    "section2": {
+      "title": "The Bond We Build with Our Customers",
+      "paragraph1": "Erdal Güda experience is not just shopping, it's a journey. We listen to each customer's story, understand their needs and offer special solutions.",
+      "paragraph2": "In our workshop, the concept of time is shaped by quality. Each piece is meticulously crafted from design to final stitch and meets you only when it meets the highest standards."
+    }
+  }
+}

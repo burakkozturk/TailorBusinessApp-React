@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '../styles/Login.css';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -8,7 +9,8 @@ import api from '../api/axiosConfig';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 
 function Login() {
-  useDocumentTitle('Giriş Yap');
+  const { t } = useTranslation('common');
+  useDocumentTitle(t('auth.login.title'));
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -40,12 +42,12 @@ function Login() {
       
       if (err.response?.status === 401) {
         // Backend'den gelen hata mesajını kontrol et
-        let errorMessage = 'Giriş bilgileri hatalı!';
+        let errorMessage = t('auth.login.invalidCredentials') || 'Giriş bilgileri hatalı!';
         
         if (err.response.data) {
           if (typeof err.response.data === 'string') {
-            if (err.response.data.includes('onaylanmamış')) {
-              errorMessage = 'Hesabınız henüz admin tarafından onaylanmamış. Lütfen onay bekleyin.';
+            if (err.response.data.includes(t('auth.login.notApproved'))) {
+              errorMessage = t('auth.login.accountNotApproved') || 'Hesabınız henüz admin tarafından onaylanmamış. Lütfen onay bekleyin.';
             } else {
               errorMessage = err.response.data;
             }
@@ -58,7 +60,7 @@ function Login() {
         
         setError(errorMessage);
       } else {
-        setError('Giriş bilgileri hatalı!');
+        setError(t('auth.login.invalidCredentials') || 'Giriş bilgileri hatalı!');
       }
     }
   };
@@ -68,26 +70,26 @@ function Login() {
       <Navbar />
       <div className="login-wrapper">
         <div className="login-box">
-          <h2 className="login-title">Giriş Yap</h2>
+          <h2 className="login-title">{t('auth.login.title')}</h2>
           {error && <p className="login-error">{error}</p>}
           <form onSubmit={handleSubmit}>
             <input
               type="text"
-              placeholder="Kullanıcı Adı"
+              placeholder={t('auth.login.username')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
             <input
               type="password"
-              placeholder="Şifre"
+              placeholder={t('auth.login.password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button type="submit" className="btn-secondary">Giriş</button>
+            <button type="submit" className="btn-secondary">{t('auth.login.loginButton')}</button>
           </form>
           
           <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px' }}>
-            <span style={{ color: '#666' }}>Hesabınız yok mu? </span>
+            <span style={{ color: '#666' }}>{t('auth.login.noAccount') || 'Hesabınız yok mu?'} </span>
             <Link 
               to="/kayit" 
               style={{ 
@@ -96,7 +98,7 @@ function Login() {
                 fontWeight: 'bold'
               }}
             >
-              Kayıt Ol
+              {t('navigation.register')}
             </Link>
           </div>
         </div>

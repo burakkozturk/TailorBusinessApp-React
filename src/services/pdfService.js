@@ -326,3 +326,7 @@ class PDFService {
 }
 
 export default new PDFService();
+
+
+
+// Pekala şimdi istediğim şey şu şuan biz aws textract kullanarak imageden ölçü okuyup veritabanına kaydetmeye çalışıyoruz ancak bu pekde düzgün şekilde çalışmıyor. Bu kısmı seninle en baştan yapmak istiyorum. En baştan başlayarak aws textract kullanarak ölçüleri okuyup veritabanına kaydetmeli ve webde gösteriyor olmalıyız. 

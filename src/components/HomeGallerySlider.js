@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Container, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import AOS from 'aos';
@@ -182,6 +183,7 @@ const PulseDot = styled(Box)(({ theme }) => ({
 }));
 
 const HomeGallerySlider = () => {
+  const { t } = useTranslation('common');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -264,7 +266,7 @@ const HomeGallerySlider = () => {
       <Container>
         <Box sx={{ textAlign: 'center', mb: 6 }} data-aos="fade-up">
           <SectionTitle variant="h3" component="h2">
-            Atölyemizden Kareler
+            {t('gallery.title')}
           </SectionTitle>
           <Typography 
             variant="body1" 
@@ -277,8 +279,7 @@ const HomeGallerySlider = () => {
               mt: 3
             }}
           >
-            Erdal Güda atölyesinin içinden özel anlar ve ustalık detayları. 
-            Her kare, kalite ve özenin bir yansıması.
+            {t('gallery.subtitle')}
           </Typography>
         </Box>
 
@@ -329,7 +330,7 @@ const HomeGallerySlider = () => {
               {isPaused && (
                 <PauseIndicator>
                   <PulseDot />
-                  Duraklatıldı
+                  {t('gallery.pauseMessage')}
                 </PauseIndicator>
               )}
 
@@ -348,7 +349,7 @@ const HomeGallerySlider = () => {
               fontStyle: 'italic'
             }}
           >
-            Otomatik kayan galeri • {homeImages.length} fotoğraf • Duraklatmak için üzerine gelin
+{t('gallery.autoSlideInfo', { count: homeImages.length })}
           </Typography>
         </Box>
       </Container>

@@ -1,0 +1,229 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "about": "À propos",
+    "blog": "Blog",
+    "contact": "Contact",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "register": "S'inscrire",
+    "services": "Services",
+    "admin": "Panneau Admin",
+    "dashboard": "Tableau de bord",
+    "customers": "Clients",
+    "orders": "Commandes",
+    "measurements": "Mesures",
+    "messages": "Messages",
+    "settings": "Paramètres",
+    "managers": "Gestion des utilisateurs",
+    "reports": "Rapports"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "print": "Imprimer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "open": "Ouvrir",
+    "view": "Voir",
+    "download": "Télécharger",
+    "upload": "Uploader",
+    "refresh": "Actualiser",
+    "reset": "Réinitialiser",
+    "update": "Mettre à jour",
+    "create": "Créer",
+    "name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "date": "Date",
+    "time": "Heure",
+    "status": "Statut",
+    "actions": "Actions",
+    "total": "Total",
+    "price": "Prix",
+    "quantity": "Quantité",
+    "description": "Description",
+    "notes": "Notes",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "specialPages": {
+    "pocketTailor": "Votre Tailleur de Poche"
+  },
+  "footer": {
+    "companyName": "Couture Erdal Güda",
+    "address": "Istanbul, Turquie",
+    "phone": "Téléphone",
+    "email": "Email",
+    "aboutUs": "À propos de nous",
+    "services": "Nos services",
+    "contact": "Contact",
+    "followUs": "Suivez-nous",
+    "allRightsReserved": "Tous droits réservés"
+  },
+  "heroSection": {
+    "title": "Exprimez votre style avec la couture sur mesure",
+    "subtitle": "Parlez votre style avec des créations sur mesure façonnées par nos maîtres tailleurs",
+    "cta": "Prendre rendez-vous",
+    "experience": "années d'expérience",
+    "satisfaction": "satisfaction client"
+  },
+  "heroSlider": {
+    "slides": [
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Maîtrise de Chaque Détail",
+        "description": "Le vrai style est intemporel. Découvrez la perfection de la couture sur mesure avec Erdal Güda."
+      },
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Produits Conçus Juste pour Vous",
+        "description": "Exprimez-vous avec des costumes confectionnés selon vos mensurations et finis avec un savoir-faire magistral."
+      },
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Maîtrise de Chaque Détail",
+        "description": "Du tissu aux boutons, de la forme du col aux coutures boutonnières - tout est conçu en pensant à vous."
+      }
+    ],
+    "contactButton": "Nous Contacter"
+  },
+  "about": {
+    "subtitle": "À Propos de Nous",
+    "title": "Faire la Différence avec Notre Savoir-faire",
+    "welcomeText": "Bienvenue !",
+    "description": "En tant qu'Atelier de Couture Erdal Güda, nous vous offrons des vêtements conçus sur mesure qui s'adaptent à vos mensurations. Chaque pièce est soigneusement confectionnée à la main. Faites la différence avec nos costumes qui reflètent votre style, confortables et élégants.",
+    "specialDesigns": "Créations Sur Mesure, Tissus de Qualité",
+    "specialDesignsDesc": "Découvrez nos vêtements originaux et de qualité adaptés à chaque morphologie. Complétez votre élégance au quotidien et lors d'occasions spéciales.",
+    "appointmentTitle": "Prenez Votre Rendez-vous",
+    "appointmentDesc": "Prenez votre rendez-vous maintenant pour créer le design le plus approprié pour vous. Nous vous attendons avec notre équipe professionnelle.",
+    "moreButton": "En Savoir Plus"
+  },
+  "services": {
+    "subtitle": "Nos Services",
+    "title": "Services Taillés pour Vous",
+    "description": "Vous pouvez découvrir tous les services que nous offrons avec notre équipe professionnelle ci-dessous.",
+    "items": [
+      {
+        "title": "Prise de Mesures",
+        "description": "Service professionnel de prise de mesures parfaitement adapté à vos mensurations."
+      },
+      {
+        "title": "Couture & Confection",
+        "description": "Service de couture impeccable et personnalisé avec savoir-faire artisanal."
+      },
+      {
+        "title": "Collection",
+        "description": "Élégance intemporelle, costumes spécialement préparés pour votre corps."
+      },
+      {
+        "title": "Entretien & Nettoyage",
+        "description": "Solutions d'entretien professionnel qui prolongent la vie de votre costume."
+      }
+    ]
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "username": "Nom d'utilisateur",
+      "password": "Mot de passe",
+      "loginButton": "Se connecter",
+      "notApproved": "non approuvé",
+      "invalidCredentials": "Identifiants invalides!",
+      "accountNotApproved": "Votre compte n'a pas encore été approuvé par l'administrateur. Veuillez attendre l'approbation.",
+      "noAccount": "Vous n'avez pas de compte?"
+    },
+    "register": {
+      "title": "S'inscrire",
+      "username": "Nom d'utilisateur",
+      "email": "Email",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "phone": "Téléphone",
+      "role": "Sélection du rôle",
+      "registerButton": "S'inscrire",
+      "registering": "Inscription en cours...",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "requiredFields": "Le nom d'utilisateur, le mot de passe et la confirmation du mot de passe sont requis",
+      "usernameMinLength": "Le nom d'utilisateur doit contenir au moins 3 caractères",
+      "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
+      "invalidEmail": "Veuillez saisir une adresse email valide",
+      "hasAccount": "Vous avez déjà un compte?",
+      "roles": {
+        "ÖLÇÜM": "Mesure - Création de commandes et saisie de mesures",
+        "KESIMHANE": "Coupe - Progression du statut de commande",
+        "DIKIMHANE": "Couture - Progression du statut de commande",
+        "ADMIN": "Admin - Accès complet"
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "name": "Votre nom",
+    "email": "Votre email",
+    "subject": "Sujet",
+    "message": "Votre message",
+    "send": "Envoyer",
+    "location": "Emplacement",
+    "locationAria": "Carte de localisation du tailleur Erdal Güda",
+    "successMessage": "Votre message a été envoyé avec succès!",
+    "errorMessage": "Une erreur s'est produite lors de l'envoi du message. Veuillez réessayer plus tard.",
+    "details": {
+      "title": "Informations de contact",
+      "phone": "Téléphone:",
+      "email": "Email:",
+      "address": "Adresse:",
+      "workingHours": "Heures d'ouverture:",
+      "weekdays": "Lundi - Samedi: 09:30 - 19:00",
+      "sunday": "Dimanche: Fermé"
+    }
+  },
+  "blog": {
+    "subtitle": "Notre Blog",
+    "title": "Derniers Articles",
+    "description": "Nous partageons avec vous les derniers développements, designs et conseils du monde de la mode et du textile.",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite lors du chargement des articles de blog. Veuillez réessayer plus tard.",
+    "noPosts": "Il n'y a pas encore d'articles dans cette catégorie.",
+    "invalidDate": "Date invalide",
+    "readMore": "Lire la suite",
+    "viewAll": "TOUS LES ARTICLES DE BLOG",
+    "dataFetchError": "Erreur lors de la récupération des données:"
+  },
+  "gallery": {
+    "title": "Images de Notre Atelier",
+    "subtitle": "Moments spéciaux et détails de maîtrise de l'intérieur de l'atelier Erdal Güda. Chaque image est un reflet de la qualité et du soin.",
+    "pauseMessage": "En pause",
+    "autoSlideInfo": "Galerie à défilement automatique • {count} photos • Survolez pour mettre en pause"
+  },
+  "aboutPage": {
+    "brandTitle": "NOTRE MARQUE",
+    "tailoringImageAlt": "Image de travail de tailleur",
+    "craftsmanshipImageAlt": "Image d'artisanat",
+    "section1": {
+      "title": "Où la Maîtrise et l'Élégance se Rencontrent",
+      "paragraph1": "Chaque vêtement raconte une histoire. Nous tissons cette histoire pour vous. En tant qu'Erdal Güda, nous visons la perfection dans chaque couture avec notre expérience de plus de 20 ans.",
+      "paragraph2": "Notre objectif n'est pas seulement de produire des produits portables, mais aussi d'offrir des pièces originales et de qualité qui reflètent votre identité et votre style."
+    },
+    "section2": {
+      "title": "Le Lien que Nous Construisons avec Nos Clients",
+      "paragraph1": "L'expérience Erdal Güda n'est pas seulement du shopping, c'est un voyage. Nous écoutons l'histoire de chaque client, comprenons ses besoins et offrons des solutions spéciales.",
+      "paragraph2": "Dans notre atelier, le concept du temps est façonné par la qualité. Chaque pièce est méticuleusement travaillée de la conception à la dernière couture et ne vous rencontre que lorsqu'elle répond aux plus hauts standards."
+    }
+  }
+}

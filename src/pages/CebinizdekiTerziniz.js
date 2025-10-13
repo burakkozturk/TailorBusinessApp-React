@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, Container, Typography, Grid, Button, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, Card, CardContent } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -152,6 +153,8 @@ const AppScreenshot = styled(Box)(({ theme }) => ({
 }));
 
 function CebinizdekiTerziniz() {
+  const { t } = useTranslation('common');
+
   useEffect(() => {
     // Initialize AOS animation library
     AOS.init({
@@ -207,7 +210,7 @@ function CebinizdekiTerziniz() {
                 lineHeight: 1.2
               }}
             >
-              Akıllı Vücut Mezurası
+              {t('smartMeter.pageTitle')}
             </Typography>
             
             <Typography variant="subtitle1" 
@@ -219,15 +222,11 @@ function CebinizdekiTerziniz() {
                 maxWidth: '95%'
               }}
             >
-              Telefonunuzun sağlık uygulamalarına bağlanarak ölçümleri daha hızlı kaydetmenizi sağlar. 
-              Ondan fazla kişinin yirmiden fazla farklı bölgelerine ait ölçülerini düzenli olarak 
-              takip etmenizi sağlar.
+              {t('smartMeter.subtitle')}
             </Typography>
             
             <List sx={{ mb: 4, pl: 0 }}>
-              {['Yapay zeka destekli sistem ile ölçüleri kullanarak elbise kesim şablonları oluşturabilir', 
-               'AppStore veya Google Play üzerinden indirebileceğiniz Fitdays+ uygulaması ile yirmiden fazla vücut bölgesini ölçebilirsiniz',
-               'Terzi olmanıza gerek yok, uygulama size adım adım rehberlik eder'].map((text, index) => (
+              {t('smartMeter.features', { returnObjects: true }).map((text, index) => (
                 <ListItem key={index} sx={{ py: 1, pl: 0 }}>
                   <ListItemIcon sx={{ minWidth: 34 }}>
                     <CheckCircleIcon sx={{ color: '#f5e6b0', fontSize: 20 }} />
@@ -252,7 +251,7 @@ function CebinizdekiTerziniz() {
               pl: 2,
               py: 0.5 
             }}>
-              "Artık terzi olmak çok kolay..."
+              "{t('smartMeter.quote')}"
             </Typography>
             
             <Box sx={{ display: 'flex', gap: 2, mb: {xs: 4, md: 6} }}>
@@ -261,14 +260,14 @@ function CebinizdekiTerziniz() {
                 className="btn-primary btn-pulse"
                 style={{ textDecoration: 'none' }}
               >
-                Hemen Satın Al
+                {t('smartMeter.buttons.buyNow')}
               </a>
               <a 
                 href="#nasil-calisir"
                 className="btn-secondary"
                 style={{ textDecoration: 'none' }}
               >
-                Nasıl Çalışır?
+                {t('smartMeter.buttons.howItWorks')}
               </a>
             </Box>
           </Box>
@@ -480,7 +479,7 @@ function CebinizdekiTerziniz() {
               style={{ textDecoration: 'none' }}
             >
               <GetAppIcon sx={{ mr: 1 }} />
-              Uygulamayı İndir
+              {t('smartMeter.buttons.downloadApp')}
             </a>
           </Box>
         </Container>

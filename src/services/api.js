@@ -3,9 +3,9 @@ import axios from 'axios';
 // API base URL
 const getAPIBaseURL = () => {
   if (process.env.NODE_ENV === 'production') {
-    return 'https://api.erdalguda.com';
+    return 'https://erdalguda.online';
   }
-  return process.env.REACT_APP_API_URL || 'http://localhost:6767';
+  return process.env.REACT_APP_API_URL || 'https://erdalguda.online';
 };
 const API_BASE_URL = getAPIBaseURL();
 

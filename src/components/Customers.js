@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import apiService from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -20,6 +21,14 @@ import { useMediaQuery } from '@mui/material';
 import useDocumentTitle from '../hooks/useDocumentTitle';
 import '../styles/Customers.css';
 import { Order } from '../constants/orderTypes';
+import { 
+  MEASUREMENT_FIELDS, 
+  MEASUREMENT_CATEGORIES, 
+  getMeasurementsByCategory,
+  validateMeasurementValue,
+  formatMeasurementValue 
+} from '../constants/measurements';
+import MeasurementModal from './MeasurementModal';
 
 // Stillendirilmiş bileşenler
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -163,7 +172,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
           fontWeight: 500
         }}
       >
-        Müşteri Düzenle
+Müşteri Düzenle
       </DialogTitle>
       <DialogContent sx={{ p: 4 }}>
         {loading ? (
@@ -315,7 +324,7 @@ const EditCustomerDialog = ({ open, onClose, customer, onUpdate }) => {
   );
 };
 
-export const OrderDialog = ({ open, onClose, customer = null, order = null, onSave, handleFileUpload, canSeePrices = true, canEditAll = true }) => {
+export const OrderDialog = ({ open, onClose, customer = null, order = null, onSave, canSeePrices = true, canEditAll = true }) => {
   const [formData, setFormData] = useState({
     productType: order?.productType || 'CEKET',
     status: order?.status || 'PREPARING',
@@ -355,13 +364,13 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
 
   // Sipariş fotoğrafı yükleme için AWS S3 kullan
-  const localHandleFileUpload = handleFileUpload || ((event) => {
+  const localHandleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
     
     // handleImageChange fonksiyonunu kullan (AWS S3 için)
     handleImageChange(event);
-  });
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -1181,7 +1190,7 @@ export const OrderDialog = ({ open, onClose, customer = null, order = null, onSa
   );
 };
 
-const Row = ({ customer, onDelete, onEdit, onSnackbar, onFileUpload, canSeePrices = true, canEditAll = true, measurementCounts = {}, onMeasurementOpen, isReadOnly = false, canDeleteCustomers = true }) => {
+const Row = ({ customer, onDelete, onEdit, onSnackbar, canSeePrices = true, canEditAll = true, measurementCounts = {}, onMeasurementOpen, isReadOnly = false, canDeleteCustomers = true }) => {
   const [open, setOpen] = useState(false);
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -1216,68 +1225,6 @@ const Row = ({ customer, onDelete, onEdit, onSnackbar, onFileUpload, canSeePrice
     fetchOrders();
   };
 
-  // Dosya yükleme işlemi
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    console.log('🚀 Dosya seçildi:', file.name, file.type, file.size);
-
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    console.log('📤 API isteği gönderiliyor... Customer ID:', customer.id);
-
-    try {
-      console.log('🔄 OCR işlemi başlıyor...');
-      
-      // AWS Textract ile ölçü verilerini işle
-      const response = await apiService.measurements.uploadFile(customer.id, formData);
-      
-      console.log('✅ API response alındı:', response);
-      console.log('📊 Response data:', response.data);
-      console.log('🎯 Success flag:', response.data?.success);
-      console.log('📏 Measurements count:', response.data?.count);
-      if (response.data && response.data.success) {
-        if (onSnackbar) {
-          onSnackbar({
-            open: true,
-            message: `${response.data.count || 0} ölçü başarıyla kaydedildi! (AWS Textract)`,
-            severity: 'success'
-          });
-        }
-        // Ölçüleri yenile
-        fetchMeasurements();
-        // Siparişleri yenile (güncel veriler için)
-        fetchOrders();
-      } else {
-        if (onSnackbar) {
-          onSnackbar({
-            open: true,
-            message: response.data?.error || 'Ölçüler yüklenirken hata oluştu.',
-            severity: 'error'
-          });
-        }
-      }
-    } catch (error) {
-      console.error('AWS Textract yükleme hatası:', error);
-      let errorMessage = 'Fotoğraf yüklenirken hata oluştu.';
-      
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      if (onSnackbar) {
-        onSnackbar({
-          open: true,
-          message: errorMessage,
-          severity: 'error'
-        });
-      }
-    }
-  };
 
   useEffect(() => {
     if (open) {
@@ -1497,28 +1444,6 @@ const Row = ({ customer, onDelete, onEdit, onSnackbar, onFileUpload, canSeePrice
                   >
                     📏 Ölçüler ({measurementCounts[customer.id] || 0})
                   </StyledButton>
-                  <StyledButton
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    component="label"
-                    sx={{
-                      borderColor: 'primary.main',
-                      color: 'primary.main',
-                      '&:hover': {
-                        borderColor: 'primary.dark',
-                        backgroundColor: 'primary.50'
-                      }
-                    }}
-                  >
-                    Fotoğraf Yükle
-                    <input
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={handleFileUpload}
-                    />
-                  </StyledButton>
                 </Box>
               </Box>
               
@@ -1654,7 +1579,6 @@ const Row = ({ customer, onDelete, onEdit, onSnackbar, onFileUpload, canSeePrice
                 customer={customer}
                 order={selectedOrder}
                 onSave={handleOrderSave}
-                handleFileUpload={handleFileUpload}
                 canSeePrices={canSeePrices}
                 canEditAll={canEditAll}
               />
@@ -1903,7 +1827,8 @@ const AddCustomerDialog = ({ open, onClose, onAdd }) => {
 
 
 const Customers = () => {
-  useDocumentTitle('Müşteri Yönetimi');
+  const { t } = useTranslation('admin');
+  useDocumentTitle(t('customers.title'));
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -2154,7 +2079,7 @@ const Customers = () => {
 
     try {
       // Genel dosya yükleme (S3'e sadece upload)
-      const response = await apiService.measurements.uploadFileGeneral(formData);
+      const response = await apiService.upload.uploadFile(formData);
       if (response.data && response.data.url) {
         setSnackbar({
           open: true,
@@ -2398,7 +2323,6 @@ const Customers = () => {
                   onDelete={handleDelete}
                   onEdit={handleEdit}
                   onSnackbar={setSnackbar}
-                  onFileUpload={handleFileUpload}
                   canSeePrices={canViewOrderPrices}
                   canEditAll={canEditAll}
                   isReadOnly={isReadOnly}
@@ -2629,7 +2553,6 @@ const Customers = () => {
         customer={customer}
         order={selectedOrder}
         onSave={handleOrderSave}
-        handleFileUpload={handleFileUpload}
         canSeePrices={canViewOrderPrices}
         canEditAll={canEditAll}
       />
@@ -2662,531 +2585,4 @@ const Customers = () => {
   );
 };
 
-// Ölçü Modal Bileşeni
-const MeasurementModal = ({ open, onClose, customer, measurements, onMeasurementsUpdate }) => {
-  const [newMeasurement, setNewMeasurement] = useState({
-    regionName: '',
-    value: '',
-    unit: 'cm'
-  });
-  const [editingMeasurement, setEditingMeasurement] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [ocrFile, setOcrFile] = useState(null);
-  const [ocrPreview, setOcrPreview] = useState(null);
-  const [ocrLoading, setOcrLoading] = useState(false);
-  const [ocrResults, setOcrResults] = useState([]);
-  const [showOcrResults, setShowOcrResults] = useState(false);
-
-  // Modal açıldığında ölçüleri yükle
-  useEffect(() => {
-    if (open && customer && onMeasurementsUpdate) {
-      onMeasurementsUpdate();
-    }
-  }, [open, customer, onMeasurementsUpdate]);
-
-  // Yeni ölçü ekleme
-  const handleAddMeasurement = async () => {
-    if (!newMeasurement.regionName.trim() || !newMeasurement.value) {
-      alert('Lütfen bölge adı ve değer girin');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await apiService.measurements.add(customer.id, {
-        regionName: newMeasurement.regionName.trim(),
-        value: parseFloat(newMeasurement.value),
-        unit: newMeasurement.unit
-      });
-
-      if (response.data && response.data.success) {
-        setNewMeasurement({ regionName: '', value: '', unit: 'cm' });
-        onMeasurementsUpdate(); // Listeyi yenile
-        alert('Ölçü başarıyla eklendi!');
-      } else {
-        alert(response.data?.error || 'Ölçü eklenirken hata oluştu');
-      }
-    } catch (error) {
-      console.error('Ölçü ekleme hatası:', error);
-      alert(error.response?.data?.error || 'Ölçü eklenirken hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Ölçü düzenleme
-  const handleEditMeasurement = async (measurementId) => {
-    if (!editingMeasurement.regionName.trim() || !editingMeasurement.value) {
-      alert('Lütfen bölge adı ve değer girin');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await apiService.measurements.update(measurementId, {
-        regionName: editingMeasurement.regionName.trim(),
-        value: parseFloat(editingMeasurement.value),
-        unit: editingMeasurement.unit
-      });
-
-      if (response.data && response.data.success) {
-        setEditingMeasurement(null);
-        onMeasurementsUpdate(); // Listeyi yenile
-        alert('Ölçü başarıyla güncellendi!');
-      } else {
-        alert(response.data?.error || 'Ölçü güncellenirken hata oluştu');
-      }
-    } catch (error) {
-      console.error('Ölçü güncelleme hatası:', error);
-      alert(error.response?.data?.error || 'Ölçü güncellenirken hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Ölçü silme
-  const handleDeleteMeasurement = async (measurementId, regionName) => {
-    if (!window.confirm(`"${regionName}" ölçüsünü silmek istediğinizden emin misiniz?`)) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await apiService.measurements.delete(measurementId);
-
-      if (response.data && response.data.success) {
-        onMeasurementsUpdate(); // Listeyi yenile
-        alert('Ölçü başarıyla silindi!');
-      } else {
-        alert(response.data?.error || 'Ölçü silinirken hata oluştu');
-      }
-    } catch (error) {
-      console.error('Ölçü silme hatası:', error);
-      alert(error.response?.data?.error || 'Ölçü silinirken hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // OCR dosya seçimi
-  const handleOcrFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Dosya türü kontrolü
-    if (!file.type.match('image.*')) {
-      alert('Lütfen bir resim dosyası seçin');
-      return;
-    }
-
-    // Dosya boyutu kontrolü (10MB)
-    if (file.size > 10485760) {
-      alert('Dosya boyutu 10MB\'dan küçük olmalıdır');
-      return;
-    }
-
-    setOcrFile(file);
-    setOcrResults([]);
-    setShowOcrResults(false);
-
-    // Önizleme için FileReader kullan
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setOcrPreview(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // OCR analizi başlat
-  const handleOcrAnalyze = async () => {
-    if (!ocrFile) {
-      alert('Lütfen önce bir resim seçin');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', ocrFile);
-
-    try {
-      setOcrLoading(true);
-      console.log('🔍 OCR analizi başlatılıyor...');
-      
-      const response = await apiService.measurements.uploadFile(customer.id, formData);
-      
-      if (response.data && response.data.success) {
-        setOcrResults(response.data.measurements || []);
-        setShowOcrResults(true);
-        console.log('✅ OCR başarılı:', response.data.measurements);
-        
-        // Ölçüleri otomatik yenile
-        if (onMeasurementsUpdate) {
-          onMeasurementsUpdate();
-        }
-        
-        alert(`🎉 ${response.data.count || 0} ölçü başarıyla kaydedildi!`);
-      } else {
-        alert(response.data?.error || 'Ölçüler çıkarılırken hata oluştu.');
-      }
-    } catch (error) {
-      console.error('❌ OCR hatası:', error);
-      let errorMessage = 'Fitdays fotoğrafı analiz edilirken hata oluştu.';
-      
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      alert(errorMessage);
-    } finally {
-      setOcrLoading(false);
-    }
-  };
-
-  // OCR temizle
-  const handleOcrClear = () => {
-    setOcrFile(null);
-    setOcrPreview(null);
-    setOcrResults([]);
-    setShowOcrResults(false);
-  };
-
-  // Ölçü verilerini TXT olarak indir
-  const handleDownloadTxt = async () => {
-    if (!customer || !measurements || measurements.length === 0) {
-      alert('İndirilecek ölçü verisi bulunamadı');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await apiService.measurements.exportTxt(customer.id);
-      
-      // Blob'u dosya olarak indir
-      const blob = new Blob([response.data], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${customer.firstName}_${customer.lastName}_olculer.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      alert('📄 Ölçü verileri başarıyla indirildi!');
-    } catch (error) {
-      console.error('Ölçü indirme hatası:', error);
-      alert('Dosya indirilirken hata oluştu: ' + (error.response?.data?.error || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-          📏 Ölçüler: {customer?.firstName} {customer?.lastName}
-        </Typography>
-      </DialogTitle>
-      
-      <DialogContent sx={{ pt: 3 }}>
-        {/* Fitdays OCR Upload */}
-        <Box sx={{ mb: 3, p: 3, bgcolor: 'primary.50', borderRadius: 2, border: '2px dashed', borderColor: 'primary.200' }}>
-          <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CameraAlt /> 📱 Fitdays OCR - Ölçü Fotoğrafı Yükle
-          </Typography>
-          
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={6}>
-              <input
-                accept="image/*"
-                style={{ display: 'none' }}
-                id="ocr-file-input"
-                type="file"
-                onChange={handleOcrFileSelect}
-              />
-              <label htmlFor="ocr-file-input">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  startIcon={<CloudUpload />}
-                  fullWidth
-                  sx={{ py: 1.5 }}
-                >
-                  Fitdays Fotoğrafı Seç
-                </Button>
-              </label>
-            </Grid>
-            
-            <Grid item xs={12} sm={3}>
-              <Button
-                variant="contained"
-                onClick={handleOcrAnalyze}
-                disabled={!ocrFile || ocrLoading}
-                startIcon={ocrLoading ? <CircularProgress size={20} /> : <Preview />}
-                fullWidth
-                sx={{ py: 1.5 }}
-              >
-                {ocrLoading ? 'Analiz Ediliyor...' : 'Analiz Et'}
-              </Button>
-            </Grid>
-            
-            <Grid item xs={12} sm={3}>
-              <Button
-                variant="text"
-                onClick={handleOcrClear}
-                disabled={!ocrFile && !ocrPreview}
-                startIcon={<DeleteOutline />}
-                fullWidth
-                sx={{ py: 1.5 }}
-              >
-                Temizle
-              </Button>
-            </Grid>
-          </Grid>
-
-          {/* OCR Önizleme */}
-          {ocrPreview && (
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                📷 Seçilen Fotoğraf:
-              </Typography>
-              <Box
-                component="img"
-                src={ocrPreview}
-                alt="OCR Preview"
-                sx={{
-                  maxWidth: '100%',
-                  maxHeight: 200,
-                  borderRadius: 2,
-                  border: '1px solid',
-                  borderColor: 'grey.300'
-                }}
-              />
-              <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
-                {ocrFile?.name} ({(ocrFile?.size / 1024 / 1024).toFixed(2)} MB)
-              </Typography>
-            </Box>
-          )}
-
-          {/* OCR Sonuçları */}
-          {showOcrResults && ocrResults.length > 0 && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'success.50', borderRadius: 2, border: '1px solid', borderColor: 'success.200' }}>
-              <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1, color: 'success.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <CheckCircle fontSize="small" /> Çıkarılan Ölçüler ({ocrResults.length})
-              </Typography>
-              <Grid container spacing={1}>
-                {ocrResults.map((result, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Box sx={{ p: 1, bgcolor: 'white', borderRadius: 1, border: '1px solid', borderColor: 'success.300' }}>
-                      <Typography variant="body2" fontWeight="medium">
-                        {result.regionName}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {result.value} {result.unit}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          )}
-        </Box>
-
-        {/* Yeni Ölçü Ekleme */}
-        <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-          <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
-            ➕ Manuel Ölçü Ekle
-          </Typography>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Bölge Adı"
-                value={newMeasurement.regionName}
-                onChange={(e) => setNewMeasurement(prev => ({ ...prev, regionName: e.target.value }))}
-                fullWidth
-                size="small"
-                placeholder="örn: Göğüs, Bel, Sol Kol..."
-              />
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <TextField
-                label="Değer"
-                type="number"
-                value={newMeasurement.value}
-                onChange={(e) => setNewMeasurement(prev => ({ ...prev, value: e.target.value }))}
-                fullWidth
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={12} sm={2}>
-              <TextField
-                select
-                label="Birim"
-                value={newMeasurement.unit}
-                onChange={(e) => setNewMeasurement(prev => ({ ...prev, unit: e.target.value }))}
-                fullWidth
-                size="small"
-              >
-                <MenuItem value="cm">cm</MenuItem>
-                <MenuItem value="mm">mm</MenuItem>
-                <MenuItem value="m">m</MenuItem>
-                <MenuItem value="inch">inch</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Button
-                variant="contained"
-                onClick={handleAddMeasurement}
-                disabled={loading}
-                fullWidth
-                sx={{ py: 1 }}
-              >
-                Ekle
-              </Button>
-            </Grid>
-          </Grid>
-        </Box>
-
-        {/* Mevcut Ölçüler */}
-        <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 2 }}>
-          📋 Mevcut Ölçüler ({measurements?.length || 0})
-        </Typography>
-
-        {measurements?.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-              Henüz ölçü eklenmemiş. Yukarıdaki formu kullanarak ölçü ekleyebilirsiniz.
-            </Typography>
-          </Box>
-        ) : (
-          <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-            {measurements?.map((measurement) => (
-              <Box
-                key={measurement.id}
-                sx={{
-                  p: 2,
-                  mb: 1,
-                  border: '1px solid',
-                  borderColor: 'grey.200',
-                  borderRadius: 2,
-                  '&:hover': { bgcolor: 'grey.50' }
-                }}
-              >
-                {editingMeasurement?.id === measurement.id ? (
-                  // Düzenleme modu
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={4}>
-                      <TextField
-                        label="Bölge Adı"
-                        value={editingMeasurement.regionName}
-                        onChange={(e) => setEditingMeasurement(prev => ({ ...prev, regionName: e.target.value }))}
-                        fullWidth
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                      <TextField
-                        label="Değer"
-                        type="number"
-                        value={editingMeasurement.value}
-                        onChange={(e) => setEditingMeasurement(prev => ({ ...prev, value: e.target.value }))}
-                        fullWidth
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={2}>
-                      <TextField
-                        select
-                        label="Birim"
-                        value={editingMeasurement.unit}
-                        onChange={(e) => setEditingMeasurement(prev => ({ ...prev, unit: e.target.value }))}
-                        fullWidth
-                        size="small"
-                      >
-                        <MenuItem value="cm">cm</MenuItem>
-                        <MenuItem value="mm">mm</MenuItem>
-                        <MenuItem value="m">m</MenuItem>
-                        <MenuItem value="inch">inch</MenuItem>
-                      </TextField>
-                    </Grid>
-                    <Grid item xs={12} sm={3}>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleEditMeasurement(measurement.id)}
-                          disabled={loading}
-                        >
-                          Kaydet
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => setEditingMeasurement(null)}
-                          disabled={loading}
-                        >
-                          İptal
-                        </Button>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                ) : (
-                  // Görüntüleme modu
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="body1" fontWeight="medium">
-                        {measurement.regionName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {measurement.value} {measurement.unit}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <IconButton
-                        size="small"
-                        onClick={() => setEditingMeasurement({
-                          id: measurement.id,
-                          regionName: measurement.regionName,
-                          value: measurement.value,
-                          unit: measurement.unit
-                        })}
-                        disabled={loading}
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteMeasurement(measurement.id, measurement.regionName)}
-                        disabled={loading}
-                        color="error"
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
-        )}
-      </DialogContent>
-      
-      <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)', display: 'flex', justifyContent: 'space-between' }}>
-        <Button
-          variant="outlined"
-          startIcon={<CloudDownload />}
-          onClick={handleDownloadTxt}
-          disabled={loading || !measurements || measurements.length === 0}
-          sx={{ color: 'success.main', borderColor: 'success.main' }}
-        >
-          TXT İndir ({measurements?.length || 0} ölçü)
-        </Button>
-        <Button onClick={onClose}>Kapat</Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-export default Customers; 
+export default Customers;

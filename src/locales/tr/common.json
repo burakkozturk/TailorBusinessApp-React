@@ -1,0 +1,375 @@
+{
+  "navigation": {
+    "home": "Ana Sayfa",
+    "about": "Hakkımızda",
+    "blog": "Blog",
+    "contact": "İletişim",
+    "login": "Giriş",
+    "logout": "Çıkış",
+    "register": "Kayıt Ol",
+    "services": "Hizmetler",
+    "admin": "Admin Panel",
+    "dashboard": "Panel",
+    "customers": "Müşteriler",
+    "orders": "Siparişler",
+    "measurements": "Ölçüler",
+    "messages": "Mesajlar",
+    "settings": "Ayarlar",
+    "managers": "Kullanıcı Yönetimi",
+    "reports": "Raporlar"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "add": "Ekle",
+    "search": "Ara",
+    "filter": "Filtrele",
+    "export": "Dışa Aktar",
+    "import": "İçe Aktar",
+    "print": "Yazdır",
+    "back": "Geri",
+    "next": "İleri",
+    "previous": "Önceki",
+    "submit": "Gönder",
+    "confirm": "Onayla",
+    "close": "Kapat",
+    "open": "Aç",
+    "view": "Görüntüle",
+    "download": "İndir",
+    "upload": "Yükle",
+    "refresh": "Yenile",
+    "reset": "Sıfırla",
+    "update": "Güncelle",
+    "create": "Oluştur",
+    "name": "Ad",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "address": "Adres",
+    "date": "Tarih",
+    "time": "Saat",
+    "status": "Durum",
+    "actions": "İşlemler",
+    "total": "Toplam",
+    "price": "Fiyat",
+    "quantity": "Miktar",
+    "description": "Açıklama",
+    "notes": "Notlar",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "specialPages": {
+    "pocketTailor": "Cebinizdeki Terziniz"
+  },
+  "footer": {
+    "companyName": "Erdal Güda Terzilik",
+    "address": "İstanbul, Türkiye",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "aboutUs": "Hakkımızda",
+    "services": "Hizmetlerimiz",
+    "contact": "İletişim",
+    "followUs": "Bizi Takip Edin",
+    "allRightsReserved": "Tüm hakları saklıdır"
+  },
+  "heroSection": {
+    "title": "Özel Dikim ile Stilinizi Yansıtın",
+    "subtitle": "Ustalarımızın ellerinde şekillenecek özel tasarımlarla tarzınızı konuşturun",
+    "cta": "Randevu Al",
+    "experience": "yıllık deneyim",
+    "satisfaction": "müşteri memnuniyeti"
+  },
+  "heroSlider": {
+    "slides": [
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Her Detayda Ustalık",
+        "description": "Gerçek stil zamansızdır. Erdal Güda ile kişiye özel dikimin kusursuzluğunu keşfedin."
+      },
+      {
+        "subtitle": "ERDAL GÜDA", 
+        "title": "Size Özel Ürünler",
+        "description": "Vücut ölçülerinize göre üretilmiş, el işçiliğiyle tamamlanmış takım elbiseler ile kendinizi ifade edin."
+      },
+      {
+        "subtitle": "ERDAL GÜDA",
+        "title": "Her Detayda Ustalık", 
+        "description": "Kumaştan düğmeye, yaka formundan ilik dikişine kadar her şey siz düşünülerek tasarlanır."
+      }
+    ],
+    "contactButton": "İletişime Geç"
+  },
+  "about": {
+    "subtitle": "Hakkımızda",
+    "title": "Ustalığımızla Fark Yaratıyoruz",
+    "welcomeText": "Hoşgeldiniz!",
+    "description": "Erdal Güda Terzilik Atölyesi olarak, size özel tasarlanmış, vücut ölçülerinize uygun kıyafetler sunuyoruz. Her bir parça, el işçiliğiyle özenle hazırlanır. Tarzınızı yansıtan, rahat ve şık takımlarımızla fark yaratın.",
+    "specialDesigns": "Özel Tasarımlar, Kaliteli Kumaşlar",
+    "specialDesignsDesc": "Her bedene uygun, özgün ve kaliteli kıyafetlerimizle tanışın. Günlük yaşamda ve özel günlerde şıklığınızı tamamlayın.",
+    "appointmentTitle": "Randevunuzu Alın",
+    "appointmentDesc": "Size en uygun tasarımı oluşturmak için hemen randevunuzu alın. Profesyonel ekibimizle sizi bekliyoruz.",
+    "moreButton": "Daha Fazla"
+  },
+  "services": {
+    "subtitle": "Hizmetlerimiz",
+    "title": "Size Özel Hizmetlerimiz",
+    "description": "Profesyonel ekibimizle sunduğumuz tüm hizmetleri aşağıda keşfedebilirsiniz.",
+    "items": [
+      {
+        "title": "Ölçü Alma",
+        "description": "Vücut ölçülerinize tam uyumlu, profesyonel ölçü alma hizmeti."
+      },
+      {
+        "title": "Terzilik & Dikiş",
+        "description": "El işçiliğiyle kusursuz, size özel terzilik hizmeti."
+      },
+      {
+        "title": "Koleksiyon",
+        "description": "Zamansız şıklıkta, bedeninize özel hazırlanmış takım-elbise."
+      },
+      {
+        "title": "Bakım & Temizleme",
+        "description": "Takım-elbisenizin ömrünü uzatan, profesyonel bakım çözümleri."
+      }
+    ]
+  },
+  "smartMeter": {
+    "pageTitle": "Akıllı Vücut Mezurası",
+    "subtitle": "Telefonunuzun sağlık uygulamalarına bağlanarak ölçümleri daha hızlı kaydetmenizi sağlar. Ondan fazla kişinin yirmiden fazla farklı bölgelerine ait ölçülerini düzenli olarak takip etmenizi sağlar.",
+    "features": [
+      "Yapay zeka destekli sistem ile ölçüleri kullanarak elbise kesim şablonları oluşturabilir",
+      "Akıllı mezura ile yirmiden fazla vücut bölgesini ölçebilirsiniz",
+      "Terzi olmanıza gerek yok, uygulama size adım adım rehberlik eder"
+    ],
+    "quote": "Artık terzi olmak çok kolay...",
+    "buttons": {
+      "buyNow": "Hemen Satın Al",
+      "howItWorks": "Nasıl Çalışır?",
+      "downloadApp": "Uygulamayı İndir",
+      "orderNow": "Hemen Sipariş Ver"
+    },
+    "app": {
+      "title": "Akıllı Mezura Uygulaması",
+      "description": "Akıllı mezura sayesinde yirmiden fazla vücut bölgesinin ölçümünü yapabilirsiniz. Merak etmeyin ölçüm yapmak için terzi olmanıza gerek yok, sistem size adım adım uygulamanız gerekenleri tarif edecek.",
+      "features": [
+        {
+          "title": "Kolay Kullanım",
+          "description": "Kullanıcı dostu arayüz ile saniyeler içinde ölçüm alın"
+        },
+        {
+          "title": "Hızlı Senkronizasyon",
+          "description": "Bluetooth ile mezuranıza anında bağlanır"
+        }
+      ]
+    },
+    "gallery": {
+      "title": "Ürün Galerisi",
+      "description": "Erdal Güda'nın özenle hazırladığı ürün koleksiyonunu keşfedin. Her bir parça, ustalık ve kaliteyi yansıtan özel tasarımlardan oluşmaktadır."
+    },
+    "howItWorks": {
+      "title": "Nasıl Çalışır?",
+      "subtitle": "Yaptığınız ölçümleri kesim şablonuna dökmekte zorlanıyor musunuz? İşte çözüm için 4 basit adım:",
+      "steps": [
+        {
+          "title": "www.erdalguda.com adresine gidin",
+          "description": "Resmi web sitemizi ziyaret edin ve hesap oluşturun"
+        },
+        {
+          "title": "İstediğiniz formatta ölçümlerinizi yükleyin",
+          "description": "Akıllı mezura ile aldığınız ölçümleri sisteme aktarın"
+        },
+        {
+          "title": "Kesim yapmak istediğiniz ürünü seçin",
+          "description": "Geniş ürün yelpazemizden dikiş modelinizi belirleyin"
+        },
+        {
+          "title": "Ve yapay zeka sizler için şablonu anında hazırlasın",
+          "description": "Yapay zeka teknolojimiz özel ölçülerinize göre şablon oluşturur"
+        }
+      ]
+    },
+    "specs": {
+      "title": "Teknik Özellikler",
+      "subtitle": "Modern ve kullanışlı tasarımıyla giyim sektöründe devrim yaratan akıllı vücut mezuranızı tanıyın",
+      "productFeatures": "Ürün Özellikleri",
+      "technicalData": "Teknik Veriler",
+      "features": {
+        "productName": "Ürün İsmi",
+        "productModel": "Ürün Modeli",
+        "measurementUnit": "Ölçü Birimi",
+        "measurementCapacity": "Ölçüm kapasitesi",
+        "productDimensions": "Ürün Boyutları",
+        "errorMargin": "Hata Payı",
+        "batteryCapacity": "Batarya Kapasitesi",
+        "chargingInput": "Şarj Girişi",
+        "powerConsumption": "Güç Tüketimi",
+        "mobileMeasurement": "Mobil Destekli Ölçüm Alma",
+        "customMeasurements": "Özelleştirilebilir Ölçümler",
+        "smartPatternDesign": "Akıllı Kesim Kalıbı Tasarımı"
+      },
+      "values": {
+        "productNameValue": "Akıllı Vücut Mezurası",
+        "productModelValue": "EG-150",
+        "measurementUnitValue": "cm/inch",
+        "measurementCapacityValue": "150cm veya 60 inch",
+        "productDimensionsValue": "78x70x27mm",
+        "errorMarginValue": "+- 4mm",
+        "batteryCapacityValue": "300mAh 1.11Wh",
+        "chargingInputValue": "5V 0.5A",
+        "powerConsumptionValue": "2.5W",
+        "yes": "Evet"
+      }
+    },
+    "cta": {
+      "title": "Cebinizdeki Terziniz",
+      "description": "Yaptığınız ölçümleri kesim şablonuna dökmekte zorlanıyor musunuz? Erdal Güda'nın yapay zeka destekli akıllı vücut mezurası ile tüm ölçümleriniz otomatik olarak şablona dönüşsün."
+    }
+  },
+  "blog": {
+    "subtitle": "Blogumuz",
+    "title": "Son Yazılarımız",
+    "description": "Moda ve tekstil dünyasından son gelişmeleri, tasarımları ve ipuçlarını sizlerle paylaşıyoruz.",
+    "loading": "Yükleniyor...",
+    "error": "Blog yazıları yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+    "noPosts": "Bu kategoride henüz blog yazısı bulunmuyor.",
+    "invalidDate": "Geçersiz tarih",
+    "readMore": "Devamını Oku",
+    "viewAll": "TÜM BLOG YAZILARI",
+    "dataFetchError": "Veri çekilirken hata oluştu:"
+  },
+  "testimonials": {
+    "title": "Müşterilerimizle Kurduğumuz Bağ",
+    "subtitle": "Erdal Güda deneyimi sadece bir alışveriş değil, bir yolculuktur. Her müşterimizin hikayesini dinliyor, ihtiyaçlarını anlıyor ve özel çözümler sunuyoruz.",
+    "sectionTitle": "MÜŞTERİLERİMİZİN YORUMLARI",
+    "sectionSubtitle": "Ne Dediler ?",
+    "testimonialData": [
+      {
+        "quote": "Gerçekten harika hizmet! Kıyafetim tam istediğim gibi oldu, ustalık müthiş.",
+        "name": "Ahmet Yılmaz"
+      },
+      {
+        "quote": "Terzilikte sınır tanımıyorlar. Kumaş kalitesi ve işçilik kusursuz.",
+        "name": "Mehmet Demir"
+      },
+      {
+        "quote": "Beklentilerimin çok ötesindeydi. Kesim ve dikiş tam profesyonel.",
+        "name": "Ayşe Kara"
+      }
+    ],
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "gallery": {
+    "title": "Atölyemizden Kareler",
+    "subtitle": "Erdal Güda atölyesinin içinden özel anlar ve ustalık detayları. Her kare, kalite ve özenin bir yansıması.",
+    "pauseMessage": "Duraklatıldı",
+    "autoSlideInfo": "Otomatik kayan galeri • {count} fotoğraf • Duraklatmak için üzerine gelin"
+  },
+  "footer": {
+    "cta": {
+      "title": "Detaylı Bilgi İçin Mesaj Gönderin",
+      "text": "Herhangi bir sorunuz mu var? E-posta adresinizi bırakın.",
+      "placeholder": "E-posta adresinizi girin",
+      "submit": "Gönder"
+    },
+    "workingHours": {
+      "title": "Çalışma Saatleri",
+      "weekdays": "Pzt–Cum: 08:00–20:00",
+      "saturday": "Cmt: 09:00–17:00",
+      "sunday": "Paz: Kapalı",
+      "appointment": "Randevu Al"
+    },
+    "quickLinks": {
+      "title": "Hızlı Linkler",
+      "home": "Ana Sayfa",
+      "services": "Hizmetler",
+      "blog": "Blog",
+      "about": "Hakkımızda",
+      "contact": "İletişim"
+    },
+    "contact": {
+      "title": "İletişim"
+    },
+    "location": {
+      "title": "Konum"
+    },
+    "copyright": "Tüm hakları saklıdır."
+  },
+  "auth": {
+    "login": {
+      "title": "Giriş Yap",
+      "username": "Kullanıcı Adı",
+      "password": "Şifre",
+      "loginButton": "Giriş",
+      "notApproved": "onaylanmamış",
+      "invalidCredentials": "Giriş bilgileri hatalı!",
+      "accountNotApproved": "Hesabınız henüz admin tarafından onaylanmamış. Lütfen onay bekleyin.",
+      "noAccount": "Hesabınız yok mu?"
+    },
+    "register": {
+      "title": "Kayıt Ol",
+      "username": "Kullanıcı Adı",
+      "email": "E-posta",
+      "password": "Şifre",
+      "confirmPassword": "Şifre Tekrar",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "phone": "Telefon",
+      "role": "Rol Seçimi",
+      "registerButton": "Kayıt Ol",
+      "registering": "Kayıt Yapılıyor...",
+      "passwordMismatch": "Şifreler eşleşmiyor",
+      "requiredFields": "Kullanıcı adı, şifre ve şifre tekrarı zorunludur",
+      "usernameMinLength": "Kullanıcı adı en az 3 karakter olmalıdır",
+      "passwordMinLength": "Şifre en az 6 karakter olmalıdır",
+      "invalidEmail": "Geçerli bir e-posta adresi girin",
+      "hasAccount": "Zaten hesabınız var mı?",
+      "roles": {
+        "ÖLÇÜM": "Ölçüm - Sipariş Oluşturma ve Ölçü Girme",
+        "KESIMHANE": "Kesimhane - Sipariş Durumu İlerletme", 
+        "DIKIMHANE": "Dikimhane - Sipariş Durumu İlerletme",
+        "ADMIN": "Admin - Tam Yetki"
+      }
+    }
+  },
+  "contact": {
+    "title": "İletişim",
+    "name": "Adınız",
+    "email": "E-posta Adresiniz",
+    "subject": "Konu",
+    "message": "Mesajınız",
+    "send": "Gönder",
+    "location": "Lokasyon",
+    "locationAria": "Erdal Güda Terzi lokasyon haritası",
+    "successMessage": "Mesajınız başarıyla gönderildi!",
+    "errorMessage": "Mesaj gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+    "details": {
+      "title": "İletişim Bilgileri",
+      "phone": "Telefon:",
+      "email": "E-posta:",
+      "address": "Adres:",
+      "workingHours": "Çalışma Saatleri:",
+      "weekdays": "Pazartesi - Cumartesi: 09:30 - 19:00",
+      "sunday": "Pazar: Kapalı"
+    }
+  },
+  "aboutPage": {
+    "brandTitle": "MARKAMIZ",
+    "tailoringImageAlt": "Terzilik çalışması görseli",
+    "craftsmanshipImageAlt": "El işçiliği görseli",
+    "section1": {
+      "title": "Ustalığın ve Zarafetin Buluştuğu Nokta",
+      "paragraph1": "Her kıyafet bir hikâye anlatır. Biz, bu hikâyeyi sizin için dokuyoruz. Erdal Güda olarak, 20 yılı aşkın deneyimimizle her dikişte mükemmelliği hedefliyoruz.",
+      "paragraph2": "Amacımız yalnızca giyilebilir ürünler üretmek değil, aynı zamanda kimliğinizi ve tarzınızı yansıtan, özgün ve kaliteli parçalar sunmaktır."
+    },
+    "section2": {
+      "title": "Müşterilerimizle Kurduğumuz Bağ",
+      "paragraph1": "Erdal Güda deneyimi sadece bir alışveriş değil, bir yolculuktur. Her müşterimizin hikâyesini dinliyor, ihtiyaçlarını anlıyor ve özel çözümler sunuyoruz.",
+      "paragraph2": "Atölyemizde zaman kavramı kaliteye göre şekillenir. Her parça, tasarımından son dikişine kadar titizlikle işlenir ve ancak en yüksek standartları karşıladığında sizinle buluşur."
+    }
+  }
+}

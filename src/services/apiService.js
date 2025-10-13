@@ -35,34 +35,42 @@ const apiService = {
     getAll: () => api.get('/api/orders'),
     getById: (id) => api.get(`/api/orders/${id}`),
     create: (orderData) => api.post('/api/orders', orderData),
-    createNew: (orderData) => api.post('/api/orders/new', orderData), // Yeni özelleştirmeler için
+    createNew: (orderData) => api.post('/api/orders/new', orderData),
     update: (id, orderData) => api.put(`/api/orders/${id}`, orderData),
-    updateAdvanced: (id, orderData) => api.put(`/api/orders/${id}/advanced`, orderData), // Özelleştirmeler için
+    updateAdvanced: (id, orderData) => api.put(`/api/orders/${id}/advanced`, orderData),
+    updateStatus: (id, status) => api.put(`/api/orders/${id}/status`, { status }),
     delete: (id) => api.delete(`/api/orders/${id}`),
+    
+    // Müşteriye göre siparişler
     getByCustomer: (customerId) => api.get(`/api/orders/by-customer/${customerId}`),
     getActiveByCustomer: (customerId) => api.get(`/api/orders/active/by-customer/${customerId}`),
-    getByStatus: (status) => api.get(`/api/orders/by-status/${status}`),
-    getByDateRange: (startDate, endDate) => api.get(`/api/orders/by-date-range?startDate=${startDate}&endDate=${endDate}`),
-    updateStatus: (id, status) => api.patch(`/api/orders/${id}/status`, { status }),
-    getProductTypeStats: (startDate, endDate) => api.get(`/api/orders/statistics/by-product-type?startDate=${startDate}&endDate=${endDate}`),
-    // ÜRÜN ÖZELLEŞTİRME SEÇENEKLERİ
-    getOptions: () => api.get('/api/orders/options/all'),
-    getProductTypeOptions: () => api.get('/api/orders/options/product-types'),
+    
+    // İstatistikler
+    getStats: () => api.get('/api/orders/stats'),
+    getMonthlyStats: () => api.get('/api/orders/stats/monthly'),
+    getStatusDistribution: () => api.get('/api/orders/stats/status-distribution'),
+    getProductDistribution: () => api.get('/api/orders/stats/product-distribution'),
+    getMonthlyTrends: () => api.get('/api/orders/stats/monthly-trends'),
+    getCustomerStats: () => api.get('/api/orders/stats/customers'),
+    
+    // Filtreleme ve arama
+    search: (searchTerm) => api.get(`/api/orders/search?q=${searchTerm}`),
+    filterByStatus: (status) => api.get(`/api/orders/filter/status/${status}`),
+    filterByCustomer: (customerId) => api.get(`/api/orders/by-customer/${customerId}`),
+    filterByDate: (startDate, endDate) => api.get(`/api/orders/filter/date?start=${startDate}&end=${endDate}`),
+    
+    // Kumaş ve ürün opsiyonları
+    getFabricOptions: () => api.get('/api/orders/options/fabrics'),
     getCollarTypeOptions: () => api.get('/api/orders/options/collar-types'),
-    getSleeveTypeOptions: () => api.get('/api/orders/options/sleeve-types'),
-    getWaistTypeOptions: () => api.get('/api/orders/options/waist-types'),
-    getPleatTypeOptions: () => api.get('/api/orders/options/pleat-types'),
-    getLegTypeOptions: () => api.get('/api/orders/options/leg-types'),
     getButtonTypeOptions: () => api.get('/api/orders/options/button-types'),
     getPocketTypeOptions: () => api.get('/api/orders/options/pocket-types'),
-    getVentTypeOptions: () => api.get('/api/orders/options/vent-types'),
+    getLiningTypeOptions: () => api.get('/api/orders/options/lining-types'),
     getBackTypeOptions: () => api.get('/api/orders/options/back-types'),
-    // İSTATİSTİKLER VE ANALİTİKLER
+    
+    // İstatistikler ve analizler
     getRevenueAnalytics: (startDate, endDate) => api.get(`/api/orders/analytics/revenue?startDate=${startDate}&endDate=${endDate}`),
     getTopCustomers: (minOrders = 1) => api.get(`/api/orders/statistics/top-customers?minOrders=${minOrders}`)
   },
-
-
 
   // BLOG İŞLEMLERİ
   blogs: {
@@ -101,59 +109,10 @@ const apiService = {
 
   // RAPOR İŞLEMLERİ
   reports: {
-    getDashboard: () => api.get('/api/reports/dashboard'),
-    getMonthly: (year, month) => api.get(`/api/reports/monthly/${year}/${month}`),
-    getYearly: (year) => api.get(`/api/reports/yearly/${year}`),
-    getCustomers: () => api.get('/api/reports/customers'),
-    getOrderStatus: () => api.get('/api/reports/orders/status'),
-    getCurrentMonth: () => api.get('/api/reports/current-month'),
-    getCurrentYear: () => api.get('/api/reports/current-year'),
-    getCustom: (startDate, endDate) => api.get(`/api/reports/custom?startDate=${startDate}&endDate=${endDate}`)
-  },
-
-  // DOSYA YÜKLEME İŞLEMLERİ
-  upload: {
-    uploadFile: (formData) => api.post('/api/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-  },
-
-  // ÖLÇÜ İŞLEMLERİ - Dinamik Ölçü Sistemi
-  measurements: {
-    // Müşterinin tüm ölçülerini getir
-    getByCustomer: (customerId) => api.get(`/api/measurements/customer/${customerId}`),
-    getByOrderId: (orderId) => api.get(`/api/measurements/order/${orderId}`),
-    // Yeni ölçü ekle
-    add: (customerId, measurementData) => api.post(`/api/measurements/customer/${customerId}`, measurementData),
-    // Ölçü güncelle
-    update: (measurementId, measurementData) => api.put(`/api/measurements/${measurementId}`, measurementData),
-    
-    // Ölçü sil
-    delete: (measurementId) => api.delete(`/api/measurements/${measurementId}`),
-    
-    // Müşterinin tüm ölçülerini sil
-    deleteAll: (customerId) => api.delete(`/api/measurements/customer/${customerId}`),
-    
-    // EasyOCR ile ölçü fotoğrafı yükle ve işle
-    uploadFile: (customerId, formData) => api.post(`/api/measurements/upload-measurements/${customerId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }),
-    
-    // Genel dosya yükleme (eski sistem ile uyumluluk için)
-    uploadFileGeneral: (formData) => api.post('/api/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }),
-    
-    // Ölçü verilerini TXT olarak export et
-    exportTxt: (customerId) => api.get(`/api/measurements/export/${customerId}`, {
-      responseType: 'blob'
-    })
+    getDashboardStats: () => api.get('/api/reports/dashboard-stats'),
+    getCustomerReport: () => api.get('/api/reports/customers'),
+    getOrderReport: () => api.get('/api/reports/orders'),
+    getRevenueReport: (period) => api.get(`/api/reports/revenue/${period}`)
   },
 
   // AI İŞLEMLERİ
@@ -165,9 +124,93 @@ const apiService = {
     validateKey: () => api.post('/api/ai/validate-key'),
     
     // AI durumu kontrol et
-    getStatus: () => api.get('/api/ai/status')
-  }
+    getStatus: () => api.get('/api/ai/status'),
+    
+    // AI Image Generation
+    getOrdersByCustomer: (customerId) => api.get(`/api/ai-image/orders/by-customer/${customerId}`),
+    generateVisualization: (formData) => api.post('/api/ai-image/visualize', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
 
+  // DOSYA YÜKLEME İŞLEMLERİ
+  upload: {
+    uploadFile: (formData) => {
+      return api.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+  },
+
+  // ÖLÇÜ İŞLEMLERİ - 16 Standart Ölçü Alanı Sistemi
+  measurements: {
+    // Müşterinin tüm ölçülerini getir
+    getByCustomer: (customerId) => api.get(`/measurements/customer/${customerId}`),
+    getByOrder: (orderId) => api.get(`/measurements/order/${orderId}`),
+    
+    // Yeni ölçü ekle
+    add: (customerId, measurementData) => api.post(`/measurements/customer/${customerId}`, measurementData),
+    
+    // Ölçü güncelle
+    update: (measurementId, measurementData) => api.put(`/measurements/${measurementId}`, measurementData),
+    
+    // Ölçü sil
+    delete: (measurementId) => api.delete(`/measurements/${measurementId}`),
+    
+    // Fitdays OCR - AWS Textract ile ölçü fotoğrafı yükle ve parse et
+    uploadFitdaysImage: (customerId, formData) => {
+      return api.post(`/measurements/upload-fitdays/${customerId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    },
+    
+    // Ölçü verilerini TXT olarak export et
+    exportTxt: (customerId) => {
+      return api.get(`/measurements/export-txt/${customerId}`, {
+        responseType: 'text'
+      });
+    },
+    
+    // 16 ölçü alanı bilgilerini getir
+    getFields: () => api.get('/measurements/fields'),
+    getFieldsByCategory: (category) => api.get(`/measurements/fields/category/${category}`),
+    validateValue: (value) => api.post('/measurements/validate', { value })
+  },
+
+  // AI MODEL İŞLEMLERİ
+  aiModel: {
+    // AI model oluştur
+    generate: (formData) => api.post('/api/ai-model/generate', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }),
+    
+    // Oluşturulan modelleri listele
+    getAll: () => api.get('/api/ai-model'),
+    getById: (id) => api.get(`/api/ai-model/${id}`),
+    
+    // Model sil
+    delete: (id) => api.delete(`/api/ai-model/${id}`),
+    
+    // Müşteriye göre modelleri getir
+    getByCustomer: (customerId) => api.get(`/api/ai-model/customer/${customerId}`),
+    
+    // Siparişe göre modelleri getir
+    getByOrder: (orderId) => api.get(`/api/ai-model/order/${orderId}`),
+    
+    // AI model fotoğrafını email olarak gönder
+    sendEmail: (data) => api.post('/api/ai-model/send-email', data),
+    
+    // Kombin önerisini email olarak gönder
+    sendCombinationEmail: (data) => api.post('/api/ai-model/send-combination-email', data)
+  }
 };
 
-export default apiService; 
+export default apiService;
